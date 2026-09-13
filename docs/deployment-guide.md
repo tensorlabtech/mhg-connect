@@ -2,7 +2,11 @@
 
 ## Trạng thái
 
-Ứng dụng đã build và chạy end-to-end local. Chưa có deployment Vercel được xác nhận trong workspace này; Neon, Blob, production variables và domain chưa được nối. Không coi các bước dưới đây là đã hoàn thành cho tới khi smoke test production và device rehearsal có bằng chứng.
+Production hiện chạy tại [mhg-connect.vercel.app](https://mhg-connect.vercel.app) trong Vercel account `lethai2597` (scope `le-thais-projects`). Project đã nối Neon Free và Vercel Blob tại Singapore (`sin1`), chạy đủ migration, seed admin/QR demo và smoke test server-side ngày 13/09/2026.
+
+Source được lưu tại repository private `tensorlabtech/mhg-connect`. Hobby plan không hỗ trợ nối tự động private repository thuộc organization, vì vậy production hiện deploy bằng Vercel CLI từ checkout đã xác thực thay vì auto-deploy theo GitHub push.
+
+Smoke test đã xác nhận landing/login, ba QR demo, vCard, admin authentication/dashboard và Blob upload hoạt động; route nội bộ trả 404 khi `ENABLE_DEV_ROUTES=false`. Device rehearsal Safari/iPhone và Chrome/Android vẫn phải thực hiện trước buổi demo khách hàng.
 
 ## Resource cần có
 
