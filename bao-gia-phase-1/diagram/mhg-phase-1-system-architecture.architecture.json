@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "MHG Connect — Kiến trúc hệ thống đề xuất",
+    "output": "mhg-phase-1-system-architecture.html",
+    "viewBox": [1395, 818],
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "views": [
+      { "id": "scan-path", "label": "Luồng quét QR", "focus": ["scanner", "edgeSecurity", "edgeCache", "publicWeb"], "note": "QR mở thẳng /q/{publicToken}. Cache HIT trả HTML hồ sơ active tại edge; mã chưa active hoặc cache MISS mới gọi origin." },
+      { "id": "cache-miss", "label": "Cache miss", "focus": ["edgeCache", "publicWeb", "api", "redis", "postgres"], "note": "Next.js xử lý /q, gọi NestJS tra trạng thái rồi render ActivationView, PublicProfileView hoặc trang trạng thái. Chỉ HTML active được cache." },
+      { "id": "owner-path", "label": "Luồng chủ hồ sơ", "focus": ["owner", "publicWeb", "api", "postgres", "edgeCache", "jobs"], "note": "Chủ hồ sơ sửa hoặc publish qua API; sau transaction, hệ thống purge URL hoặc Cache-Tag và retry bằng BullMQ nếu cần." },
+      { "id": "operations", "label": "Vận hành MHG", "focus": ["admin", "api", "postgres", "edgeCache", "jobs"], "note": "Admin khóa, mở hoặc đổi trang active trong PostgreSQL trước; cache chỉ bị xóa sau commit để không phục vụ trạng thái cũ." }
+    ]
+  },
+  "components": [
+    { "id": "scanner", "type": "external", "label": "Khách quét QR", "sublabel": "mobile browser", "pos": [30, 350], "size": [160, 70] },
+    { "id": "owner", "type": "external", "label": "Chủ hồ sơ", "sublabel": "kích hoạt · builder", "pos": [30, 120], "size": [160, 70] },
+    { "id": "admin", "type": "external", "label": "Nhân sự MHG", "sublabel": "quản lý mã QR", "pos": [30, 580], "size": [170, 70] },
+    { "id": "edgeSecurity", "type": "security", "label": "Cloudflare Edge", "sublabel": "DNS · TLS · WAF", "pos": [260, 351], "size": [180, 74], "tag": "managed" },
+    { "id": "edgeCache", "type": "cloud", "label": "Edge Cache", "sublabel": "/q active HTML", "pos": [520, 350], "size": [190, 76], "tag": "Cloudflare" },
+    { "id": "publicWeb", "type": "frontend", "label": "Next.js Web", "sublabel": "/q route · SSR · builder", "pos": [760, 350], "size": [190, 76] },
+    { "id": "api", "type": "backend", "label": "NestJS API", "sublabel": "Prisma · M1–M6", "pos": [1020, 350], "size": [190, 76] },
+    { "id": "postgres", "type": "database", "label": "PostgreSQL", "sublabel": "source of truth", "pos": [1200, 570], "size": [160, 70], "tag": "managed" },
+    { "id": "redis", "type": "database", "label": "Redis", "sublabel": "OTP · rate limit · BullMQ", "pos": [1000, 570], "size": [190, 70], "tag": "managed" },
+    { "id": "jobs", "type": "messagebus", "label": "BullMQ Worker", "sublabel": "QR batch · purge retry", "pos": [760, 570], "size": [190, 70] },
+    { "id": "otpProvider", "type": "external", "label": "Email OTP", "sublabel": "Zalo ZNS tùy chọn", "pos": [1020, 110], "size": [190, 70] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Người dùng bên ngoài", "wraps": ["scanner", "owner"], "pad": 18 },
+    { "kind": "region", "label": "Cloudflare managed · tài khoản MHG", "wraps": ["edgeSecurity", "edgeCache"], "pad": 22 },
+    { "kind": "region", "label": "Ứng dụng do đội dự án vận hành", "wraps": ["publicWeb", "api", "jobs"], "pad": 22 },
+    { "kind": "region", "label": "Dữ liệu managed · không thuộc Cloudflare", "wraps": ["redis", "postgres"], "pad": 18 },
+    { "kind": "region", "label": "Nhà cung cấp bên thứ ba", "wraps": ["otpProvider"], "pad": 14 },
+    { "kind": "region", "label": "Vận hành nội bộ MHG", "wraps": ["admin"], "pad": 14 }
+  ],
+  "connections": [
+    { "id": "scanToEdge", "from": "scanner", "to": "edgeSecurity", "label": "GET /q/{publicToken}", "variant": "emphasis", "labelAt": [225, 438] },
+    { "id": "edgeToCache", "from": "edgeSecurity", "to": "edgeCache", "label": "GET /q/{publicToken}", "variant": "emphasis", "route": "straight", "fromSide": "right", "toSide": "left", "labelAt": [500, 440] },
+    { "id": "cacheToScanner", "from": "edgeCache", "to": "scanner", "label": "HIT: active profile HTML", "variant": "emphasis", "fromSide": "bottom", "toSide": "bottom", "via": [[615, 475], [110, 475]] },
+    { "id": "cacheMissToWeb", "from": "edgeCache", "to": "publicWeb", "label": "MISS: HTTPS origin", "variant": "dashed", "route": "straight", "fromSide": "right", "toSide": "left", "labelAt": [735, 440] },
+    { "id": "webToCache", "from": "publicWeb", "to": "edgeCache", "label": "cache active HTML only", "variant": "emphasis", "fromSide": "top", "toSide": "top", "via": [[855, 280], [615, 280]], "labelAt": [875, 250] },
+    { "id": "ownerToWeb", "from": "owner", "to": "publicWeb", "label": "HTTPS · builder" },
+    { "id": "webToApi", "from": "publicWeb", "to": "api", "label": "trạng thái QR + snapshot", "variant": "emphasis", "route": "straight", "fromSide": "right", "toSide": "left", "labelAt": [990, 330] },
+    { "id": "adminToApi", "from": "admin", "to": "api", "label": "RBAC · API quản trị", "variant": "security", "fromSide": "right", "toSide": "left", "via": [[240, 615], [240, 700], [970, 700], [970, 388]], "labelAt": [600, 720] },
+    { "id": "apiToDb", "from": "api", "to": "postgres", "label": "Prisma transaction", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "via": [[1115, 520], [1280, 520]], "labelAt": [1200, 540] },
+    { "id": "apiToRedis", "from": "api", "to": "redis", "label": "OTP · rate limit · queue", "fromSide": "bottom", "toSide": "top", "labelAt": [1095, 680] },
+    { "id": "apiToJobs", "from": "api", "to": "jobs", "label": "enqueue sau commit", "variant": "dashed", "fromSide": "bottom", "toSide": "right", "via": [[1115, 520], [980, 520], [980, 605]], "labelAt": [1045, 480] },
+    { "id": "jobsToCache", "from": "jobs", "to": "edgeCache", "label": "Purge API · retry", "variant": "security", "fromSide": "top", "toSide": "bottom", "labelAt": [810, 500] },
+    { "id": "apiToOtp", "from": "api", "to": "otpProvider", "label": "gửi OTP", "variant": "security", "labelAt": [1160, 250] }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Đường đọc công khai", "items": ["Một URL duy nhất: /q/{publicToken}", "Cache HIT không gọi origin", "Chỉ cache HTML hồ sơ active; activation và trạng thái lỗi dùng no-store"] },
+    { "dot": "rose", "title": "Đường ghi an toàn", "items": ["Commit database trước, purge cache sau", "Lock, unlock, activate và publish đều invalidate cache", "BullMQ retry khi Cloudflare Purge API lỗi"] }
+  ]
+}

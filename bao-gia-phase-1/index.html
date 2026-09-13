@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MHG Connect — Đề xuất &amp; Báo giá</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#12100C; --surface:#1A1712; --surface2:#221E18;
+  --line:#2E281E; --line2:#453B29;
+  --gold:#D4A93C; --gold-dim:#8A7128; --gold-soft:#332912; --gold-core:#EBD9A6;
+  --ink:#ECE6D9; --ink-dim:#A89E8C; --ink-faint:#78715F;
+  --bar:#544935; --warn:#C9713F;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,sans-serif; font-size:16px; line-height:1.78; -webkit-font-smoothing:antialiased}
+.wrap{max-width:900px; margin:0 auto; padding:80px 30px 120px}
+header{border-bottom:1px solid var(--line); padding-bottom:40px; margin-bottom:20px}
+.eyebrow{font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold-dim); margin:0 0 20px}
+h1{font-family:'Playfair Display',Georgia,serif; font-weight:600; font-size:54px; line-height:1.07; margin:0 0 20px; color:var(--ink)}
+h1 em{font-style:italic; color:var(--gold); font-weight:500}
+.lede{font-size:18px; color:var(--ink-dim); margin:0 0 32px; max-width:60ch}
+.kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:14px}
+.kpi{border-left:1px solid var(--line2); padding:2px 0 2px 16px}
+.kpi .v{font-family:'Playfair Display',Georgia,serif; font-size:30px; line-height:1; color:var(--gold); font-weight:600}
+.kpi .l{font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--ink-faint); margin-top:9px; letter-spacing:.03em; line-height:1.5}
+.groundwork{color:var(--ink-faint); font-style:italic; font-size:15px; max-width:72ch; margin:28px 0 0; line-height:1.7}
+h2{font-family:'Playfair Display',Georgia,serif; font-weight:600; font-size:34px; line-height:1.18; margin:82px 0 10px; color:var(--ink); padding-top:30px; border-top:1px solid var(--line)}
+h2 .num{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--gold-dim); display:block; margin-bottom:14px; letter-spacing:.14em}
+h4{font-family:'JetBrains Mono',monospace; font-weight:500; font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint); margin:36px 0 16px}
+p{margin:0 0 18px; max-width:70ch}
+.lead{font-size:17px; color:var(--ink-dim); max-width:70ch}
+strong{font-weight:600; color:var(--ink)}
+.g{color:var(--gold)}
+figure{margin:36px 0}
+figcaption{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-faint); margin-top:14px; text-align:center; letter-spacing:.04em}
+.grid{display:grid; gap:16px; margin:26px 0}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:20px 22px}
+.card h5{margin:0 0 8px; font-size:14.5px; font-weight:600; color:var(--ink)}
+.card p{margin:0; font-size:13.6px; color:var(--ink-dim); line-height:1.65}
+.card .k{font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--gold-dim); margin-bottom:10px}
+.shot{width:100%; height:auto; display:block; border:1px solid var(--line2); border-radius:12px; box-shadow:0 30px 60px -30px rgba(0,0,0,.7); cursor:zoom-in}
+.grp{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:18px 0}
+.grp figure{margin:0}
+.grp .shot{box-shadow:0 20px 44px -24px rgba(0,0,0,.7)}
+.grp figcaption{text-align:left}
+@media(max-width:640px){ .grp{grid-template-columns:1fr} }
+.beats{display:grid; gap:0; margin:26px 0 8px}
+.beat{display:grid; grid-template-columns:38px 1fr; gap:18px; padding:0 0 24px; position:relative}
+.beat:not(:last-child)::before{content:""; position:absolute; left:18px; top:34px; bottom:-2px; width:1px; background:var(--line2)}
+.beat .bn{width:36px; height:36px; border:1px solid var(--gold-dim); border-radius:50%; display:grid; place-items:center; font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--gold); background:var(--bg); z-index:1}
+.beat p{margin:0; padding-top:5px; color:var(--ink-dim); font-size:15px}
+.beat b{color:var(--ink); font-weight:600}
+.modx{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:24px 26px; margin-bottom:16px}
+.modx__top{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.modx__l{display:flex; align-items:center; gap:12px}
+.modx__id{font-family:'JetBrains Mono',monospace; font-weight:500; font-size:13px; color:#241a06; background:var(--gold); padding:3px 10px; border-radius:6px}
+.modx h3{margin:0; font-size:18.5px; color:var(--ink); font-family:'Playfair Display',Georgia,serif; font-weight:600}
+.modx__price{font-family:'JetBrains Mono',monospace; font-size:13px; text-align:right; color:var(--gold); font-weight:500}
+.modx__price .mm{display:block; color:var(--ink-faint); font-size:11px; font-weight:400; margin-top:3px}
+.modx__purpose{font-size:14.5px; color:var(--ink-dim); margin:12px 0 18px; max-width:none}
+.modx__grid{display:grid; grid-template-columns:1fr 1fr; gap:24px}
+.modx__grid h6{margin:0 0 11px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-faint); font-weight:500}
+.modx__deliver{margin-top:16px; padding-top:14px; border-top:1px dashed var(--line); font-size:13px; color:var(--ink-dim); line-height:1.55}
+.modx__deliver span{font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold-dim); margin-right:8px}
+.fnlist{list-style:none; padding:0; margin:0; display:grid; gap:8px; max-width:none}
+.fnlist li{font-size:13.5px; color:var(--ink-dim); padding-left:16px; position:relative; line-height:1.5; margin:0}
+.fnlist li::before{content:""; position:absolute; left:0; top:9px; width:5px; height:5px; background:var(--gold-dim); border-radius:1px}
+.chips{display:flex; flex-wrap:wrap; gap:7px}
+.chip{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-dim); background:var(--surface2); border:1px solid var(--line); padding:4px 10px; border-radius:100px}
+.price-hero{border:1px solid var(--line2); border-radius:16px; padding:30px 32px; margin:26px 0; background:var(--surface)}
+.price-hero .big{font-family:'Playfair Display',Georgia,serif; font-size:56px; line-height:1; color:var(--gold); font-weight:600}
+.price-hero .sub{font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--ink-dim); margin-top:14px; letter-spacing:.02em; line-height:1.7}
+table.t2{width:100%; border-collapse:collapse; margin:18px 0 10px; font-size:14.5px}
+table.t2 th{font-family:'JetBrains Mono',monospace; font-weight:500; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); text-align:left; padding:0 0 12px; border-bottom:1px solid var(--line2)}
+table.t2 th:last-child{text-align:right}
+table.t2 td{padding:14px 0; border-bottom:1px solid var(--line); vertical-align:top; color:var(--ink); line-height:1.55}
+table.t2 td.r{text-align:right; font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--ink-faint); white-space:nowrap; padding-left:16px; width:130px}
+table.t2 td small{display:block; color:var(--ink-dim); font-size:13px; font-weight:400; margin-top:3px}
+table.t2 tr.total td{font-weight:700; color:var(--ink)}
+table.t2 tr.total td.r{color:var(--gold)}
+.bars{display:grid; gap:12px; margin:10px 0 4px}
+.bar{display:grid; grid-template-columns:220px 1fr; gap:16px; align-items:center}
+.bar .bl{font-size:13.5px; color:var(--ink)}
+.bar .bl small{font-family:'JetBrains Mono',monospace; color:var(--ink-faint); font-size:11px}
+.bar .track{background:var(--surface2); border:1px solid var(--line); border-radius:100px; height:24px; overflow:hidden}
+.bar .fill{height:100%; background:linear-gradient(90deg,var(--gold-dim),var(--gold)); border-radius:100px; display:flex; align-items:center; justify-content:flex-end; padding-right:11px; color:#241a06; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500}
+.phasebar{display:flex; gap:8px; margin:22px 0}
+.phasebar > div{border-radius:10px; padding:15px 18px; font-family:'JetBrains Mono',monospace; font-size:12.5px; letter-spacing:.03em; line-height:1.5}
+.phasebar .ph1{background:linear-gradient(90deg,var(--gold-dim),var(--gold)); color:#241a06; font-weight:600}
+.phasebar .ph2{background:var(--bar); color:var(--ink)}
+.phasebar small{display:block; font-weight:400; opacity:.85; margin-top:3px}
+.callout{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:24px 28px; margin:28px 0}
+.callout p:last-child{margin-bottom:0}
+.callout .tag{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold-dim); display:block; margin-bottom:12px}
+.quote-meta{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-faint); margin:24px 0 0; letter-spacing:.02em; line-height:2.1}
+.quote-meta b{color:var(--ink-dim); font-weight:500}
+.exlist{margin:8px 0 0; padding-left:20px} .exlist li{color:var(--ink-dim); font-size:14px; margin-bottom:6px}
+.sign{display:grid; grid-template-columns:1fr 1fr; gap:40px; margin:34px 0 0}
+.sign > div{border-top:1px solid var(--line2); padding-top:10px}
+.sign .sl{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold-dim)}
+.sign .sn{font-size:12px; color:var(--ink-faint); margin-top:46px}
+table.t2 tr.plain td{color:var(--ink-dim); font-weight:400}
+@media(max-width:640px){ .sign{grid-template-columns:1fr; gap:28px} }
+footer{margin-top:90px; padding-top:28px; border-top:1px solid var(--line); font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-faint)}
+.lightbox{position:fixed; inset:0; background:rgba(8,7,5,.93); display:none; align-items:center; justify-content:center; z-index:999; padding:24px; cursor:zoom-out}
+.lightbox.open{display:flex}
+.lightbox img{max-width:96vw; max-height:92vh; border-radius:8px; box-shadow:0 40px 90px -20px rgba(0,0,0,.9)}
+.lightbox .cls{position:fixed; top:16px; right:22px; color:var(--ink-dim); font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.12em; text-transform:uppercase}
+@media(max-width:760px){
+  .wrap{padding:52px 20px 80px} h1{font-size:40px} h2{font-size:28px}
+  .kpis,.g4,.g2{grid-template-columns:1fr 1fr}
+  .modx__grid{grid-template-columns:1fr} .bar{grid-template-columns:120px 1fr}
+  .phasebar{flex-direction:column} .price-hero .big{font-size:44px}
+}
+@media(max-width:440px){ .kpis,.g4,.g2{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Đề xuất kỹ thuật &amp; Báo giá</p>
+  <h1>MHG Connect —<br>hệ thống QR <em>định danh</em><br>và hồ sơ <em>số</em></h1>
+  <p class="lede">Mỗi Sticker Nano Airpurity mang một mã QR định danh: quét ra hồ sơ số — cho cả cá nhân và doanh nghiệp.</p>
+  <div class="kpis">
+    <div class="kpi"><div class="v">4</div><div class="l">HẠNG MỤC</div></div>
+    <div class="kpi"><div class="v">170tr</div><div class="l">CHI PHÍ PHÁT TRIỂN</div></div>
+    <div class="kpi"><div class="v">~3,5</div><div class="l">MAN-MONTH</div></div>
+    <div class="kpi"><div class="v">~1,5–2th</div><div class="l">TRIỂN KHAI</div></div>
+  </div>
+  <p class="groundwork">Xây trên nền định hướng đã phác thảo (MHG Connect V12), chuẩn hoá thành đặc tả kỹ thuật &amp; báo giá để triển khai được ngay.</p>
+  <p class="quote-meta"><b>Số báo giá:</b> ………&nbsp;&nbsp;·&nbsp;&nbsp;<b>Ngày lập:</b> 11/08/2026&nbsp;&nbsp;·&nbsp;&nbsp;<b>Hiệu lực:</b> 30 ngày<br><b>Đơn vị cung cấp:</b> ………&nbsp;&nbsp;·&nbsp;&nbsp;<b>Khách hàng:</b> ………</p>
+</header>
+
+<h2><span class="num">01 — MỤC TIÊU</span>Bối cảnh &amp; mục tiêu</h2>
+<p class="lead">MHG bán ~1.000 sản phẩm sticker mỗi tháng. Gắn mã QR định danh biến sản phẩm vật lý thành điểm chạm số: quét → hồ sơ số. Hệ thống gồm: phát hành mã (cá nhân + doanh nghiệp), hồ sơ tùy biến, cổng doanh nghiệp &amp; trang quản trị.</p>
+<figure>
+  <img class="shot" src="assets/intro.png" alt="Hành trình: dán sticker MHG, quét mã, mở hồ sơ số" />
+  <figcaption>Hành trình thật — sticker MHG dán sau điện thoại → khách quét mã → mở hồ sơ số (nhấp để xem lớn)</figcaption>
+</figure>
+<div class="grid g4">
+  <div class="card"><div class="k">01</div><h5>Phát hành &amp; kích hoạt mã</h5><p>Sinh, quản lý, in lô mã QR (cá nhân + doanh nghiệp); kích hoạt qua OTP.</p></div>
+  <div class="card"><div class="k">02</div><h5>Hồ sơ &amp; nhiều trang đích</h5><p>Chọn template + sửa nội dung; tạo nhiều trang đích, đổi trang đang bật cho cùng một mã.</p></div>
+  <div class="card"><div class="k">03</div><h5>Cổng doanh nghiệp</h5><p>Doanh nghiệp đặt lô, gán mã cho nhân sự — quản lý tập trung.</p></div>
+  <div class="card"><div class="k">04</div><h5>MHG kiểm soát</h5><p>Trang quản trị theo dõi mã, lô, doanh nghiệp toàn hệ thống.</p></div>
+</div>
+
+<h2><span class="num">02 — KIẾN TRÚC</span>Kiến trúc hệ thống</h2>
+<p class="lead">Ba lớp — mỗi lớp nâng cấp riêng được, dễ mở rộng về sau.</p>
+<figure>
+<svg viewBox="0 0 680 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ba lớp: trải nghiệm, dịch vụ lõi, dữ liệu">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M2 1L8 5L2 9" fill="none" stroke="#8A7128" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g font-family="Inter,sans-serif">
+    <rect x="40" y="20" width="600" height="90" rx="12" fill="#1A1712" stroke="#2E281E"/>
+    <text x="60" y="44" fill="#A89E8C" font-size="12" font-weight="500">01 · TRẢI NGHIỆM — Web / PWA</text>
+    <rect x="60" y="58" width="170" height="40" rx="8" fill="#221E18" stroke="#453B29"/><text x="145" y="83" text-anchor="middle" fill="#ECE6D9" font-size="12.5">QR Resolver</text>
+    <rect x="245" y="58" width="170" height="40" rx="8" fill="#221E18" stroke="#453B29"/><text x="330" y="83" text-anchor="middle" fill="#ECE6D9" font-size="12.5">Builder + template</text>
+    <rect x="430" y="58" width="190" height="40" rx="8" fill="#221E18" stroke="#453B29"/><text x="525" y="83" text-anchor="middle" fill="#ECE6D9" font-size="12.5">Trang hồ sơ (SSR)</text>
+    <path d="M340 110 L340 130" stroke="#8A7128" stroke-width="1.4" marker-end="url(#ar)" fill="none"/>
+    <rect x="40" y="132" width="600" height="90" rx="12" fill="#332912" stroke="#8A7128"/>
+    <text x="60" y="156" fill="#D4A93C" font-size="12" font-weight="500">02 · DỊCH VỤ LÕI — Backend</text>
+    <rect x="60" y="170" width="170" height="40" rx="8" fill="#241E10" stroke="#6B5720"/><text x="145" y="195" text-anchor="middle" fill="#EBD9A6" font-size="12.5">QR Registry + Kích hoạt</text>
+    <rect x="245" y="170" width="170" height="40" rx="8" fill="#241E10" stroke="#6B5720"/><text x="330" y="195" text-anchor="middle" fill="#EBD9A6" font-size="12.5">Cổng Doanh nghiệp</text>
+    <rect x="430" y="170" width="190" height="40" rx="8" fill="#241E10" stroke="#6B5720"/><text x="525" y="195" text-anchor="middle" fill="#EBD9A6" font-size="12.5">Master Admin</text>
+    <path d="M340 222 L340 242" stroke="#8A7128" stroke-width="1.4" marker-end="url(#ar)" fill="none"/>
+    <rect x="40" y="244" width="600" height="56" rx="12" fill="#1A1712" stroke="#2E281E"/>
+    <text x="60" y="268" fill="#A89E8C" font-size="12" font-weight="500">03 · DỮ LIỆU &amp; HẠ TẦNG</text>
+    <text x="60" y="288" fill="#ECE6D9" font-size="13.5">PostgreSQL · Redis · CDN + lưu trữ</text>
+  </g>
+</svg>
+<figcaption>Kiến trúc ba lớp — lớp vàng là lõi dịch vụ</figcaption>
+</figure>
+
+<h2><span class="num">03 — HẠNG MỤC</span>Chi tiết &amp; công nghệ</h2>
+<p class="lead">Bốn hạng mục, khoán độc lập. Công nghệ chọn theo nguyên tắc <strong class="g">phổ biến hơn mới lạ</strong> — dễ tuyển người bảo trì lâu dài.</p>
+
+<div class="modx"><div class="modx__top"><div class="modx__l"><span class="modx__id">1</span><h3>Mã cá nhân + doanh nghiệp + kích hoạt</h3></div><div class="modx__price">55.000.000₫<span class="mm">~1,0–1,4 MM</span></div></div>
+  <p class="modx__purpose">Hạ tầng mã QR định danh + luồng kích hoạt hồ sơ.</p>
+  <div class="modx__grid">
+    <div><h6>Chức năng</h6><ul class="fnlist"><li>Sinh &amp; quản lý lô mã (phân loại cá nhân/doanh nghiệp), chống trùng</li><li>Xuất file in PDF cho nhà in</li><li>Quét → resolver → OTP (Email/Zalo) → gắn mã với tài khoản</li><li>Resolver trỏ tới <strong class="g">trang đích đang bật (active)</strong> của mã</li></ul></div>
+    <div><h6>Công nghệ</h6><div class="chips"><span class="chip">uuidv7</span><span class="chip">nanoid</span><span class="chip">BullMQ</span><span class="chip">node-qrcode</span><span class="chip">Cloudflare Workers</span><span class="chip">otplib</span></div></div>
+  </div>
+  <div class="modx__deliver"><span>Bàn giao</span>API + CSDL mã QR, dịch vụ resolver &amp; kích hoạt OTP. Nghiệm thu: sinh lô 10.000 mã không trùng; quét → kích hoạt → gắn tài khoản; resolver trỏ đúng trang đang active.</div>
+</div>
+
+<div class="modx"><div class="modx__top"><div class="modx__l"><span class="modx__id">2</span><h3>Trình dựng hồ sơ + nhiều trang đích</h3></div><div class="modx__price">55.000.000₫<span class="mm">~1,2–1,6 MM</span></div></div>
+  <p class="modx__purpose">Người dùng tự dựng hồ sơ bằng page builder cơ bản và bộ template theo ngành; tạo nhiều trang đích, chọn trang đang bật cho cùng một mã.</p>
+  <div class="modx__grid">
+    <div><h6>Chức năng</h6><ul class="fnlist"><li><strong class="g">Page builder cơ bản</strong>: kéo-thả, thêm/sửa/sắp xếp khối (text, ảnh, link, nút gọi/Zalo, bản đồ…)</li><li><strong class="g">Template sẵn theo ngành nghề</strong> (bác sĩ, sale BĐS, spa, nhà hàng, cửa hàng…) — dựng hồ sơ trong 1 phút</li><li><strong class="g">Nhiều trang đích cho một mã, đặt trang “đang hoạt động”</strong> — cùng một QR, đổi trang đích bất kỳ lúc nào (hôm nay trỏ A, mai chuyển B → quét ra B)</li><li>Trang hồ sơ render SSR tối ưu mobile + lưu danh bạ (vCard); chống XSS</li></ul></div>
+    <div><h6>Công nghệ</h6><div class="chips"><span class="chip">Next.js SSR</span><span class="chip">react-hook-form</span><span class="chip">zod</span><span class="chip">DOMPurify</span><span class="chip">sharp</span></div></div>
+  </div>
+  <div class="modx__deliver"><span>Bàn giao</span>Page builder + bộ template theo ngành, quản lý nhiều trang đích, trang hồ sơ công khai (SSR). Nghiệm thu: dựng &amp; xuất bản hồ sơ; đổi trang active → quét ra đúng trang; tải nhanh trên mobile.</div>
+</div>
+
+<div class="modx"><div class="modx__top"><div class="modx__l"><span class="modx__id">3</span><h3>Cổng doanh nghiệp</h3></div><div class="modx__price">35.000.000₫<span class="mm">~0,8–1,0 MM</span></div></div>
+  <p class="modx__purpose">Doanh nghiệp đặt lô mã cho nhân sự; mỗi nhân viên có một hồ sơ công việc gắn thông tin doanh nghiệp.</p>
+  <div class="modx__grid">
+    <div><h6>Chức năng</h6><ul class="fnlist"><li><strong class="g">Tài khoản thuộc doanh nghiệp = hồ sơ công việc</strong>: kèm logo/tên công ty, chức danh, phòng ban (cạnh thông tin cá nhân)</li><li><strong class="g">Doanh nghiệp chọn template/nhận diện chung</strong> (logo, màu, thông tin công ty); nhân viên điền &amp; chỉnh phần cá nhân của mình (ảnh, chức danh, liên hệ)</li><li>Doanh nghiệp đặt lô mã, gán cho nhân sự; thu hồi/hủy mã khi nhân sự nghỉ (mã cá nhân của người đó không ảnh hưởng)</li><li>Dashboard doanh nghiệp: danh sách nhân sự, mã, lượt quét, trạng thái</li></ul></div>
+    <div><h6>Công nghệ</h6><div class="chips"><span class="chip">NestJS</span><span class="chip">Prisma</span><span class="chip">PostgreSQL</span></div></div>
+  </div>
+  <div class="modx__deliver"><span>Bàn giao</span>Portal doanh nghiệp: đặt/gán lô mã, hồ sơ công việc (template do doanh nghiệp chọn), dashboard. Nghiệm thu: đặt lô → gán nhân sự → xem lượt quét; thu hồi/hủy mã khi nghỉ.</div>
+</div>
+<div class="callout"><span class="tag">Cá nhân vs Doanh nghiệp</span><p>Tài khoản <strong>cá nhân</strong> tự sở hữu &amp; tự quản hồ sơ, dữ liệu riêng. Tài khoản <strong>thuộc doanh nghiệp</strong> dùng <strong>hồ sơ công việc</strong> — mã do doanh nghiệp đặt &amp; gán, <strong>doanh nghiệp chọn template/nhận diện còn nhân viên điền phần cá nhân</strong>, và nằm trong dashboard quản lý của doanh nghiệp. Việc khóa cứng phần công ty (remote lock) &amp; phân quyền chi tiết nằm ở phần Mở rộng.</p></div>
+
+<div class="modx"><div class="modx__top"><div class="modx__l"><span class="modx__id">4</span><h3>Master admin (MHG)</h3></div><div class="modx__price">25.000.000₫<span class="mm">~0,5–0,7 MM</span></div></div>
+  <p class="modx__purpose">Trung tâm để MHG kiểm soát toàn hệ thống.</p>
+  <div class="modx__grid">
+    <div><h6>Chức năng</h6><ul class="fnlist"><li>Sổ QR tổng: quản lý mã, lô, doanh nghiệp</li><li>Trạng thái kích hoạt, khóa mã khi cần</li><li>Tài khoản &amp; quyền admin</li></ul></div>
+    <div><h6>Công nghệ</h6><div class="chips"><span class="chip">shadcn/ui</span><span class="chip">Tailwind</span><span class="chip">TanStack Table</span></div></div>
+  </div>
+  <div class="modx__deliver"><span>Bàn giao</span>Trang quản trị của MHG. Nghiệm thu: tra cứu &amp; quản lý toàn bộ mã/lô/doanh nghiệp; khóa mã; tài khoản &amp; quyền admin.</div>
+</div>
+
+<div class="grp">
+  <figure><img class="shot" src="assets/mockup-admin.png" alt="Trung tâm quản lý mã QR" /><figcaption>Master Admin — kho mã QR, vòng đời mã, chi tiết từng mã</figcaption></figure>
+  <figure><img class="shot" src="assets/mockup-b2b.png" alt="Cổng doanh nghiệp" /><figcaption>Cổng Doanh nghiệp — quản trị nhân sự &amp; mã QR</figcaption></figure>
+</div>
+<h4>Nền tảng chung</h4>
+<div class="chips"><span class="chip">TypeScript</span><span class="chip">Next.js</span><span class="chip">NestJS</span><span class="chip">PostgreSQL</span><span class="chip">Redis</span><span class="chip">Cloudflare Workers</span><span class="chip">Docker</span></div>
+
+<h2><span class="num">04 — BÁO GIÁ</span>Báo giá chi tiết</h2>
+<div class="price-hero">
+  <div class="big">170.000.000₫</div>
+  <div class="sub">Tổng chi phí thực hiện (chưa gồm VAT) · ~4 man-month<br>Chưa gồm hạ tầng vận hành &amp; phần điều phối/thương mại.</div>
+</div>
+<table class="t2"><thead><tr><th>STT · Hạng mục &amp; nội dung công việc</th><th>Thành tiền</th></tr></thead><tbody>
+<tr><td><strong>1 · Mã cá nhân + doanh nghiệp + kích hoạt</strong><small>Sinh &amp; quản lý lô mã (phân loại cá nhân/DN), xuất file in · resolver + kích hoạt OTP (Email/Zalo), trỏ trang đích đang active</small></td><td class="r">55.000.000</td></tr>
+<tr><td><strong>2 · Trình dựng hồ sơ + nhiều trang đích</strong><small>Page builder cơ bản + template theo ngành · tạo nhiều trang đích, chọn trang active · trang hồ sơ SSR + lưu danh bạ, chống XSS</small></td><td class="r">55.000.000</td></tr>
+<tr><td><strong>3 · Cổng doanh nghiệp</strong><small>Đặt/gán lô mã, thu hồi khi nghỉ · hồ sơ công việc (DN chọn template) · dashboard doanh nghiệp</small></td><td class="r">35.000.000</td></tr>
+<tr><td><strong>4 · Master admin</strong><small>Sổ QR tổng, quản lý lô/doanh nghiệp, khóa mã, phân quyền admin</small></td><td class="r">25.000.000</td></tr>
+<tr class="plain"><td>Cộng</td><td class="r">170.000.000</td></tr>
+<tr class="plain"><td>Thuế GTGT (VAT)</td><td class="r">chưa bao gồm</td></tr>
+<tr class="total"><td>TỔNG CỘNG</td><td class="r">170.000.000</td></tr>
+</tbody></table>
+<h4>Phân bổ chi phí</h4>
+<div class="bars">
+  <div class="bar"><div class="bl">1 · Mã + kích hoạt</div><div class="track"><div class="fill" style="width:100%">55tr</div></div></div>
+  <div class="bar"><div class="bl">2 · Hồ sơ + template</div><div class="track"><div class="fill" style="width:100%">55tr</div></div></div>
+  <div class="bar"><div class="bl">3 · Cổng doanh nghiệp</div><div class="track"><div class="fill" style="width:64%">35tr</div></div></div>
+  <div class="bar"><div class="bl">4 · Master admin</div><div class="track"><div class="fill" style="width:45%">25tr</div></div></div>
+</div>
+<h4>Điều khoản thanh toán</h4>
+<div class="grid g3">
+  <div class="card"><div class="k" style="color:var(--gold)">40% · Tạm ứng</div><h5>Khi ký hợp đồng</h5><p>Khởi động, dựng hạ tầng, bắt đầu.</p></div>
+  <div class="card"><div class="k" style="color:var(--gold)">40% · Go-live</div><h5>Bàn giao phần chạy được</h5><p>~1 tháng — mã + kích hoạt + hồ sơ chạy thật.</p></div>
+  <div class="card"><div class="k" style="color:var(--gold)">20% · Cuối</div><h5>Nghiệm thu &amp; bàn giao</h5><p>Hoàn thiện cổng DN + admin, nghiệm thu.</p></div>
+</div>
+<p style="font-size:13.5px; color:var(--ink-faint)">Chuyển khoản: ……… · Chỉ thanh toán cho phần đã nghiệm thu.</p>
+
+<h4>Bảo hành &amp; hỗ trợ</h4>
+<p>Bảo hành sửa lỗi <strong>1–2 tháng</strong> sau nghiệm thu (miễn phí). Sau đó, hỗ trợ &amp; nâng cấp theo nhu cầu — dịch vụ con người, <strong>không phải</strong> phí thuê server/hạ tầng.</p>
+
+<h4>Chi phí KHÔNG bao gồm</h4>
+<ul class="exlist"><li>Hạ tầng vận hành: hosting, CDN, tên miền (~50–100tr/năm)</li><li>Phí dịch vụ bên thứ 3: Zalo ZNS / Email số lượng lớn (theo lưu lượng)</li><li>Thuế GTGT (VAT)</li></ul>
+
+<p style="font-size:13.5px; color:var(--ink-faint); margin-top:18px">Báo giá có hiệu lực <strong>30 ngày</strong> kể từ ngày lập. Giá khoán theo hạng mục, nghiệm thu độc lập. Mọi hạng mục có thể điều chỉnh theo trao đổi.</p>
+<div class="sign">
+  <div><div class="sl">Đơn vị cung cấp</div><div class="sn">(ký, ghi rõ họ tên)</div></div>
+  <div><div class="sl">Khách hàng</div><div class="sn">(ký, ghi rõ họ tên)</div></div>
+</div>
+
+<h2><span class="num">05 — KẾ HOẠCH</span>Triển khai</h2>
+<p class="lead">Ước tính <strong class="g">~1,5–2 tháng</strong> với đội gọn 2–3 người. Chia làm chạy được sớm rồi bổ sung phần doanh nghiệp.</p>
+<div class="phasebar">
+  <div class="ph1" style="flex:1">CHẠY ĐƯỢC<small>~1 tháng · mã + kích hoạt + hồ sơ</small></div>
+  <div class="ph2" style="flex:1">HOÀN THIỆN<small>đến ~2 tháng · cổng DN + master admin</small></div>
+</div>
+
+<h2><span class="num">06 — MỞ RỘNG</span>Tính năng có thể bổ sung sau</h2>
+<p class="lead">Khi cần, hệ thống mở rộng thêm các tính năng sau mà không phải làm lại phần lõi:</p>
+<div class="grid g4">
+  <div class="card"><div class="k">Nâng cấp</div><h5>Builder resize đầy đủ</h5><p>Kéo-thả resize khối 2 chiều — điểm khác biệt (USP) mạnh nhất.</p></div>
+  <div class="card"><div class="k">Doanh thu</div><h5>Quảng cáo trang trung gian</h5><p>Trang trung gian + khối tài trợ + đo lường — tạo dòng tiền quảng cáo.</p></div>
+  <div class="card"><div class="k">B2B</div><h5>Doanh nghiệp nâng cao</h5><p>Multi-tenant đầy đủ, khóa hồ sơ từ xa, phân quyền chi tiết.</p></div>
+  <div class="card"><div class="k">Nền tảng</div><h5>Mobile App</h5><p>iOS + Android cho chủ hồ sơ.</p></div>
+</div>
+
+<footer>MHG Connect · Đề xuất &amp; Báo giá · 11/08/2026 — mọi hạng mục có thể điều chỉnh phạm vi/giá theo trao đổi.</footer>
+
+</div>
+<div class="lightbox" id="lb"><span class="cls">Nhấp bất kỳ đâu để đóng ✕</span><img id="lbimg" src="" alt="" /></div>
+<script>
+(function(){
+  var lb=document.getElementById('lb'), img=document.getElementById('lbimg');
+  document.addEventListener('click', function(e){
+    var t=e.target;
+    if(t.classList.contains('shot')){ img.src=t.getAttribute('src'); lb.classList.add('open'); }
+    else if(lb.classList.contains('open')){ lb.classList.remove('open'); img.src=''; }
+  });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ lb.classList.remove('open'); img.src=''; } });
+})();
+</script>
+</body>
+</html>

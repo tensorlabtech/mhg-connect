@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "MHG Connect — Dữ liệu hồ sơ từ builder đến edge cache",
+    "output": "mhg-phase-1-profile-publishing.html",
+    "viewBox": [1068, 680],
+    "quality_profile": "showcase",
+    "views": [
+      { "id": "authoring", "label": "Soạn và publish", "focus": ["builder", "validation", "draft", "published", "ssr"], "note": "NestJS dùng Zod và DOMPurify kiểm tra nội dung; PostgreSQL giữ draft và snapshot published bất biến." },
+      { "id": "edgePublish", "label": "Đưa lên edge", "focus": ["published", "ssr", "visitor"], "note": "Sau commit, API purge /q/{token}. Request kế tiếp render snapshot rồi được Cloudflare cache; BullMQ retry nếu purge lỗi." },
+      { "id": "media", "label": "Media công khai", "focus": ["upload", "mediaPolicy", "storage", "ssr", "visitor"], "note": "Ảnh được Sharp kiểm tra và tối ưu trước khi lưu Object Storage; CDN chỉ phục vụ object public đã duyệt." }
+    ]
+  },
+  "stages": [
+    { "label": "Đầu vào" },
+    { "label": "Kiểm tra" },
+    { "label": "Nguồn chuẩn" },
+    { "label": "Origin + Edge" },
+    { "label": "Tiêu thụ" }
+  ],
+  "nodes": [
+    { "id": "builder", "type": "frontend", "label": "Profile Builder", "sublabel": "React Hook Form", "stage": 0, "row": 0 },
+    { "id": "upload", "type": "frontend", "label": "Media Upload", "sublabel": "ảnh đại diện · gallery", "stage": 0, "row": 2 },
+    { "id": "validation", "type": "backend", "label": "Profile API", "sublabel": "NestJS · Zod · DOMPurify", "stage": 1, "row": 0 },
+    { "id": "mediaPolicy", "type": "backend", "label": "Media Policy", "sublabel": "MIME · size · Sharp", "stage": 1, "row": 2 },
+    { "id": "draft", "type": "database", "label": "Draft Profile", "sublabel": "editable block JSON", "stage": 2, "row": 0, "tag": "private" },
+    { "id": "published", "type": "database", "label": "Published Snapshot", "sublabel": "immutable version", "stage": 2, "row": 1, "tag": "public source" },
+    { "id": "storage", "type": "cloud", "label": "Object Storage", "sublabel": "optimized media", "stage": 2, "row": 2 },
+    { "id": "ssr", "type": "cloud", "label": "/q SSR → Edge Cache", "sublabel": "Next.js · CDN", "stage": 3, "row": 1 },
+    { "id": "visitor", "type": "external", "label": "Khách quét", "sublabel": "mobile browser", "stage": 4, "row": 1 }
+  ],
+  "flows": [
+    { "id": "builderToValidation", "from": "builder", "to": "validation", "label": "block JSON + URLs", "classification": "user content", "variant": "security" },
+    { "id": "validationToDraft", "from": "validation", "to": "draft", "label": "sanitized draft", "classification": "private profile", "variant": "emphasis", "route": "straight" },
+    { "id": "draftToPublished", "from": "draft", "to": "published", "label": "publish + purge URL/tag", "classification": "public profile", "variant": "emphasis", "route": "straight", "labelAt": [530, 200] },
+    { "id": "publishedToSsr", "from": "published", "to": "ssr", "label": "published JSON", "classification": "public content", "variant": "emphasis", "route": "straight" },
+    { "id": "uploadToPolicy", "from": "upload", "to": "mediaPolicy", "label": "raw image", "classification": "user upload", "variant": "security" },
+    { "id": "policyToStorage", "from": "mediaPolicy", "to": "storage", "label": "optimized media", "classification": "validated media", "variant": "emphasis" },
+    { "id": "cacheToVisitor", "from": "ssr", "to": "visitor", "label": "cached HTML + media", "classification": "public response", "variant": "emphasis", "route": "straight" }
+  ]
+}

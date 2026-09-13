@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "MHG Connect — Kích hoạt QR lần đầu",
+    "output": "mhg-phase-1-activation.html",
+    "viewBox": [920, 580],
+    "column_fit": "spread",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "request-otp",
+        "label": "Yêu cầu OTP",
+        "focus": ["owner", "web", "api", "redis", "otp"],
+        "note": "API xác nhận mã đã phát hành, chưa có chủ và không bị khóa trước khi giới hạn yêu cầu rồi gửi OTP có TTL."
+      },
+      {
+        "id": "claim-owner",
+        "label": "Xác nhận chủ sở hữu",
+        "focus": ["web", "api", "redis", "db", "edgeCache"],
+        "note": "OTP chỉ dùng một lần; claim được ghi bằng transaction có audit, sau đó purge HTML /q/{token} để lần mở tiếp theo nhận trạng thái mới."
+      }
+    ]
+  },
+  "participants": [
+    { "id": "owner", "type": "external", "label": "Chủ hồ sơ", "sublabel": "người kích hoạt" },
+    { "id": "web", "type": "frontend", "label": "Next.js /q", "sublabel": "Route · ActivationView" },
+    { "id": "api", "type": "backend", "label": "NestJS API", "sublabel": "CSPRNG OTP · nghiệp vụ" },
+    { "id": "otp", "type": "external", "label": "Email OTP", "sublabel": "Zalo ZNS tùy chọn" },
+    { "id": "redis", "type": "database", "label": "Redis", "sublabel": "OTP hash · TTL" },
+    { "id": "db", "type": "database", "label": "PostgreSQL", "sublabel": "source of truth" },
+    { "id": "edgeCache", "type": "cloud", "label": "Edge Cache", "sublabel": "Cloudflare Cache API" }
+  ],
+  "segments": [
+    { "from": 150, "to": 495, "label": "Kích hoạt an toàn và đồng bộ edge" }
+  ],
+  "messages": [
+    { "id": "openActivation", "from": "owner", "to": "web", "y": 165, "label": "GET /q/{publicToken} → ActivationView" },
+    { "id": "requestOtp", "from": "web", "to": "api", "y": 195, "label": "yêu cầu OTP cho publicToken", "variant": "security" },
+    { "id": "checkQr", "from": "api", "to": "db", "y": 225, "label": "kiểm tra issued · unclaimed · unlocked", "variant": "security" },
+    { "id": "rateLimit", "from": "api", "to": "redis", "y": 255, "label": "rate limit + OTP hash / TTL", "variant": "security" },
+    { "id": "sendOtp", "from": "api", "to": "otp", "y": 285, "label": "gửi Email OTP", "variant": "security" },
+    { "id": "submitOtp", "from": "web", "to": "api", "y": 325, "label": "xác nhận {publicToken, OTP}", "variant": "emphasis" },
+    { "id": "consumeOtp", "from": "api", "to": "redis", "y": 360, "label": "consume-once", "variant": "security" },
+    { "id": "claimQr", "from": "api", "to": "db", "y": 395, "label": "atomic first verified claim + audit", "variant": "emphasis" },
+    { "id": "purgeQr", "from": "api", "to": "edgeCache", "y": 430, "label": "sau commit: purge /q/{token}", "variant": "security" },
+    { "id": "activationOk", "from": "api", "to": "web", "y": 465, "label": "session + chuyển Profile Builder", "variant": "return" }
+  ]
+}

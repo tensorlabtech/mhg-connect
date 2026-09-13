@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "MHG Connect — Triển khai và vận hành đề xuất",
+    "quality_profile": "showcase",
+    "viewBox": [1320, 752],
+    "views": [
+      { "id": "servingPath", "label": "Đường phục vụ công khai", "focus": ["internet", "edgeGateway", "edgeCache", "webRuntime", "apiRuntime", "dataServices"], "note": "Cache HIT kết thúc ở edge. Cache MISS mới gọi Next.js hoặc NestJS, sau đó response public được cache lại." },
+      { "id": "writePath", "label": "Write và purge", "focus": ["webRuntime", "apiRuntime", "dataServices", "workerRuntime", "edgeCache"], "note": "API commit PostgreSQL, cập nhật Redis rồi gọi Cloudflare Purge API; BullMQ worker retry nếu purge lỗi." },
+      { "id": "operations", "label": "Quan sát và khôi phục", "focus": ["edgeGateway", "edgeCache", "apiRuntime", "workerRuntime", "dataServices", "observability", "backup"], "note": "Cloudflare Analytics/Logs theo dõi edge; application logs, queue backlog và DB backup bao phủ origin." }
+    ]
+  },
+  "components": [
+    { "id": "internet", "type": "external", "label": "Browser / QR Scanner", "sublabel": "HTTPS", "pos": [30, 120], "size": [180, 74] },
+    { "id": "edgeGateway", "type": "cloud", "label": "Cloudflare Gateway", "sublabel": "DNS · TLS · WAF", "pos": [260, 120], "size": [210, 80], "tag": "Edge" },
+    { "id": "edgeCache", "type": "cloud", "label": "Cloudflare Edge Cache", "sublabel": "/q active HTML", "pos": [520, 120], "size": [220, 80], "tag": "Edge" },
+    { "id": "webRuntime", "type": "frontend", "label": "Web Runtime", "sublabel": "Next.js SSR · Docker", "pos": [790, 120], "size": [200, 80] },
+    { "id": "apiRuntime", "type": "backend", "label": "API Runtime", "sublabel": "NestJS · Prisma · Docker", "pos": [1050, 120], "size": [210, 80] },
+    { "id": "workerRuntime", "type": "backend", "label": "Background Worker", "sublabel": "QR batch · media · purge retry", "pos": [525, 380], "size": [210, 76] },
+    { "id": "dataServices", "type": "database", "label": "PostgreSQL + Redis", "sublabel": "source · cache · queue", "pos": [790, 380], "size": [220, 76], "tag": "managed" },
+    { "id": "otpProvider", "type": "external", "label": "Email OTP", "sublabel": "Zalo ZNS tùy chọn", "pos": [1050, 380], "size": [210, 72] },
+    { "id": "objectStorage", "type": "cloud", "label": "Object Storage", "sublabel": "media · QR exports", "pos": [390, 600], "size": [210, 76], "tag": "managed" },
+    { "id": "backup", "type": "cloud", "label": "Backup Storage", "sublabel": "DB snapshots · retention", "pos": [690, 600], "size": [210, 76], "tag": "managed" },
+    { "id": "observability", "type": "cloud", "label": "Observability", "sublabel": "edge + app + queue", "pos": [990, 600], "size": [210, 76], "tag": "managed" }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Cloudflare managed · tài khoản MHG", "wraps": ["edgeGateway", "edgeCache"], "pad": 22 },
+    { "kind": "region", "label": "Runtime ứng dụng · mã nguồn dự án", "wraps": ["webRuntime", "apiRuntime", "workerRuntime"], "pad": 24 },
+    { "kind": "region", "label": "Dữ liệu managed · không thuộc Cloudflare", "wraps": ["dataServices", "objectStorage", "backup"], "pad": 20 },
+    { "kind": "region", "label": "Nhà cung cấp bên thứ ba", "wraps": ["otpProvider"], "pad": 16 }
+  ],
+  "connections": [
+    { "id": "internetToEdge", "from": "internet", "to": "edgeGateway", "label": "HTTPS", "variant": "emphasis" },
+    { "id": "gatewayToCache", "from": "edgeGateway", "to": "edgeCache", "label": "WAF + CDN", "variant": "emphasis", "labelAt": [495, 214] },
+    { "id": "cacheToWeb", "from": "edgeCache", "to": "webRuntime", "label": "MISS: SSR origin", "variant": "dashed", "labelAt": [765, 214] },
+    { "id": "webToApi", "from": "webRuntime", "to": "apiRuntime", "label": "API JSON", "variant": "emphasis" },
+    { "id": "apiToData", "from": "apiRuntime", "to": "dataServices", "label": "Prisma · Redis", "variant": "emphasis", "fromSide": "bottom", "toSide": "right", "via": [[1155, 280], [1040, 280], [1040, 418]], "labelAt": [1095, 300] },
+    { "id": "apiToWorker", "from": "apiRuntime", "to": "workerRuntime", "label": "BullMQ enqueue", "variant": "dashed", "fromSide": "bottom", "toSide": "right", "via": [[1155, 320], [760, 320], [760, 418]], "labelAt": [955, 340] },
+    { "id": "apiPurge", "from": "apiRuntime", "to": "edgeCache", "label": "Purge API after commit", "variant": "security", "fromSide": "top", "toSide": "top", "via": [[1155, 70], [630, 70]] },
+    { "id": "workerPurgeRetry", "from": "workerRuntime", "to": "edgeCache", "label": "retry purge + backoff", "variant": "dashed", "route": "straight", "fromSide": "top", "toSide": "bottom", "labelAt": [660, 300] },
+    { "id": "apiToOtp", "from": "apiRuntime", "to": "otpProvider", "label": "send OTP", "variant": "security", "labelAt": [1265, 290] },
+    { "id": "workerToStorage", "from": "workerRuntime", "to": "objectStorage", "label": "media + QR export", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "labelAt": [565, 540] },
+    { "id": "postgresBackup", "from": "dataServices", "to": "backup", "label": "scheduled snapshot", "variant": "security", "fromSide": "bottom", "toSide": "top", "labelAt": [845, 540] }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "SLO đường quét", "items": ["Cache HIT không phụ thuộc origin", "Không cache OTP, admin, draft hoặc session", "Lock và disable phải purge ngay, không stale-while-revalidate"] },
+    { "dot": "amber", "title": "Vận hành tối thiểu", "items": ["Alert purge failure và queue backlog", "Theo dõi cache hit ratio, Cloudflare 5xx và origin latency", "Backup PostgreSQL có retention và kiểm thử restore"] }
+  ]
+}

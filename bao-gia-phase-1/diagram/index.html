@@ -1,0 +1,1161 @@
+<!doctype html>
+<html lang="vi">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>MHG Connect | 10 sơ đồ kỹ thuật</title>
+        <style>
+            :root {
+                color-scheme: dark;
+                --bg: #12100c;
+                --surface: #1a1712;
+                --surface-strong: #221e18;
+                --line: #453b29;
+                --gold: #d4a93c;
+                --text: #ece6d9;
+                --text-muted: #aaa292;
+                --space-1: 0.25rem;
+                --space-2: 0.5rem;
+                --space-3: 0.75rem;
+                --space-4: 1rem;
+                --space-6: 1.5rem;
+                --space-8: 2rem;
+                --space-12: 3rem;
+                --space-16: 4rem;
+                --radius: 0.75rem;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html {
+                scroll-behavior: smooth;
+            }
+
+            body {
+                min-width: 20rem;
+                margin: 0;
+                background: var(--bg);
+                color: var(--text);
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                line-height: 1.6;
+            }
+
+            .site-header {
+                background: transparent;
+            }
+
+            .site-header-inner {
+                width: min(calc(100% - var(--space-12)), 90rem);
+                margin: 0 auto;
+                padding: var(--space-12) 0 var(--space-8);
+            }
+
+            .site-brand {
+                display: block;
+                color: var(--text);
+                font-size: clamp(2rem, 4vw, 3.5rem);
+                font-weight: 650;
+                line-height: 1.05;
+                letter-spacing: -0.035em;
+            }
+
+            .site-tagline {
+                display: block;
+                margin-top: var(--space-2);
+                color: var(--text-muted);
+                font-size: 0.9375rem;
+            }
+
+            main {
+                width: min(calc(100% - var(--space-12)), 90rem);
+                margin: 0 auto;
+                padding: 0 0 var(--space-16);
+            }
+
+            .visually-hidden {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+            }
+
+            .diagram-section {
+                padding-top: var(--space-8);
+                border-top: 1px solid var(--line);
+            }
+
+            .diagram-section + .diagram-section {
+                margin-top: var(--space-16);
+            }
+
+            .section-heading {
+                display: grid;
+                grid-template-columns: minmax(20rem, 1fr) auto;
+                column-gap: var(--space-8);
+                align-items: end;
+                margin-bottom: var(--space-6);
+            }
+
+            .heading-line {
+                min-width: 0;
+            }
+
+            .section-number {
+                display: block;
+                margin-bottom: var(--space-2);
+                color: var(--gold);
+                font-size: 0.75rem;
+                font-weight: 700;
+                letter-spacing: 0.08em;
+            }
+
+            h2 {
+                margin: 0;
+                font-size: clamp(1.5rem, 3vw, 2rem);
+                font-weight: 650;
+                line-height: 1.2;
+                letter-spacing: -0.02em;
+                white-space: nowrap;
+            }
+
+            .section-summary {
+                max-width: 58ch;
+                margin: var(--space-2) 0 0;
+                color: var(--text-muted);
+                font-size: 1rem;
+                text-wrap: pretty;
+            }
+
+            .play-controls {
+                grid-column: 2;
+                grid-row: 1 / span 2;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+                align-self: end;
+                gap: var(--space-2);
+                max-width: 50rem;
+                margin: 0;
+            }
+
+            .play-button {
+                min-height: 2.75rem;
+                padding: var(--space-2) var(--space-3);
+                border: 1px solid var(--line);
+                border-radius: calc(var(--radius) - var(--space-1));
+                background: var(--surface-strong);
+                color: var(--text-muted);
+                font:
+                    600 0.8125rem/1.25 ui-monospace,
+                    SFMono-Regular,
+                    Menlo,
+                    Consolas,
+                    monospace;
+                cursor: pointer;
+                touch-action: manipulation;
+            }
+
+            .play-button:hover {
+                color: var(--text);
+            }
+
+            .play-button:active {
+                transform: translateY(2px);
+            }
+
+            .play-button:focus-visible {
+                outline: 2px solid var(--gold);
+                outline-offset: 2px;
+            }
+
+            .play-button[aria-pressed="true"] {
+                border-color: var(--gold);
+                background: var(--gold);
+                color: var(--bg);
+            }
+
+            .play-button[data-stop] {
+                background: transparent;
+            }
+
+            .play-status {
+                width: 100%;
+                min-height: 1.25rem;
+                margin: 0;
+                color: var(--text-muted);
+                font-size: 0.75rem;
+                text-align: right;
+            }
+
+            .diagram-shell {
+                position: relative;
+                height: auto;
+                aspect-ratio: var(--diagram-aspect);
+                overflow: auto;
+                overscroll-behavior: contain;
+                border: 1px solid var(--line);
+                border-radius: var(--radius);
+                background: #070b18;
+            }
+
+            #architecture .diagram-shell {
+                --diagram-aspect: 1395 / 818;
+                --mobile-height: 36.5rem;
+            }
+
+            #cloudflare .diagram-shell {
+                --diagram-aspect: 1390 / 744;
+                --mobile-height: 32rem;
+            }
+
+            #activation .diagram-shell {
+                --diagram-aspect: 920 / 580;
+                --mobile-height: 33rem;
+            }
+
+            #public-scan .diagram-shell {
+                --diagram-aspect: 1080 / 740;
+                --mobile-height: 33rem;
+            }
+
+            #publishing .diagram-shell {
+                --diagram-aspect: 1068 / 680;
+                --mobile-height: 34.5rem;
+            }
+
+            #lifecycle .diagram-shell {
+                --diagram-aspect: 1080 / 650;
+                --mobile-height: 37.5rem;
+            }
+
+            #domain-model .diagram-shell {
+                --diagram-aspect: 1180 / 680;
+                --mobile-height: 38rem;
+            }
+
+            #access-security .diagram-shell {
+                --diagram-aspect: 1180 / 672;
+                --mobile-height: 38rem;
+            }
+
+            #deployment .diagram-shell {
+                --diagram-aspect: 1320 / 752;
+                --mobile-height: 39rem;
+            }
+
+            #admin-batch .diagram-shell {
+                --diagram-aspect: 1080 / 650;
+                --mobile-height: 62rem;
+            }
+
+            iframe {
+                display: block;
+                width: 100%;
+                height: 100%;
+                border: 0;
+                background: #070b18;
+            }
+
+            .standalone-link {
+                display: inline-block;
+                min-height: 2.75rem;
+                margin-top: var(--space-3);
+                padding: var(--space-2) var(--space-3);
+                color: var(--text-muted);
+                font-size: 0.875rem;
+                text-underline-offset: var(--space-1);
+            }
+
+            .standalone-link:hover {
+                color: var(--text);
+            }
+
+            .standalone-link:focus-visible {
+                outline: 2px solid var(--gold);
+                outline-offset: 2px;
+                border-radius: var(--space-1);
+            }
+
+            @media (max-width: 68rem) {
+                .section-heading {
+                    grid-template-columns: 1fr;
+                }
+
+                .play-controls {
+                    grid-column: 1;
+                    grid-row: auto;
+                    width: 100%;
+                    max-width: none;
+                    margin-top: var(--space-4);
+                }
+            }
+
+            @media (max-width: 48rem) {
+                main {
+                    width: calc(100% - var(--space-6));
+                    padding: 0 0 var(--space-16);
+                }
+
+                .site-header-inner {
+                    width: calc(100% - var(--space-6));
+                    padding: var(--space-8) 0 var(--space-6);
+                }
+
+                .diagram-section + .diagram-section {
+                    margin-top: var(--space-12);
+                }
+            }
+
+            @media (max-width: 30rem) {
+                h2 {
+                    white-space: normal;
+                }
+            }
+
+            @media (max-width: 40rem) {
+                .diagram-shell {
+                    height: var(--mobile-height);
+                    aspect-ratio: auto;
+                }
+
+                iframe {
+                    width: 60rem;
+                    max-width: none;
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                html {
+                    scroll-behavior: auto;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <header class="site-header">
+            <div class="site-header-inner">
+                <span class="site-brand">MHG Connect</span>
+                <span class="site-tagline"
+                    >Giải pháp kỹ thuật MVP · M1–M6</span
+                >
+            </div>
+        </header>
+        <main>
+            <h1 class="visually-hidden">
+                MHG Connect: 10 sơ đồ kỹ thuật
+            </h1>
+
+            <section class="diagram-section" id="architecture">
+                <div class="section-heading">
+                    <div class="heading-line">
+                        <span class="section-number">01 / 10</span>
+                        <h2>Kiến trúc tổng thể</h2>
+                    </div>
+                    <p class="section-summary">
+                        Kiến trúc đề xuất để triển khai MVP M1–M6; tách rõ
+                        Cloudflare edge, ứng dụng và dữ liệu của dự án.
+                    </p>
+                    <div class="play-controls" data-frame="architecture-frame">
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="scan-path"
+                        >
+                            ▶ Luồng quét QR
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="cache-miss"
+                        >
+                            ▶ Cache MISS
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="owner-path"
+                        >
+                            ▶ Chủ hồ sơ
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="operations"
+                        >
+                            ▶ Vận hành MHG
+                        </button>
+                        <button class="play-button" type="button" data-stop>
+                            Dừng
+                        </button>
+                        <p class="play-status" aria-live="polite">
+                            Chọn một kịch bản để chạy.
+                        </p>
+                    </div>
+                </div>
+                <div class="diagram-shell">
+                    <iframe
+                        id="architecture-frame"
+                        title="Kiến trúc tổng thể MHG Connect"
+                        data-base-src="mhg-phase-1-system-architecture.html"
+                        loading="eager"
+                    ></iframe>
+                </div>
+                <a
+                    class="standalone-link"
+                    href="viewer.html?diagram=architecture"
+                    target="_blank"
+                    rel="noopener"
+                    >Mở sơ đồ riêng</a
+                >
+            </section>
+
+            <section class="diagram-section" id="cloudflare">
+                <div class="section-heading">
+                    <div class="heading-line">
+                        <span class="section-number">02 / 10</span>
+                        <h2>Cloudflare trong hệ thống</h2>
+                    </div>
+                    <p class="section-summary">
+                        Edge security, CDN cache, purge và observability;
+                        phân biệt rõ Cloudflare với origin của dự án.
+                    </p>
+                    <div class="play-controls" data-frame="cloudflare-frame">
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="cacheHit"
+                        >
+                            ▶ Cache HIT
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="cacheMiss"
+                        >
+                            ▶ Cache MISS
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="invalidation"
+                        >
+                            ▶ Purge sau write
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="protection"
+                        >
+                            ▶ Security + telemetry
+                        </button>
+                        <button class="play-button" type="button" data-stop>
+                            Dừng
+                        </button>
+                        <p class="play-status" aria-live="polite">
+                            Chọn một kịch bản để chạy.
+                        </p>
+                    </div>
+                </div>
+                <div class="diagram-shell">
+                    <iframe
+                        id="cloudflare-frame"
+                        title="Cloudflare trong MHG Connect"
+                        data-base-src="mhg-phase-1-cloudflare-responsibilities.html"
+                        loading="lazy"
+                    ></iframe>
+                </div>
+                <a
+                    class="standalone-link"
+                    href="viewer.html?diagram=cloudflare"
+                    target="_blank"
+                    rel="noopener"
+                    >Mở sơ đồ riêng</a
+                >
+            </section>
+
+            <section class="diagram-section" id="activation">
+                <div class="section-heading">
+                    <div class="heading-line">
+                        <span class="section-number">03 / 10</span>
+                        <h2>Kích hoạt lần đầu</h2>
+                    </div>
+                    <p class="section-summary">
+                        First verified claim: kiểm tra trạng thái mã, xác thực
+                        Email OTP và claim atomically cho một tài khoản.
+                    </p>
+                    <div class="play-controls" data-frame="activation-frame">
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="request-otp"
+                        >
+                            ▶ Yêu cầu OTP
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="claim-owner"
+                        >
+                            ▶ Xác nhận chủ sở hữu
+                        </button>
+                        <button class="play-button" type="button" data-stop>
+                            Dừng
+                        </button>
+                        <p class="play-status" aria-live="polite">
+                            Chọn một kịch bản để chạy.
+                        </p>
+                    </div>
+                </div>
+                <div class="diagram-shell">
+                    <iframe
+                        id="activation-frame"
+                        title="Trình tự kích hoạt QR lần đầu"
+                        data-base-src="mhg-phase-1-activation.html"
+                        loading="lazy"
+                    ></iframe>
+                </div>
+                <a
+                    class="standalone-link"
+                    href="viewer.html?diagram=activation"
+                    target="_blank"
+                    rel="noopener"
+                    >Mở sơ đồ riêng</a
+                >
+            </section>
+
+            <section class="diagram-section" id="public-scan">
+                <div class="section-heading">
+                    <div class="heading-line">
+                        <span class="section-number">04 / 10</span>
+                        <h2>Khách quét QR</h2>
+                    </div>
+                    <p class="section-summary">
+                        Đường HIT chỉ nằm ở edge; đường MISS mới vào origin.
+                        scan_event và profile_view được đo riêng.
+                    </p>
+                    <div class="play-controls" data-frame="public-scan-frame">
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="cache-hit"
+                        >
+                            ▶ Cache HIT
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="cache-miss"
+                        >
+                            ▶ Cache MISS
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="analytics"
+                        >
+                            ▶ Đo traffic
+                        </button>
+                        <button class="play-button" type="button" data-stop>
+                            Dừng
+                        </button>
+                        <p class="play-status" aria-live="polite">
+                            Chọn một kịch bản để chạy.
+                        </p>
+                    </div>
+                </div>
+                <div class="diagram-shell">
+                    <iframe
+                        id="public-scan-frame"
+                        title="Trình tự khách quét QR công khai"
+                        data-base-src="mhg-phase-1-public-scan.html"
+                        loading="lazy"
+                    ></iframe>
+                </div>
+                <a
+                    class="standalone-link"
+                    href="viewer.html?diagram=public-scan"
+                    target="_blank"
+                    rel="noopener"
+                    >Mở sơ đồ riêng</a
+                >
+            </section>
+
+            <section class="diagram-section" id="publishing">
+                <div class="section-heading">
+                    <div class="heading-line">
+                        <span class="section-number">05 / 10</span>
+                        <h2>Dựng và xuất bản</h2>
+                    </div>
+                    <p class="section-summary">
+                        Publish snapshot, purge URL/Cache-Tag và phục vụ HTML,
+                        media công khai qua Cloudflare edge.
+                    </p>
+                    <div class="play-controls" data-frame="publishing-frame">
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="authoring"
+                        >
+                            ▶ Soạn và xuất bản
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="media"
+                        >
+                            ▶ Luồng media
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="edgePublish"
+                        >
+                            ▶ Đưa lên edge
+                        </button>
+                        <button class="play-button" type="button" data-stop>
+                            Dừng
+                        </button>
+                        <p class="play-status" aria-live="polite">
+                            Chọn một kịch bản để chạy.
+                        </p>
+                    </div>
+                </div>
+                <div class="diagram-shell">
+                    <iframe
+                        id="publishing-frame"
+                        title="Dòng dữ liệu dựng và xuất bản hồ sơ"
+                        data-base-src="mhg-phase-1-profile-publishing.html"
+                        loading="lazy"
+                    ></iframe>
+                </div>
+                <a
+                    class="standalone-link"
+                    href="viewer.html?diagram=publishing"
+                    target="_blank"
+                    rel="noopener"
+                    >Mở sơ đồ riêng</a
+                >
+            </section>
+
+            <section class="diagram-section" id="lifecycle">
+                <div class="section-heading">
+                    <div class="heading-line">
+                        <span class="section-number">06 / 10</span>
+                        <h2>Vòng đời QR</h2>
+                    </div>
+                    <p class="section-summary">
+                        Các trạng thái: tạo mã, xuất in, kích hoạt,
+                        phục vụ, khóa tạm và vô hiệu hóa có audit.
+                    </p>
+                    <div class="play-controls" data-frame="lifecycle-frame">
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="normalLifecycle"
+                        >
+                            ▶ Vòng đời chuẩn
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="controlExceptions"
+                        >
+                            ▶ Khóa và hủy mã
+                        </button>
+                        <button class="play-button" type="button" data-stop>
+                            Dừng
+                        </button>
+                        <p class="play-status" aria-live="polite">
+                            Chọn một kịch bản để chạy.
+                        </p>
+                    </div>
+                </div>
+                <div class="diagram-shell">
+                    <iframe
+                        id="lifecycle-frame"
+                        title="Vòng đời một mã QR"
+                        data-base-src="mhg-phase-1-qr-lifecycle.html"
+                        loading="lazy"
+                    ></iframe>
+                </div>
+                <a
+                    class="standalone-link"
+                    href="viewer.html?diagram=lifecycle"
+                    target="_blank"
+                    rel="noopener"
+                    >Mở sơ đồ riêng</a
+                >
+            </section>
+
+            <section class="diagram-section" id="domain-model">
+                <div class="section-heading">
+                    <div class="heading-line">
+                        <span class="section-number">07 / 10</span>
+                        <h2>Mô hình dữ liệu lõi</h2>
+                    </div>
+                    <p class="section-summary">
+                        QR cá nhân, trang active, snapshot published cùng hai
+                        metric scan_event và profile_view.
+                    </p>
+                    <div class="play-controls" data-frame="domain-model-frame">
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="ownership"
+                        >
+                            ▶ Cá nhân và mã QR
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="publishing"
+                        >
+                            ▶ Nháp và xuất bản
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="traceability"
+                        >
+                            ▶ Quét và lượt xem
+                        </button>
+                        <button class="play-button" type="button" data-stop>
+                            Dừng
+                        </button>
+                        <p class="play-status" aria-live="polite">
+                            Chọn một kịch bản để chạy.
+                        </p>
+                    </div>
+                </div>
+                <div class="diagram-shell">
+                    <iframe
+                        id="domain-model-frame"
+                        title="Mô hình dữ liệu lõi MHG Connect"
+                        data-base-src="mhg-phase-1-domain-model.html"
+                        loading="lazy"
+                    ></iframe>
+                </div>
+                <a
+                    class="standalone-link"
+                    href="viewer.html?diagram=domain-model"
+                    target="_blank"
+                    rel="noopener"
+                    >Mở sơ đồ riêng</a
+                >
+            </section>
+
+            <section class="diagram-section" id="access-security">
+                <div class="section-heading">
+                    <div class="heading-line">
+                        <span class="section-number">08 / 10</span>
+                        <h2>Truy cập và bảo mật</h2>
+                    </div>
+                    <p class="section-summary">
+                        Ranh giới public, authenticated và managed data;
+                        OTP/session, ownership, RBAC và cache public.
+                    </p>
+                    <div
+                        class="play-controls"
+                        data-frame="access-security-frame"
+                    >
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="publicAccess"
+                        >
+                            ▶ Khách quét
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="ownerAccess"
+                        >
+                            ▶ Chủ hồ sơ
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="adminAccess"
+                        >
+                            ▶ Quản trị MHG
+                        </button>
+                        <button class="play-button" type="button" data-stop>
+                            Dừng
+                        </button>
+                        <p class="play-status" aria-live="polite">
+                            Chọn một kịch bản để chạy.
+                        </p>
+                    </div>
+                </div>
+                <div class="diagram-shell">
+                    <iframe
+                        id="access-security-frame"
+                        title="Truy cập, phân quyền và bảo mật"
+                        data-base-src="mhg-phase-1-access-security.html"
+                        loading="lazy"
+                    ></iframe>
+                </div>
+                <a
+                    class="standalone-link"
+                    href="viewer.html?diagram=access-security"
+                    target="_blank"
+                    rel="noopener"
+                    >Mở sơ đồ riêng</a
+                >
+            </section>
+
+            <section class="diagram-section" id="deployment">
+                <div class="section-heading">
+                    <div class="heading-line">
+                        <span class="section-number">09 / 10</span>
+                        <h2>Triển khai và vận hành</h2>
+                    </div>
+                    <p class="section-summary">
+                        Topology production đề xuất, tác vụ nền, dịch vụ dữ
+                        liệu, quan sát hệ thống và phương án backup.
+                    </p>
+                    <div class="play-controls" data-frame="deployment-frame">
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="servingPath"
+                        >
+                            ▶ Phục vụ công khai
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="writePath"
+                        >
+                            ▶ Write và purge
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="operations"
+                        >
+                            ▶ Quan sát và backup
+                        </button>
+                        <button class="play-button" type="button" data-stop>
+                            Dừng
+                        </button>
+                        <p class="play-status" aria-live="polite">
+                            Chọn một kịch bản để chạy.
+                        </p>
+                    </div>
+                </div>
+                <div class="diagram-shell">
+                    <iframe
+                        id="deployment-frame"
+                        title="Triển khai và vận hành đề xuất"
+                        data-base-src="mhg-phase-1-deployment-operations.html"
+                        loading="lazy"
+                    ></iframe>
+                </div>
+                <a
+                    class="standalone-link"
+                    href="viewer.html?diagram=deployment"
+                    target="_blank"
+                    rel="noopener"
+                    >Mở sơ đồ riêng</a
+                >
+            </section>
+
+            <section class="diagram-section" id="admin-batch">
+                <div class="section-heading">
+                    <div class="heading-line">
+                        <span class="section-number">10 / 10</span>
+                        <h2>Vận hành lô QR</h2>
+                    </div>
+                    <p class="section-summary">
+                        Trình tự Admin tạo lô, sinh token nền, xuất file cho nhà
+                        in, đánh dấu đã in, tra cứu và khóa mã.
+                    </p>
+                    <div class="play-controls" data-frame="admin-batch-frame">
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="issueBatch"
+                        >
+                            ▶ Tạo và sinh lô
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="printHandoff"
+                        >
+                            ▶ Xuất file nhà in
+                        </button>
+                        <button
+                            class="play-button"
+                            type="button"
+                            aria-pressed="false"
+                            data-play-view="controlCode"
+                        >
+                            ▶ Tra cứu và khóa
+                        </button>
+                        <button class="play-button" type="button" data-stop>
+                            Dừng
+                        </button>
+                        <p class="play-status" aria-live="polite">
+                            Chọn một kịch bản để chạy.
+                        </p>
+                    </div>
+                </div>
+                <div class="diagram-shell">
+                    <iframe
+                        id="admin-batch-frame"
+                        title="Vận hành lô QR của Admin"
+                        data-base-src="mhg-phase-1-admin-qr-batch.html"
+                        loading="lazy"
+                    ></iframe>
+                </div>
+                <a
+                    class="standalone-link"
+                    href="viewer.html?diagram=admin-batch"
+                    target="_blank"
+                    rel="noopener"
+                    >Mở sơ đồ riêng</a
+                >
+            </section>
+        </main>
+        <script src="diagram-learning-content.js"></script>
+        <script src="diagram-learning-popovers.js"></script>
+        <script>
+            var diagramSources = new Map();
+            var diagramRenderIds = new WeakMap();
+            var localPlaybackRuns = new WeakMap();
+
+            function escapeHtml(value) {
+                return value.replace(/[&<>"']/g, function (character) {
+                    return {
+                        "&": "&amp;",
+                        "<": "&lt;",
+                        ">": "&gt;",
+                        '"': "&quot;",
+                        "'": "&#039;",
+                    }[character];
+                });
+            }
+
+            function loadDiagramSource(path) {
+                if (!diagramSources.has(path)) {
+                    diagramSources.set(
+                        path,
+                        fetch(path).then(function (response) {
+                            if (!response.ok)
+                                throw new Error("HTTP " + response.status);
+                            return response.text();
+                        }),
+                    );
+                }
+                return diagramSources.get(path);
+            }
+
+            function prepareDiagramHtml(source, autoplay, view) {
+                var baseUrl = new URL(".", window.location.href).href;
+                var bootScript =
+                    '<base href="' +
+                    baseUrl +
+                    '">' +
+                    '<link rel="stylesheet" href="clean-archify.css">' +
+                    "<script>window.__ARCHIFY_EMBED_PLAY__=" +
+                    (autoplay ? "true" : "false") +
+                    ";" +
+                    "window.__ARCHIFY_EMBED_VIEW__=" +
+                    JSON.stringify(view || "") +
+                    ";" +
+                    "<\/script>";
+                return source
+                    .replace(
+                        /<html([^>]*)>/i,
+                        '<html$1 data-clean="true" data-theme="dark">',
+                    )
+                    .replace(/<head([^>]*)>/i, "$&" + bootScript)
+                    .replace(
+                        /return new URLSearchParams\(location\.search\)\.get\('play'\) === '1';/g,
+                        "return window.__ARCHIFY_EMBED_PLAY__ === true || new URLSearchParams(location.search).get('play') === '1';",
+                    )
+                    .replace(
+                        /var initial = params\.get\('view'\);/g,
+                        "var initial = window.__ARCHIFY_EMBED_VIEW__ || params.get('view');",
+                    );
+            }
+
+            function showDiagramError(frame, error) {
+                frame.srcdoc =
+                    '<style>body{margin:0;display:grid;place-items:center;height:100vh;background:#070b18;color:#aaa292;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}</style>' +
+                    "<p>Không tải được sơ đồ: " +
+                    escapeHtml(error.message) +
+                    "</p>";
+            }
+
+            function renderLocalDiagram(frame, options) {
+                var params = new URLSearchParams({
+                    embed: "1",
+                    theme: "dark",
+                });
+                if (options.autoplay) {
+                    var runId = (localPlaybackRuns.get(frame) || 0) + 1;
+                    localPlaybackRuns.set(frame, runId);
+                    params.set("play", "1");
+                    params.set("run", String(runId));
+                }
+
+                var source = frame.dataset.baseSrc + "?" + params.toString();
+                if (options.view) {
+                    source += "#view=" + encodeURIComponent(options.view);
+                }
+
+                frame.removeAttribute("srcdoc");
+                frame.src = source;
+                frame.dataset.loaded = "true";
+                return Promise.resolve();
+            }
+
+            function renderDiagram(frame, options) {
+                options = options || {};
+                var renderId = (diagramRenderIds.get(frame) || 0) + 1;
+                diagramRenderIds.set(frame, renderId);
+
+                if (window.location.protocol === "file:") {
+                    return renderLocalDiagram(frame, options);
+                }
+
+                return loadDiagramSource(frame.dataset.baseSrc)
+                    .then(function (source) {
+                        if (diagramRenderIds.get(frame) !== renderId) return;
+                        frame.srcdoc = prepareDiagramHtml(
+                            source,
+                            options.autoplay,
+                            options.view,
+                        );
+                        frame.dataset.loaded = "true";
+                    })
+                    .catch(function (error) {
+                        if (diagramRenderIds.get(frame) === renderId)
+                            showDiagramError(frame, error);
+                    });
+            }
+
+            function getGuidedController(frame) {
+                try {
+                    var archify = frame.contentWindow.Archify;
+                    var guided = archify && archify.guidedViews;
+                    if (
+                        !guided ||
+                        typeof guided.activate !== "function" ||
+                        typeof guided.playCurrent !== "function"
+                    )
+                        return null;
+                    return guided;
+                } catch (_) {
+                    return null;
+                }
+            }
+
+            function playDiagramView(frame, view) {
+                return renderDiagram(frame, {
+                    autoplay: true,
+                    view: view,
+                });
+            }
+
+            function stopDiagramPlayback(frame) {
+                var guided = getGuidedController(frame);
+                if (!guided) return renderDiagram(frame);
+                if (
+                    typeof guided.isPlaying === "function" &&
+                    guided.isPlaying()
+                )
+                    guided.pause();
+                guided.showAll();
+                return Promise.resolve();
+            }
+
+            document
+                .querySelectorAll("iframe[data-base-src]")
+                .forEach(function (frame, index) {
+                    if (index === 0 || !("IntersectionObserver" in window)) {
+                        renderDiagram(frame);
+                        return;
+                    }
+                    var observer = new IntersectionObserver(
+                        function (entries) {
+                            if (
+                                !entries.some(function (entry) {
+                                    return entry.isIntersecting;
+                                })
+                            )
+                                return;
+                            observer.disconnect();
+                            renderDiagram(frame);
+                        },
+                        { rootMargin: "600px 0px" },
+                    );
+                    observer.observe(frame);
+                });
+
+            document.addEventListener("click", function (event) {
+                var button = event.target.closest(".play-button");
+                if (!button) return;
+                var controls = button.closest(".play-controls");
+                var frame = document.getElementById(controls.dataset.frame);
+                var status = controls.querySelector(".play-status");
+                controls
+                    .querySelectorAll("[data-play-view]")
+                    .forEach(function (item) {
+                        item.setAttribute("aria-pressed", "false");
+                    });
+                if (button.hasAttribute("data-stop")) {
+                    stopDiagramPlayback(frame);
+                    status.textContent = "Đã dừng. Sơ đồ trở về toàn cảnh.";
+                    return;
+                }
+                button.setAttribute("aria-pressed", "true");
+                playDiagramView(frame, button.dataset.playView);
+                status.textContent =
+                    "Đang chạy: " +
+                    button.textContent.replace("▶", "").trim() +
+                    ".";
+            });
+        </script>
+    </body>
+</html>

@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "MHG Connect — Vận hành lô QR của Admin",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "column_fit": "spread",
+    "views": [
+      { "id": "issueBatch", "label": "Tạo và sinh lô", "focus": ["admin", "api", "queue", "worker", "db"], "note": "API nhận yêu cầu nhanh; worker sinh token theo lô và ghi dữ liệu bền vững." },
+      { "id": "printHandoff", "label": "Xuất file cho nhà in", "focus": ["worker", "db", "storage", "admin", "api"], "note": "File chỉ được tải sau khi lô hoàn tất; trạng thái đã in được xác nhận riêng." },
+      { "id": "controlCode", "label": "Tra cứu và khóa mã", "focus": ["admin", "api", "db", "edgeCache", "queue"], "note": "Admin tra đúng mã; API commit trạng thái và audit trước, sau đó purge cache. BullMQ retry nếu Cloudflare Purge API lỗi." }
+    ],
+    "viewBox": [1080, 650]
+  },
+  "participants": [
+    { "id": "admin", "type": "external", "label": "MHG Admin", "sublabel": "master control" },
+    { "id": "api", "type": "backend", "label": "NestJS API", "sublabel": "RBAC · orchestration" },
+    { "id": "queue", "type": "messagebus", "label": "BullMQ", "sublabel": "Redis queue" },
+    { "id": "worker", "type": "backend", "label": "QR Worker", "sublabel": "node-qrcode · PDF" },
+    { "id": "db", "type": "database", "label": "PostgreSQL", "sublabel": "QR source of truth" },
+    { "id": "storage", "type": "cloud", "label": "Object Storage", "sublabel": "PDF / ảnh QR" },
+    { "id": "edgeCache", "type": "cloud", "label": "Edge Cache", "sublabel": "Cloudflare Purge API" }
+  ],
+  "segments": [
+    { "from": 150, "to": 260, "label": "Tạo yêu cầu" },
+    { "from": 274, "to": 354, "label": "Sinh lô nền" },
+    { "from": 368, "to": 452, "label": "Xuất file" },
+    { "from": 466, "to": 580, "label": "Kiểm soát và đồng bộ edge" }
+  ],
+  "messages": [
+    { "id": "createBatch", "from": "admin", "to": "api", "y": 160, "label": "tạo lô QR", "variant": "emphasis", "note": "loại · số lượng · tên lô" },
+    { "id": "validateBatch", "from": "api", "to": "db", "y": 188, "label": "RBAC + tạo batch pending", "variant": "security" },
+    { "id": "enqueueGeneration", "from": "api", "to": "queue", "y": 216, "label": "enqueue {batchId}", "variant": "emphasis" },
+    { "id": "acceptedBatch", "from": "api", "to": "admin", "y": 244, "label": "đã nhận + batchId", "variant": "return" },
+    { "id": "deliverJob", "from": "queue", "to": "worker", "y": 286, "label": "deliver batch job", "variant": "dashed" },
+    { "id": "persistCodes", "from": "worker", "to": "db", "y": 314, "label": "publicToken ngẫu nhiên + batch ready", "variant": "emphasis" },
+    { "id": "writeExport", "from": "worker", "to": "storage", "y": 342, "label": "ghi PDF / ảnh QR", "variant": "emphasis" },
+    { "id": "readBatch", "from": "admin", "to": "api", "y": 384, "label": "xem trạng thái lô" },
+    { "id": "returnDownload", "from": "api", "to": "admin", "y": 412, "label": "ready + link tải có hạn", "variant": "return" },
+    { "id": "downloadExport", "from": "admin", "to": "storage", "y": 440, "label": "tải file xuất", "variant": "emphasis" },
+    { "id": "controlCode", "from": "admin", "to": "api", "y": 482, "label": "đánh dấu đã in / khóa mã", "variant": "security" },
+    { "id": "persistControl", "from": "api", "to": "db", "y": 495, "label": "atomic status + audit", "variant": "security" },
+    { "id": "purgeControl", "from": "api", "to": "edgeCache", "y": 530, "label": "sau commit: purge /q/{token}", "variant": "security" },
+    { "id": "retryPurge", "from": "api", "to": "queue", "y": 565, "label": "enqueue nếu purge lỗi", "variant": "dashed" }
+  ],
+  "activations": [
+    { "participant": "api", "from": 154, "to": 250, "type": "backend" },
+    { "participant": "queue", "from": 210, "to": 294, "type": "messagebus" },
+    { "participant": "worker", "from": 280, "to": 350, "type": "backend" },
+    { "participant": "api", "from": 378, "to": 418, "type": "backend" },
+    { "participant": "storage", "from": 336, "to": 446, "type": "cloud" },
+    { "participant": "api", "from": 476, "to": 578, "type": "security" },
+    { "participant": "db", "from": 182, "to": 516, "type": "database" },
+    { "participant": "edgeCache", "from": 534, "to": 548, "type": "cloud" }
+  ]
+}

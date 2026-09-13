@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.next/
+.vinext/
+.vite/
+.wrangler/
+.openai/
+.vercel/
+.env*
+!.env.example
+.DS_Store
+*.tsbuildinfo
+site/

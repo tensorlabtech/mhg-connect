@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "MHG Connect — Truy cập, phân quyền và bảo mật",
+    "quality_profile": "showcase",
+    "views": [
+      { "id": "publicAccess", "label": "Khách quét công khai", "focus": ["guest", "edgeSecurity", "edgeCache", "publicProfile"], "note": "Cloudflare chỉ cache HTML hồ sơ active tại /q/{token}. Activation, lỗi và response theo session dùng no-store." },
+      { "id": "ownerAccess", "label": "Chủ hồ sơ", "focus": ["owner", "identity", "policyApi", "sanitizer", "coreData"], "note": "OTP tạo phiên; mọi thao tác sửa phải vượt ownership check và làm sạch nội dung ở server." },
+      { "id": "adminAccess", "label": "Quản trị MHG", "focus": ["adminRoles", "identity", "policyApi", "auditLog", "coreData"], "note": "Admin vận hành quản mã; chỉ super admin quản tài khoản admin." }
+    ],
+    "viewBox": [1180, 672]
+  },
+  "components": [
+    { "id": "guest", "type": "external", "label": "Khách quét", "sublabel": "không đăng nhập", "pos": [40, 80], "size": [170, 70] },
+    { "id": "owner", "type": "external", "label": "Chủ hồ sơ", "sublabel": "quản nội dung của mình", "pos": [40, 260], "size": [170, 70] },
+    { "id": "adminRoles", "type": "external", "label": "Admin MHG", "sublabel": "vận hành / super admin", "pos": [40, 440], "size": [190, 74] },
+    { "id": "edgeSecurity", "type": "security", "label": "Cloudflare Security", "sublabel": "TLS · WAF · rate limit", "pos": [300, 80], "size": [190, 70] },
+    { "id": "edgeCache", "type": "cloud", "label": "Public Edge Cache", "sublabel": "/q active HTML", "pos": [560, 80], "size": [200, 70] },
+    { "id": "identity", "type": "security", "label": "Identity + Session", "sublabel": "CSPRNG OTP · Redis TTL", "pos": [320, 260], "size": [200, 76] },
+    { "id": "policyApi", "type": "security", "label": "API Policy Guard", "sublabel": "authentication · ownership · RBAC", "pos": [590, 260], "size": [220, 82] },
+    { "id": "sanitizer", "type": "security", "label": "Server-side Sanitizer", "sublabel": "NestJS · Zod · DOMPurify", "pos": [590, 500], "size": [220, 76] },
+    { "id": "publicProfile", "type": "frontend", "label": "Next.js /q Route", "sublabel": "activation · active · locked", "pos": [900, 80], "size": [210, 76] },
+    { "id": "coreData", "type": "database", "label": "Core Data", "sublabel": "QR · owner · profile · role", "pos": [900, 260], "size": [210, 82] },
+    { "id": "auditLog", "type": "database", "label": "Audit Log", "sublabel": "admin + activation events", "pos": [900, 520], "size": [210, 76] }
+  ],
+  "boundaries": [
+    { "kind": "security-group", "label": "Cloudflare public edge", "wraps": ["edgeSecurity", "edgeCache"], "pad": 20 },
+    { "kind": "security-group", "label": "Published origin · read only", "wraps": ["publicProfile"], "pad": 18 },
+    { "kind": "security-group", "label": "Ứng dụng đã xác thực · mã nguồn dự án", "wraps": ["identity", "policyApi", "sanitizer"], "pad": 24 },
+    { "kind": "security-group", "label": "Dữ liệu managed · tài khoản dự án", "wraps": ["coreData", "auditLog"], "pad": 20 }
+  ],
+  "connections": [
+    { "id": "guestScans", "from": "guest", "to": "edgeSecurity", "label": "GET /q/{token}", "variant": "emphasis" },
+    { "id": "securityToCache", "from": "edgeSecurity", "to": "edgeCache", "label": "request hợp lệ", "variant": "security", "labelAt": [525, 164] },
+    { "id": "cacheServes", "from": "edgeCache", "to": "publicProfile", "label": "MISS mới gọi origin", "variant": "dashed" },
+    { "id": "ownerAuthenticates", "from": "owner", "to": "identity", "label": "OTP + session", "variant": "security" },
+    { "id": "identityAuthorizes", "from": "identity", "to": "policyApi", "label": "verified principal", "variant": "security", "labelAt": [555, 356] },
+    { "id": "adminAuthenticates", "from": "adminRoles", "to": "identity", "label": "MHG role", "variant": "security", "labelAt": [275, 468] },
+    { "id": "policyReadsWrites", "from": "policyApi", "to": "coreData", "label": "authorized owner / admin", "labelAt": [855, 356] },
+    { "id": "policySanitizes", "from": "policyApi", "to": "sanitizer", "label": "block JSON", "variant": "security", "fromSide": "bottom", "toSide": "top", "labelAt": [700, 356] },
+    { "id": "sanitizerPersists", "from": "sanitizer", "to": "coreData", "label": "validated content", "variant": "emphasis", "fromSide": "right", "toSide": "bottom", "via": [[850, 538], [850, 400], [1005, 400]] },
+    { "id": "coreAudits", "from": "coreData", "to": "auditLog", "label": "append event", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "labelAt": [1012, 440] }
+  ],
+  "cards": [
+    { "dot": "rose", "title": "Fail closed", "items": ["Ownership check trước mọi sửa đổi hồ sơ", "RBAC kiểm soát thao tác admin", "OTP bị giới hạn gửi và số lần nhập sai"] },
+    { "dot": "emerald", "title": "Phạm vi public", "items": ["Khách chỉ đọc published snapshot", "publicToken không cấp quyền quản trị", "Không cache OTP, claim, admin, draft hoặc response theo session"] }
+  ]
+}

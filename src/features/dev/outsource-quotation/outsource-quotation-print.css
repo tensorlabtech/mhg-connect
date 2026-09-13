@@ -1,0 +1,112 @@
+@page quotation {
+  size: A4;
+  margin: 14mm;
+}
+
+@media print {
+  .quotation-page {
+    background: #0a0a0a !important;
+    page: quotation;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .quotation-shell {
+    width: 100% !important;
+    padding-inline: 0 !important;
+  }
+
+  .quotation-hero {
+    min-height: 257mm !important;
+    padding-block: 0 !important;
+  }
+
+  .quotation-page section {
+    padding-block: 0 !important;
+  }
+
+  .quotation-metrics-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .quotation-metric {
+    padding: 16px !important;
+  }
+
+  .quotation-objective-intro,
+  .quotation-principle {
+    grid-template-columns: 4fr 8fr !important;
+  }
+
+  .quotation-package-body {
+    grid-template-columns: 7fr 5fr !important;
+    gap: 32px !important;
+  }
+
+  .quotation-pricing-card {
+    grid-template-columns: 4fr 8fr !important;
+    gap: 32px !important;
+  }
+
+  .quotation-cost-row {
+    grid-template-columns: 40px minmax(0, 1fr) 110px !important;
+    gap: 12px !important;
+  }
+
+  .quotation-cost-percentage {
+    display: none !important;
+  }
+
+  .quotation-cost-price {
+    font-size: 11px !important;
+  }
+
+  .quotation-paired-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .quotation-journey-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+
+  .quotation-journey-grid::before {
+    top: 20px !important;
+    right: 10% !important;
+    bottom: auto !important;
+    left: 10% !important;
+    width: auto !important;
+    height: 1px !important;
+  }
+
+  .quotation-journey-step {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .quotation-total-price {
+    font-size: 34px !important;
+  }
+
+  .quotation-footer {
+    min-height: 257mm !important;
+    align-content: center !important;
+    padding-block: 0 !important;
+  }
+
+  .quotation-print-hidden {
+    display: none !important;
+  }
+
+  .quotation-print-break-after {
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .quotation-print-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    overflow: hidden;
+  }
+}

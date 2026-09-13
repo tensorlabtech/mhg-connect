@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MHG Connect — Báo giá chi tiết</title>
+<style>
+:root{
+  --paper:#FCFCFA; --ink:#1C1E1B; --muted:#54594F; --faint:#878C81;
+  --line:#E7E8E1; --line2:#D6D8CE; --accent:#0E6B4A; --accent-dk:#0A4E36;
+  --accent-soft:#EAF2ED; --amber:#8A6A2E; --amber-soft:#FBF6EC; --amber-line:#E8DBC0;
+  --ask:#1E5A8A; --ask-soft:#EDF3F8; --ask-line:#CFE0EC;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact; print-color-adjust:exact}
+body{margin:0; background:#EDEDE8; color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:15px; line-height:1.62; -webkit-font-smoothing:antialiased}
+.page{max-width:820px; margin:26px auto; background:var(--paper); padding:56px 60px 64px;
+  box-shadow:0 2px 20px rgba(0,0,0,.08)}
+/* ---------- letterhead ---------- */
+.lh{display:flex; justify-content:space-between; align-items:flex-start; gap:24px;
+  padding-bottom:20px; border-bottom:2px solid var(--ink)}
+.lh__brand{font-size:22px; font-weight:800; letter-spacing:-.01em}
+.lh__brand b{color:var(--accent)}
+.lh__brand .tag{display:block; font-size:11px; font-weight:600; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--faint); margin-top:5px}
+.lh__contact{font-size:12.5px; color:var(--muted); text-align:right; line-height:1.7}
+h1{font-size:27px; line-height:1.22; margin:26px 0 8px; font-weight:800; letter-spacing:-.015em}
+.subtitle{font-size:15px; color:var(--muted); margin:0 0 24px; max-width:62ch}
+/* ---------- meta table ---------- */
+.meta{width:100%; border-collapse:collapse; margin:0 0 8px; font-size:14px}
+.meta td{padding:9px 0; border-bottom:1px solid var(--line); vertical-align:top}
+.meta td:first-child{color:var(--faint); width:170px; padding-right:16px}
+.meta td:last-child{color:var(--ink); font-weight:500}
+.meta tr:last-child td{border-bottom:none}
+.meta .total{font-weight:800; color:var(--accent-dk); font-size:15px}
+/* ---------- sections ---------- */
+h2{font-size:18px; margin:34px 0 12px; font-weight:800; letter-spacing:-.01em;
+  padding-bottom:9px; border-bottom:1px solid var(--line2)}
+h2 .n{color:var(--accent); margin-right:8px; font-variant-numeric:tabular-nums}
+p{margin:0 0 13px; max-width:66ch}
+.muted{color:var(--muted)}
+strong{font-weight:700}
+.arrow{color:var(--accent); font-weight:700}
+/* ---------- module blocks ---------- */
+.mod{border:1px solid var(--line2); border-radius:9px; padding:18px 20px 16px; margin:14px 0;
+  page-break-inside:avoid; break-inside:avoid}
+.mod__hd{display:flex; align-items:center; gap:11px; margin-bottom:4px}
+.mod__id{font-size:12px; font-weight:800; color:#fff; background:var(--accent);
+  padding:3px 9px; border-radius:5px; letter-spacing:.02em; flex-shrink:0}
+.mod__ti{font-size:15.5px; font-weight:800}
+.mod__ph{margin-left:auto; font-size:10px; font-weight:700; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--faint); white-space:nowrap}
+.mod__lead{font-size:13.5px; color:var(--muted); margin:2px 0 12px}
+.inc{list-style:none; margin:0; padding:0; display:grid; gap:7px}
+.inc li{position:relative; padding-left:18px; font-size:13.7px; line-height:1.55; color:var(--ink)}
+.inc li::before{content:""; position:absolute; left:2px; top:8px; width:6px; height:6px;
+  background:var(--accent); border-radius:50%}
+.lim{margin-top:12px; background:var(--amber-soft); border:1px solid var(--amber-line);
+  border-left:3px solid var(--amber); border-radius:0 6px 6px 0; padding:10px 13px;
+  font-size:12.7px; color:#5f5233; line-height:1.55}
+.lim b{color:var(--amber); font-weight:700}
+/* ---------- generic tables ---------- */
+table.t{width:100%; border-collapse:collapse; margin:14px 0; font-size:13.8px}
+table.t thead th{text-align:left; font-size:11px; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--faint); font-weight:700; padding:0 10px 9px 0; border-bottom:1.5px solid var(--line2)}
+table.t thead th.r{text-align:right; padding-right:0}
+table.t td{padding:11px 10px 11px 0; border-bottom:1px solid var(--line); vertical-align:top}
+table.t td.r{text-align:right; padding-right:0; font-variant-numeric:tabular-nums; white-space:nowrap}
+table.t tr.grp td{background:var(--accent-soft); font-weight:800; color:var(--accent-dk); font-size:12.5px;
+  padding-top:9px; padding-bottom:9px; padding-left:10px}
+table.t tr.grp td:first-child{padding-left:10px}
+table.t tr.mrow td{font-weight:700; border-bottom:1px solid var(--line2)}
+table.t tr.sub td{color:var(--muted); font-weight:400; font-size:12.8px; padding-top:7px; padding-bottom:7px}
+table.t tr.sub td:first-child{padding-left:22px; position:relative}
+table.t tr.sub td:first-child::before{content:"–"; position:absolute; left:9px; color:var(--faint)}
+table.t tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:800; padding-top:12px}
+table.t tr.total td.r{color:var(--accent-dk); font-size:15px}
+table.t.bx td{border:1px solid var(--line); padding:10px 12px}
+table.t.bx thead th{border:1px solid var(--line2); background:#F4F4EF; padding:9px 12px; color:var(--muted)}
+/* ---------- roles + spec detail (Mục 3) ---------- */
+table.roles{width:100%; border-collapse:collapse; margin:12px 0 4px; font-size:13.5px}
+table.roles td{padding:10px 12px; border:1px solid var(--line); vertical-align:top}
+table.roles td:first-child{width:186px; font-weight:700; color:var(--accent-dk); background:var(--accent-soft)}
+dl.f{margin:12px 0 0; display:grid; grid-template-columns:128px 1fr; gap:0}
+dl.f dt{font-size:10.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--accent-dk); padding:10px 12px 10px 0; border-top:1px solid var(--line)}
+dl.f dd{margin:0; padding:10px 0; border-top:1px solid var(--line); font-size:13.3px; color:var(--ink)}
+dl.f dt:first-of-type, dl.f dd:first-of-type{border-top:none; padding-top:2px}
+dl.f ul{margin:0; padding:0; list-style:none; display:grid; gap:6px}
+dl.f ul li{position:relative; padding-left:15px; line-height:1.5; color:var(--muted)}
+dl.f ul li::before{content:""; position:absolute; left:2px; top:8px; width:5px; height:5px; background:var(--accent); border-radius:50%}
+dl.f ul li b, dl.f ul li strong{color:var(--ink)}
+.ask{margin-top:12px; background:var(--ask-soft); border:1px solid var(--ask-line); border-left:3px solid var(--ask); border-radius:0 6px 6px 0; padding:10px 13px; font-size:12.6px; color:#274b64}
+.ask b{color:var(--ask); font-weight:700; display:block; margin-bottom:5px}
+.ask ul{margin:0; padding-left:16px; display:grid; gap:5px}
+.ask ul li{line-height:1.5}
+.ask .df{color:#3d6b3f; font-style:italic}
+table.q{width:100%; border-collapse:collapse; margin:14px 0; font-size:12.8px}
+table.q thead th{text-align:left; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--faint); font-weight:700; padding:0 10px 9px 0; border-bottom:1.5px solid var(--line2)}
+table.q td{padding:9px 12px 9px 0; border-bottom:1px solid var(--line); vertical-align:top; color:var(--muted)}
+table.q td:first-child{width:48px; font-weight:700; color:var(--accent-dk)}
+table.q td b{color:var(--ink)}
+.small{font-size:12.3px; color:var(--faint); line-height:1.6}
+/* ---------- lists ---------- */
+ul.d{margin:8px 0 13px; padding-left:19px; max-width:66ch}
+ul.d li{margin-bottom:6px; color:var(--muted)}
+ul.d li b, ul.d li strong{color:var(--ink)}
+ol.d{margin:8px 0 13px; padding-left:20px; max-width:66ch}
+ol.d li{margin-bottom:7px; color:var(--muted)}
+ol.d li strong{color:var(--ink)}
+.callout{background:#F5F6F1; border:1px solid var(--line); border-radius:8px; padding:14px 16px; margin:14px 0; font-size:13.5px; color:var(--muted)}
+.callout b{color:var(--ink)}
+.two{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:14px 0}
+.k{font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); margin-bottom:6px}
+.foot{margin-top:38px; padding-top:16px; border-top:1px solid var(--line); font-size:12px; color:var(--faint)}
+/* ---------- print ---------- */
+@media print{
+  body{background:#fff}
+  .page{margin:0; max-width:none; box-shadow:none; padding:0}
+  @page{size:A4; margin:16mm 15mm}
+  h2{page-break-after:avoid}
+  .mod,table.t,.lim,.callout{page-break-inside:avoid}
+}
+@media(max-width:640px){ .page{padding:34px 22px} .two{grid-template-columns:1fr} .lh{flex-direction:column} .lh__contact{text-align:left} }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ===================== LETTERHEAD ===================== -->
+<div class="lh">
+  <div class="lh__brand">MHG <b>Connect</b><span class="tag">Đề xuất giải pháp &amp; Báo giá</span></div>
+  <div class="lh__contact">Đơn vị thực hiện: <b>[Đội ngũ phát triển]</b><br>Người phụ trách: [—]<br>Liên hệ: [email] · [điện thoại]</div>
+</div>
+
+<h1>Báo giá — Hệ thống QR định danh<br>&amp; hồ sơ số MHG Connect</h1>
+<p class="subtitle">Nền tảng gắn mỗi sản phẩm một mã QR định danh, quét ra hồ sơ số cho cá nhân và cổng quản lý mã theo lô cho doanh nghiệp · Triển khai 2 giai đoạn.</p>
+
+<table class="meta">
+  <tr><td>Đơn vị thực hiện</td><td>[Đội ngũ phát triển] — điền khi chốt</td></tr>
+  <tr><td>Số báo giá</td><td>MHG-2026-CONNECT-01</td></tr>
+  <tr><td>Ngày lập</td><td>20/08/2026</td></tr>
+  <tr><td>Hiệu lực báo giá</td><td>30 ngày kể từ ngày lập</td></tr>
+  <tr><td>Phạm vi</td><td>Toàn bộ hệ thống, chia làm Giai đoạn 1 và Giai đoạn 2</td></tr>
+  <tr><td>Tổng chi phí</td><td class="total">170.000.000đ (một trăm bảy mươi triệu đồng) — chưa gồm VAT</td></tr>
+</table>
+
+<!-- ===================== 1. HIỆN TRẠNG ===================== -->
+<h2><span class="n">1.</span>Hiện trạng và bài toán</h2>
+<p>MHG sở hữu công nghệ Sticker kháng khuẩn Nano Airpurity với độ phủ thị trường tốt (hàng nghìn sản phẩm mỗi tháng). Tuy nhiên mỗi sản phẩm bán ra hiện chỉ mang <strong>giá trị vật lý</strong> — sau khi tới tay người dùng thì gần như không còn điểm chạm nào giữa MHG và người dùng cuối, cũng chưa có kênh để khai thác giá trị số trên chính sản phẩm đó.</p>
+<p>Gắn mỗi sản phẩm một <strong>mã QR định danh</strong> mở ra một lớp giá trị mới: người dùng quét mã là ra một <strong>hồ sơ số</strong> (danh thiếp điện tử) của chính họ; doanh nghiệp có thể đặt cả lô mã làm quà tặng, onboarding nhân sự hay marketing. Nhưng để làm được, cần một hệ thống hoàn chỉnh chứ không chỉ một trang web: phát hành mã theo lô và chống trùng, kích hoạt an toàn, cho người dùng tự dựng hồ sơ, quản lý mã ở cấp doanh nghiệp, và một trung tâm để MHG kiểm soát toàn bộ.</p>
+<p>Tài liệu này đề xuất xây dựng hệ thống đó — <strong>MHG Connect</strong> — ở phạm vi lõi chạy được, chi phí tối ưu, ra thị trường nhanh, đồng thời chừa sẵn đường mở rộng cho các phần nâng cao về sau.</p>
+
+<!-- ===================== 2. HOẠT ĐỘNG THẾ NÀO ===================== -->
+<h2><span class="n">2.</span>Sản phẩm hoạt động thế nào</h2>
+<p>Đây là <strong>ứng dụng web</strong>, mở bằng trình duyệt trên điện thoại và máy tính, không cần cài đặt. Ba khái niệm cốt lõi:</p>
+<ul class="d">
+  <li><strong>Tài khoản</strong> = một người, định danh bằng số điện thoại hoặc email. Một tài khoản có thể sở hữu <strong>nhiều mã</strong> (mã cá nhân của mình, và mã công việc do doanh nghiệp gán).</li>
+  <li><strong>Mã QR</strong> = mã in trên sản phẩm. Mỗi mã có thể gắn <strong>nhiều trang đích</strong>, nhưng chỉ một trang ở trạng thái <strong>“đang hoạt động” (active)</strong>. Đổi trang active thì QR không đổi — hôm nay trỏ trang A, mai chuyển sang trang B, người quét ra ngay trang B.</li>
+  <li><strong>Hồ sơ</strong> = trang đích khách nhìn thấy khi quét: ảnh, tên, chức danh, nút gọi/Zalo/website, bản đồ, nút lưu danh bạ.</li>
+</ul>
+<p>Luồng điển hình: <span class="arrow">khách quét mã</span> → mở hồ sơ đang active → bấm “Lưu danh bạ”. Chủ hồ sơ lần đầu <span class="arrow">kích hoạt mã</span> bằng OTP (Email/Zalo), chọn template và dựng hồ sơ. Doanh nghiệp thì <span class="arrow">đặt cả lô mã</span>, gán cho nhân sự, quản lý tập trung. MHG nhìn toàn hệ thống qua trang quản trị.</p>
+
+<!-- ===================== 3. PHẠM VI CHI TIẾT ===================== -->
+<h2><span class="n">3.</span>Phạm vi chi tiết theo hạng mục</h2>
+<p class="muted">Mỗi hạng mục mô tả <strong>vai trò · màn hình · quy tắc nghiệp vụ · kết quả bàn giao</strong>, kèm <strong>Giới hạn</strong> (ranh giới phạm vi) và <strong>Cần chốt</strong> (điểm cần MHG xác nhận). Mọi yêu cầu không xuất hiện ở đây, hoặc nằm ở Mục 4, được xem là phát sinh và xử lý theo Mục 10. Dòng <i>in nghiêng</i> trong “Cần chốt” là đề xuất mặc định nếu MHG không có ý kiến khác.</p>
+
+<p class="k">Vai trò người dùng</p>
+<table class="roles">
+  <tr><td>Khách quét</td><td>Người quét mã QR, không cần đăng nhập. Xem hồ sơ, bấm liên hệ, lưu danh bạ.</td></tr>
+  <tr><td>Chủ hồ sơ (người dùng cuối)</td><td>Sở hữu mã cá nhân; dựng và quản lý hồ sơ, nhiều trang đích, đặt trang active.</td></tr>
+  <tr><td>Nhân viên (doanh nghiệp)</td><td>Được doanh nghiệp gán mã công việc; điền phần thông tin cá nhân trong khuôn nhận diện của doanh nghiệp.</td></tr>
+  <tr><td>Quản trị doanh nghiệp</td><td>Quản lý lô mã, nhân sự và nhận diện thương hiệu của doanh nghiệp mình.</td></tr>
+  <tr><td>Master admin (MHG)</td><td>Kiểm soát toàn hệ thống: sổ QR tổng, khóa mã, quản lý doanh nghiệp, phân quyền admin.</td></tr>
+</table>
+
+<div class="mod">
+  <div class="mod__hd"><span class="mod__id">M1</span><span class="mod__ti">Hạ tầng mã QR &amp; phát hành</span><span class="mod__ph">Giai đoạn 1</span></div>
+  <p class="mod__lead">Sinh, phân loại và xuất mã QR theo lô để đưa đi in.</p>
+  <dl class="f">
+    <dt>Vai trò</dt><dd>Master admin (MHG) tạo và quản lý lô mã.</dd>
+    <dt>Màn hình</dt><dd><ul>
+      <li><b>Tạo lô mã:</b> nhập số lượng, loại (cá nhân / doanh nghiệp), tên lô, ghi chú → sinh mã hàng loạt</li>
+      <li><b>Danh sách lô:</b> tên, loại, số lượng, số đã kích hoạt, ngày tạo, trạng thái</li>
+      <li><b>Chi tiết lô:</b> danh sách mã, trạng thái từng mã, tìm kiếm</li>
+      <li><b>Xuất file in:</b> chọn lô → xuất PDF/ảnh chứa QR theo mẫu</li>
+    </ul></dd>
+    <dt>Quy tắc &amp; logic</dt><dd><ul>
+      <li>Mỗi mã một token duy nhất toàn hệ thống, sinh ngẫu nhiên — không tuần tự (chống đoán mã kế tiếp)</li>
+      <li>Mã chưa kích hoạt khi quét → trang “chưa kích hoạt / hướng dẫn kích hoạt”</li>
+      <li>Không xóa cứng mã đã phát hành; chỉ vô hiệu hóa để giữ lịch sử</li>
+      <li>Trạng thái mã: <b>mới tạo → đã in → đã kích hoạt → (khóa / vô hiệu)</b></li>
+    </ul></dd>
+    <dt>Dữ liệu chính</dt><dd><b>Mã:</b> token, loại, trạng thái, thuộc lô, tài khoản gắn, ngày kích hoạt. <b>Lô:</b> tên, loại, số lượng, ngày tạo, người tạo, ghi chú.</dd>
+    <dt>Phụ thuộc</dt><dd>Là nền cho M2 (kích hoạt) và M8 (sổ QR tổng). Không phụ thuộc module khác.</dd>
+    <dt>Bàn giao</dt><dd>Sinh lô 10.000 mã không trùng; xuất file in mở được &amp; QR quét ra đúng; tra cứu một mã ra trạng thái và lô.</dd>
+  </dl>
+  <div class="lim"><b>Giới hạn:</b> Chỉ xuất mã QR + mã định danh dạng chuẩn để nhà in ghép vào thiết kế tem của MHG — <b>không</b> bao gồm thiết kế đồ họa tem/sticker và quản lý kho vật lý / logistics tem.</div>
+</div>
+
+<div class="mod">
+  <div class="mod__hd"><span class="mod__id">M2</span><span class="mod__ti">Kích hoạt &amp; định tuyến mã</span><span class="mod__ph">Giai đoạn 1</span></div>
+  <p class="mod__lead">Quét ra đúng trang; gắn mã với chủ sở hữu một cách an toàn.</p>
+  <dl class="f">
+    <dt>Vai trò</dt><dd>Chủ hồ sơ (kích hoạt &amp; sở hữu); Khách quét (xem).</dd>
+    <dt>Màn hình</dt><dd><ul>
+      <li>Trang trung chuyển khi quét (resolver) → điều hướng tới trang active</li>
+      <li>Màn hình kích hoạt: nhập SĐT / email → nhận OTP → xác nhận → gắn mã</li>
+      <li>Đăng nhập lại để quản lý hồ sơ</li>
+    </ul></dd>
+    <dt>Quy tắc &amp; logic</dt><dd><ul>
+      <li>Mã chưa gắn ai: người kích hoạt đầu tiên (qua OTP) trở thành chủ sở hữu</li>
+      <li>Mã đã gắn: quét ra trang active của chủ; không cho kích hoạt lại (trừ khi admin gỡ)</li>
+      <li>Một tài khoản (SĐT / email) sở hữu nhiều mã</li>
+      <li>Mỗi mã đúng <b>một trang active</b> tại một thời điểm; đổi active có hiệu lực gần như tức thì</li>
+      <li>OTP hết hạn sau vài phút; giới hạn số lần gửi &amp; số lần nhập sai (khóa tạm) để chống spam</li>
+      <li>Ghi nhật ký kích hoạt (thời điểm, kênh, mã) phục vụ tra soát</li>
+    </ul></dd>
+    <dt>Dữ liệu chính</dt><dd><b>OTP:</b> mã, kênh gửi, thời điểm hết hạn, số lần thử. <b>Liên kết:</b> mã ↔ tài khoản; con trỏ tới trang active hiện tại của mã.</dd>
+    <dt>Phụ thuộc</dt><dd>Cần M1 (mã đã phát hành). Cấp trang đích cho M4/M5 hiển thị.</dd>
+    <dt>Bàn giao</dt><dd>Quét mã mới → kích hoạt OTP → gắn tài khoản → đổi trang active → quét lại ra trang mới.</dd>
+  </dl>
+  <div class="lim"><b>Giới hạn:</b> Kênh OTP giới hạn <b>Email và Zalo ZNS</b>; chưa gồm SMS. Phí gửi Zalo ZNS / email do MHG chi trả theo thực tế. Chưa gồm đăng nhập mạng xã hội (Google/Facebook) ở giai đoạn này.</div>
+  <div class="ask"><b>Cần chốt</b><ul>
+    <li>Kênh OTP lúc go-live: Email, Zalo, hay cả hai? <span class="df">Đề xuất: Email trước, Zalo bổ sung.</span></li>
+  </ul></div>
+</div>
+
+<div class="mod">
+  <div class="mod__hd"><span class="mod__id">M3</span><span class="mod__ti">Trình dựng hồ sơ (page builder)</span><span class="mod__ph">Giai đoạn 1</span></div>
+  <p class="mod__lead">Người dùng tự dựng hồ sơ bằng kéo-thả, không cần biết kỹ thuật.</p>
+  <dl class="f">
+    <dt>Vai trò</dt><dd>Chủ hồ sơ.</dd>
+    <dt>Màn hình</dt><dd><ul>
+      <li>Trình dựng: danh sách khối (trái) · canvas khung điện thoại (giữa) · thuộc tính khối (phải)</li>
+      <li>Thêm / xóa / kéo sắp xếp khối; sửa nội dung; bật / tắt hiển thị từng khối; xem trước</li>
+      <li>Quản lý ảnh: tải lên, thay, xóa (tự nén / resize)</li>
+      <li>Lưu nháp · Xuất bản</li>
+    </ul></dd>
+    <dt>Bộ khối</dt><dd>Ảnh đại diện / bìa · Tên &amp; chức danh · Giới thiệu · Nút liên hệ (gọi / Zalo / SMS / email) · Website &amp; liên kết · Mạng xã hội · Bản đồ · Thư viện ảnh · Video nhúng (YouTube) · Nút lưu danh bạ.</dd>
+    <dt>Quy tắc &amp; logic</dt><dd><ul>
+      <li>Sắp xếp khối theo chiều dọc một cột; mỗi khối rộng hết khung</li>
+      <li>Nội dung nhập được làm sạch (chống XSS) trước khi lưu &amp; hiển thị</li>
+      <li>Bản nháp không công khai; chỉ bản xuất bản mới hiện khi quét</li>
+    </ul></dd>
+    <dt>Dữ liệu chính</dt><dd><b>Hồ sơ (trang):</b> tiêu đề, trạng thái (nháp / xuất bản), thuộc mã. <b>Khối:</b> loại, nội dung, thứ tự, bật/tắt.</dd>
+    <dt>Phụ thuộc</dt><dd>Trang do M3 dựng được M4 nhân bản / gắn template và M5 render công khai.</dd>
+    <dt>Bàn giao</dt><dd>Dựng hồ sơ từ trống → thêm ≥5 loại khối → xuất bản → hiển thị đúng trên mobile.</dd>
+  </dl>
+  <div class="lim"><b>Giới hạn:</b> Builder ở mức cơ bản — kéo-thả sắp xếp &amp; sửa nội dung theo bộ khối định sẵn. <b>Chưa</b> gồm resize khối 2 chiều tự do, chia cột phức tạp hay CSS tùy biến.</div>
+  <div class="ask"><b>Cần chốt</b><ul>
+    <li>Có cần khối “form thu lead” (khách để lại liên hệ) không? <span class="df">Đề xuất: để Mở rộng.</span></li>
+  </ul></div>
+</div>
+
+<div class="mod">
+  <div class="mod__hd"><span class="mod__id">M4</span><span class="mod__ti">Template ngành &amp; nhiều trang đích</span><span class="mod__ph">Giai đoạn 1</span></div>
+  <p class="mod__lead">Bắt đầu nhanh bằng template; quản lý nhiều trang đích trên một mã.</p>
+  <dl class="f">
+    <dt>Vai trò</dt><dd>Chủ hồ sơ.</dd>
+    <dt>Màn hình</dt><dd><ul>
+      <li>Thư viện template: xem trước từng bộ trước khi chọn</li>
+      <li>Chọn template khi tạo trang mới; áp template = tạo trang mới (không đè dữ liệu trang cũ)</li>
+      <li>Quản lý danh sách trang đích của một mã: tạo, nhân bản, đổi tên, đặt active, ẩn / xóa</li>
+    </ul></dd>
+    <dt>Template ngành</dt><dd>Năm bộ dựng sẵn: y tế / bác sĩ · môi giới BĐS · spa / thẩm mỹ · nhà hàng / quán · sale — kinh doanh.</dd>
+    <dt>Quy tắc &amp; logic</dt><dd><ul>
+      <li>Template = bộ khối + nội dung mẫu; chọn xong người dùng sửa tự do</li>
+      <li>Một mã có nhiều trang đích, đúng một trang active; đổi active áp dụng ngay</li>
+      <li>Nhân bản trang: sao chép toàn bộ khối sang trang mới</li>
+    </ul></dd>
+    <dt>Dữ liệu chính</dt><dd><b>Template:</b> tên, ngành, bộ khối mẫu. <b>Trang đích:</b> tên, thuộc mã, có phải active hay không.</dd>
+    <dt>Bàn giao</dt><dd>Tạo 2 trang từ 2 template khác nhau → đặt active lần lượt → quét ra đúng trang đang active.</dd>
+  </dl>
+  <div class="lim"><b>Giới hạn:</b> Số template khởi tạo tối đa khoảng <b>5 ngành</b> theo bộ thống nhất; thêm template ngành mới sau bàn giao tính là hạng mục riêng. Nội dung mẫu (ảnh, chữ) ở mức minh họa.</div>
+</div>
+
+<div class="mod">
+  <div class="mod__hd"><span class="mod__id">M5</span><span class="mod__ti">Trang hồ sơ công khai</span><span class="mod__ph">Giai đoạn 1</span></div>
+  <p class="mod__lead">Trang khách nhìn thấy khi quét — nhanh, gọn, an toàn.</p>
+  <dl class="f">
+    <dt>Vai trò</dt><dd>Khách quét (không đăng nhập).</dd>
+    <dt>Màn hình</dt><dd><ul>
+      <li>Trang hồ sơ render phía máy chủ (SSR)</li>
+      <li>Nút “Lưu danh bạ” (vCard) · nút chia sẻ liên kết</li>
+      <li>Trang trạng thái: mã không tồn tại / chưa kích hoạt / bị khóa</li>
+    </ul></dd>
+    <dt>Quy tắc &amp; logic</dt><dd><ul>
+      <li>Render phía server, tối ưu tốc độ tải trên mobile</li>
+      <li>vCard gồm: tên, SĐT, email, công ty, chức danh, website (theo các khối có trong hồ sơ)</li>
+      <li>Thẻ preview (OG tags) khi dán link vào Zalo / Facebook</li>
+      <li>Đếm lượt quét / lượt xem (dữ liệu cho M7)</li>
+    </ul></dd>
+    <dt>Dữ liệu chính</dt><dd><b>Lượt quét:</b> mã, thời điểm, loại thiết bị (cơ bản). <b>vCard:</b> dựng từ các khối liên hệ có trong hồ sơ.</dd>
+    <dt>Phụ thuộc</dt><dd>Hiển thị trang do M3/M4 tạo &amp; M2 định tuyến; số liệu quét dùng cho M7.</dd>
+    <dt>Bàn giao</dt><dd>Quét → trang tải nhanh; lưu danh bạ ra đúng thông tin; dán link vào Zalo hiện preview.</dd>
+  </dl>
+  <div class="lim"><b>Giới hạn:</b> Chưa gồm miền riêng cho từng hồ sơ (custom domain) — dùng miền chung của hệ thống theo dạng đường dẫn. Giao diện tiếng Việt, chưa gồm đa ngôn ngữ.</div>
+</div>
+
+<div class="mod">
+  <div class="mod__hd"><span class="mod__id">M6</span><span class="mod__ti">Master admin — mã &amp; cá nhân</span><span class="mod__ph">Giai đoạn 1</span></div>
+  <p class="mod__lead">Trung tâm để MHG vận hành phần mã &amp; người dùng cá nhân — đủ để Giai đoạn 1 chạy thực tế độc lập.</p>
+  <dl class="f">
+    <dt>Vai trò</dt><dd>Master admin (super admin · admin vận hành).</dd>
+    <dt>Màn hình</dt><dd><ul>
+      <li><b>Sổ QR tổng:</b> toàn bộ mã / lô, lọc theo lô / trạng thái, thống kê tổng quan</li>
+      <li><b>Chi tiết mã:</b> trạng thái, chủ sở hữu, lịch sử; khóa / mở / vô hiệu</li>
+      <li><b>Quản lý người dùng cá nhân:</b> tra cứu tài khoản, trạng thái</li>
+      <li><b>Cấu hình hệ thống:</b> thông số OTP, template mặc định, thông tin chung</li>
+      <li><b>Tài khoản admin &amp; phân quyền;</b> xuất Excel / CSV danh sách mã / lô</li>
+    </ul></dd>
+    <dt>Quy tắc &amp; logic</dt><dd><ul>
+      <li>Mã bị khóa khi quét → trang “tạm khóa”; mở lại thì khôi phục</li>
+      <li>Phân quyền theo bộ vai trò định sẵn: super admin toàn quyền; admin vận hành quản lý mã nhưng không quản trị tài khoản admin</li>
+      <li>Ghi nhật ký thao tác quản trị cơ bản (ai, làm gì, khi nào)</li>
+    </ul></dd>
+    <dt>Dữ liệu chính</dt><dd><b>Phần mã:</b> mã, lô, tài khoản người dùng. <b>Quản trị:</b> tài khoản admin &amp; vai trò; nhật ký thao tác.</dd>
+    <dt>Phụ thuộc</dt><dd>Bao trùm dữ liệu M1–M5. Không cần M7–M9 — nhờ vậy <b>Giai đoạn 1 vận hành được độc lập</b> (phát hành → kích hoạt → hồ sơ → quản trị mã).</dd>
+    <dt>Bàn giao</dt><dd>Tra một mã → xem chủ sở hữu → khóa → quét ra trang khóa → mở lại; tạo một admin vận hành với quyền giới hạn. Đủ để MHG đưa phần cá nhân ra thị trường trước.</dd>
+  </dl>
+  <div class="lim"><b>Giới hạn:</b> Phần quản trị doanh nghiệp nằm ở M9 (Giai đoạn 2). Phân quyền admin theo bộ vai trò định sẵn (chưa tùy biến tới từng thao tác). Chưa gồm nhật ký kiểm toán nâng cao &amp; cảnh báo bất thường tự động.</div>
+  <div class="ask"><b>Cần chốt</b><ul>
+    <li>MHG có cần xem / sửa nội dung hồ sơ người dùng cuối không? <span class="df">Đề xuất: chỉ quản mã + khóa, không sửa nội dung hồ sơ cá nhân (quyền riêng tư).</span></li>
+  </ul></div>
+</div>
+
+<div class="mod">
+  <div class="mod__hd"><span class="mod__id">M7</span><span class="mod__ti">Cổng doanh nghiệp</span><span class="mod__ph">Giai đoạn 2</span></div>
+  <p class="mod__lead">Doanh nghiệp quản lý mã &amp; hồ sơ nhân sự tập trung.</p>
+  <dl class="f">
+    <dt>Vai trò</dt><dd>Quản trị doanh nghiệp · Nhân viên.</dd>
+    <dt>Màn hình</dt><dd><ul>
+      <li><b>Thiết lập DN:</b> thông tin công ty, logo, màu nhận diện</li>
+      <li><b>Quản lý lô mã:</b> nhận / đặt lô, xem tồn, gán mã cho nhân sự</li>
+      <li><b>Quản lý nhân sự:</b> danh sách, thêm nhân sự, gán mã, thu hồi</li>
+      <li><b>Hồ sơ công việc:</b> nhân viên điền phần cá nhân trong khuôn DN</li>
+    </ul></dd>
+    <dt>Quy tắc &amp; logic</dt><dd><ul>
+      <li>DN chọn template &amp; <b>khóa nhận diện</b> (logo / màu / bố cục khung); nhân viên chỉ sửa vùng thông tin cá nhân</li>
+      <li><b>Thu hồi mã</b> (nhân sự nghỉ): mã công việc vô hiệu, hồ sơ công việc ẩn; mã &amp; hồ sơ <b>CÁ NHÂN</b> của nhân viên <b>KHÔNG</b> ảnh hưởng</li>
+      <li>Một tài khoản có thể vừa có mã cá nhân (tự sở hữu) vừa có mã công việc (DN gán) → hai hồ sơ tách biệt</li>
+      <li>Mã công việc thuộc quyền quản lý của DN; mã cá nhân thuộc quyền cá nhân</li>
+    </ul></dd>
+    <dt>Dữ liệu chính</dt><dd><b>Doanh nghiệp:</b> tên, logo, bộ nhận diện, template mặc định. <b>Nhân sự:</b> tài khoản, mã công việc gán, trạng thái (đang làm / đã thu hồi). <b>Hồ sơ công việc:</b> phần công ty (khóa) + phần cá nhân (nhân viên điền).</dd>
+    <dt>Phụ thuộc</dt><dd>Dùng lô mã từ M1 và luồng kích hoạt M2; hồ sơ công việc render qua M5.</dd>
+    <dt>Bàn giao</dt><dd>DN đặt lô → gán 3 nhân sự → nhân viên điền hồ sơ → quét ra hồ sơ công việc → thu hồi 1 mã → hồ sơ công việc ẩn, hồ sơ cá nhân còn nguyên.</dd>
+  </dl>
+  <div class="lim"><b>Giới hạn:</b> Mô hình doanh nghiệp một cấp (chưa phân cấp chi nhánh / phòng ban nhiều tầng, chưa multi-tenant đầy đủ). Chưa gồm khóa / ẩn hồ sơ nhân sự từ xa và phân quyền chi tiết theo vai trò trong DN — thuộc phần mở rộng (Mục 4).</div>
+  <div class="ask"><b>Cần chốt</b><ul>
+    <li>Một tài khoản nhận mã từ <b>nhiều DN</b> cùng lúc? <span class="df">Đề xuất: CÓ — mỗi mã công việc là một hồ sơ riêng.</span></li>
+    <li>Nhân viên tự đăng ký vào DN hay DN gán? <span class="df">Đề xuất: DN gán mã, nhân viên kích hoạt bằng OTP như mã thường.</span></li>
+  </ul></div>
+</div>
+
+<div class="mod">
+  <div class="mod__hd"><span class="mod__id">M8</span><span class="mod__ti">Bảng theo dõi doanh nghiệp</span><span class="mod__ph">Giai đoạn 2</span></div>
+  <p class="mod__lead">Doanh nghiệp nhìn được tình trạng mã &amp; nhân sự của mình.</p>
+  <dl class="f">
+    <dt>Vai trò</dt><dd>Quản trị doanh nghiệp.</dd>
+    <dt>Màn hình</dt><dd><ul>
+      <li>Dashboard: số nhân sự, mã đã phát / đã kích hoạt, tổng lượt quét</li>
+      <li>Danh sách nhân sự + trạng thái mã; tìm / lọc</li>
+      <li>Thống kê lượt quét theo mã (tổng, theo thời gian)</li>
+      <li>Bộ lọc theo khoảng thời gian; xuất Excel danh sách nhân sự / mã</li>
+    </ul></dd>
+    <dt>Quy tắc &amp; logic</dt><dd><ul>
+      <li>Chỉ số trong phạm vi doanh nghiệp đó — không thấy dữ liệu DN khác</li>
+      <li>Số liệu cập nhật gần thời gian thực (có thể trễ vài phút)</li>
+    </ul></dd>
+    <dt>Dữ liệu chính</dt><dd><b>Chỉ số DN:</b> tổng nhân sự, mã đã phát / kích hoạt, lượt quét theo mã &amp; theo thời gian (giới hạn trong DN).</dd>
+    <dt>Phụ thuộc</dt><dd>Đọc dữ liệu nhân sự / mã từ M7 và lượt quét từ M5.</dd>
+    <dt>Bàn giao</dt><dd>Dashboard hiển thị đúng số nhân sự / mã / lượt quét của DN.</dd>
+  </dl>
+  <div class="lim"><b>Giới hạn:</b> Chỉ số &amp; biểu đồ theo bộ thống nhất khi thiết kế; chưa gồm công cụ tự dựng báo cáo kéo-thả và chưa kết nối BI ngoài (Power BI, Looker…). Thống kê lượt quét ở mức tổng hợp.</div>
+</div>
+
+<div class="mod">
+  <div class="mod__hd"><span class="mod__id">M9</span><span class="mod__ti">Master admin — doanh nghiệp</span><span class="mod__ph">Giai đoạn 2</span></div>
+  <p class="mod__lead">Mở rộng master admin để quản trị phần doanh nghiệp — phát sinh khi có Cổng doanh nghiệp ở Giai đoạn 2.</p>
+  <dl class="f">
+    <dt>Vai trò</dt><dd>Master admin.</dd>
+    <dt>Màn hình</dt><dd><ul>
+      <li><b>Danh sách doanh nghiệp:</b> hồ sơ DN, trạng thái, tìm / lọc</li>
+      <li><b>Mã của từng DN:</b> lô mã đã cấp, tình trạng sử dụng</li>
+      <li><b>Cấp / duyệt lô mã cho DN;</b> theo dõi tổng số DN, mã DN, lượt quét ở cấp master</li>
+    </ul></dd>
+    <dt>Quy tắc &amp; logic</dt><dd><ul>
+      <li>Master có thể khóa / mở một DN; DN bị khóa → mã công việc của DN tạm dừng</li>
+      <li>Chỉ hiển thị khi đã có dữ liệu doanh nghiệp (sau khi M7 vận hành)</li>
+    </ul></dd>
+    <dt>Dữ liệu chính</dt><dd><b>Doanh nghiệp:</b> danh sách, trạng thái. <b>Liên kết:</b> DN ↔ lô mã đã cấp.</dd>
+    <dt>Phụ thuộc</dt><dd>Nối vào M6 (master admin lõi); cần M7 (Cổng DN) đã có dữ liệu doanh nghiệp.</dd>
+    <dt>Bàn giao</dt><dd>Xem danh sách DN → cấp lô cho một DN → khóa / mở DN.</dd>
+  </dl>
+  <div class="lim"><b>Giới hạn:</b> Chưa gồm phân quyền chi tiết theo DN, hạn mức / tính phí (billing) doanh nghiệp — thuộc phần mở rộng (Mục 4).</div>
+</div>
+
+<p class="k" style="margin-top:26px">Danh sách câu hỏi cần MHG chốt</p>
+<p class="muted">Gom toàn bộ điểm “Cần chốt” ở trên để MHG trả lời một lượt. Nếu không có ý kiến khác, hệ thống làm theo cột <strong>Đề xuất mặc định</strong>.</p>
+<table class="q">
+  <thead><tr><th>Mã</th><th>Câu hỏi</th><th>Đề xuất mặc định</th></tr></thead>
+  <tbody>
+    <tr><td>M2</td><td>Kênh OTP lúc go-live (Zalo cần tích hợp riêng)</td><td>Email trước, Zalo bổ sung</td></tr>
+    <tr><td>M3</td><td>Có làm khối “form thu lead” không</td><td>Để Mở rộng</td></tr>
+    <tr><td>M6</td><td>MHG xem/sửa nội dung hồ sơ người dùng cuối</td><td>Chỉ quản mã + khóa, không sửa nội dung</td></tr>
+    <tr><td>M7</td><td>Một tài khoản nhận mã từ nhiều DN cùng lúc</td><td>CÓ — mỗi mã một hồ sơ riêng</td></tr>
+    <tr><td>M7</td><td>Nhân viên tự đăng ký hay DN gán</td><td>DN gán, nhân viên kích hoạt OTP</td></tr>
+  </tbody>
+</table>
+
+<!-- ===================== 4. NGOÀI PHẠM VI ===================== -->
+<h2><span class="n">4.</span>Ngoài phạm vi</h2>
+<p class="muted">Để rõ ràng ngay từ đầu, những phần dưới đây <strong>không</strong> nằm trong gói 170 triệu. Chúng không bị loại bỏ vĩnh viễn — có thể bổ sung ở giai đoạn sau và báo giá riêng khi MHG cần.</p>
+<ul class="d">
+  <li>Ứng dụng mobile cài từ CH Play / App Store (sản phẩm là web, chạy tốt trên trình duyệt điện thoại — responsive)</li>
+  <li>Quảng cáo / trang trung gian &amp; đo lường quảng cáo (viewability, chống gian lận)</li>
+  <li>Trình dựng hồ sơ resize kéo-thả 2 chiều đầy đủ (mức tùy biến như Notion)</li>
+  <li>Cổng doanh nghiệp multi-tenant đầy đủ: phân cấp nhiều tầng, khóa hồ sơ từ xa, phân quyền chi tiết theo vai trò</li>
+  <li>Thiết kế đồ họa tem / sticker và in ấn vật lý</li>
+  <li>Đăng nhập mạng xã hội (Google / Facebook), SSO doanh nghiệp, xác thực đa yếu tố (MFA)</li>
+  <li>Miền riêng cho từng hồ sơ (custom domain); giao diện đa ngôn ngữ</li>
+  <li>Tích hợp cổng thanh toán / thu phí người dùng cuối</li>
+  <li>Di trú dữ liệu số lượng lớn từ hệ thống cũ</li>
+</ul>
+
+<!-- ===================== 5. GIẢ ĐỊNH ===================== -->
+<h2><span class="n">5.</span>Giả định và phụ thuộc</h2>
+<p class="muted">Tiến độ và phạm vi trên dựa vào các điều kiện sau. Nếu một điều kiện không được đáp ứng, tiến độ và/hoặc phạm vi được điều chỉnh tương ứng.</p>
+<ol class="d">
+  <li>MHG cung cấp bộ nhận diện thương hiệu (logo, màu, font) và nội dung mẫu cho template.</li>
+  <li>MHG cử một đầu mối nghiệm thu, phản hồi trong <strong>03 ngày làm việc</strong> tại mỗi mốc; phản hồi chậm làm dời tiến độ tương ứng.</li>
+  <li>MHG cấp / kết nối tài khoản gửi Zalo ZNS (Official Account) và email gửi khi cần OTP &amp; thông báo; phí gửi do MHG chi trả.</li>
+  <li>Thiết kế đồ họa tem và in ấn do MHG phụ trách; hệ thống chỉ xuất mã QR + mã định danh chuẩn.</li>
+  <li>Đội phát triển cấp hạ tầng server trong quá trình xây dựng và giai đoạn đầu vận hành; sau đó chuyển giao để MHG tự vận hành (hoặc thỏa thuận riêng).</li>
+  <li>Phạm vi được chốt tại tài liệu này; thay đổi yêu cầu sau khi bắt đầu triển khai xử lý theo Mục 10.</li>
+</ol>
+
+<!-- ===================== 6. CHI PHÍ ===================== -->
+<h2><span class="n">6.</span>Chi phí</h2>
+<p>Tổng chi phí: <strong>170.000.000đ</strong> (một trăm bảy mươi triệu đồng), phân bổ theo hai giai đoạn:</p>
+<table class="t">
+  <thead><tr><th>Hạng mục &amp; công việc cấu thành</th><th class="r">Thành tiền (đ)</th></tr></thead>
+  <tbody>
+    <tr class="grp"><td>GIAI ĐOẠN 1 — lõi chạy được &amp; quản trị mã (cá nhân dùng đầu-cuối)</td><td class="r">128.000.000</td></tr>
+
+    <tr class="mrow"><td>M1 · Hạ tầng mã QR &amp; phát hành</td><td class="r">25.000.000</td></tr>
+    <tr class="sub"><td>CSDL mã &amp; lô, sinh token định danh chống trùng / chống đoán</td><td class="r">10.000.000</td></tr>
+    <tr class="sub"><td>Phân loại, gắn nhãn, tra cứu &amp; quản lý vòng đời lô mã</td><td class="r">8.000.000</td></tr>
+    <tr class="sub"><td>Xuất file in (PDF/ảnh) theo lô cho nhà in</td><td class="r">7.000.000</td></tr>
+
+    <tr class="mrow"><td>M2 · Kích hoạt &amp; định tuyến mã</td><td class="r">30.000.000</td></tr>
+    <tr class="sub"><td>Resolver + redirect lớp biên (edge), trỏ trang active</td><td class="r">12.000.000</td></tr>
+    <tr class="sub"><td>Luồng kích hoạt OTP (Email/Zalo), gắn mã với tài khoản</td><td class="r">13.000.000</td></tr>
+    <tr class="sub"><td>Cơ chế nhiều trang đích / mã &amp; chọn trang active</td><td class="r">5.000.000</td></tr>
+
+    <tr class="mrow"><td>M3 · Trình dựng hồ sơ (page builder)</td><td class="r">22.000.000</td></tr>
+    <tr class="sub"><td>Khung builder kéo-thả: quản lý &amp; sắp xếp khối, xem trước</td><td class="r">13.000.000</td></tr>
+    <tr class="sub"><td>Bộ khối nội dung (ảnh, liên hệ, MXH, bản đồ, thư viện ảnh)</td><td class="r">6.000.000</td></tr>
+    <tr class="sub"><td>Lưu nháp / xuất bản, chỉnh sửa lại</td><td class="r">3.000.000</td></tr>
+
+    <tr class="mrow"><td>M4 · Template ngành &amp; nhiều trang đích</td><td class="r">22.000.000</td></tr>
+    <tr class="sub"><td>Cơ chế template + 5 template ngành dựng sẵn</td><td class="r">12.000.000</td></tr>
+    <tr class="sub"><td>Quản lý nhiều trang đích: tạo, nhân bản, đặt active, ẩn</td><td class="r">10.000.000</td></tr>
+
+    <tr class="mrow"><td>M5 · Trang hồ sơ công khai</td><td class="r">11.000.000</td></tr>
+    <tr class="sub"><td>Trang hồ sơ SSR tối ưu hiển thị trên mobile</td><td class="r">5.000.000</td></tr>
+    <tr class="sub"><td>Lưu danh bạ vCard + thẻ preview khi chia sẻ</td><td class="r">3.000.000</td></tr>
+    <tr class="sub"><td>Làm sạch nội dung người dùng nhập, chống XSS</td><td class="r">3.000.000</td></tr>
+
+    <tr class="mrow"><td>M6 · Master admin — mã &amp; cá nhân</td><td class="r">18.000.000</td></tr>
+    <tr class="sub"><td>Sổ QR tổng + chi tiết mã: tra cứu, lọc, thống kê</td><td class="r">9.000.000</td></tr>
+    <tr class="sub"><td>Vòng đời mã: khóa / mở / vô hiệu hóa</td><td class="r">5.000.000</td></tr>
+    <tr class="sub"><td>Tài khoản admin, phân quyền &amp; cấu hình hệ thống</td><td class="r">4.000.000</td></tr>
+
+    <tr class="grp"><td>GIAI ĐOẠN 2 — doanh nghiệp</td><td class="r">42.000.000</td></tr>
+
+    <tr class="mrow"><td>M7 · Cổng doanh nghiệp</td><td class="r">25.000.000</td></tr>
+    <tr class="sub"><td>Không gian DN, nhận diện thương hiệu &amp; hồ sơ công việc</td><td class="r">11.000.000</td></tr>
+    <tr class="sub"><td>Đặt / gán / thu hồi lô mã cho nhân sự</td><td class="r">9.000.000</td></tr>
+    <tr class="sub"><td>Quan hệ tài khoản ↔ mã cá nhân &amp; mã công việc</td><td class="r">5.000.000</td></tr>
+
+    <tr class="mrow"><td>M8 · Bảng theo dõi doanh nghiệp</td><td class="r">10.000.000</td></tr>
+    <tr class="sub"><td>Dashboard số liệu: nhân sự, mã, lượt quét</td><td class="r">6.000.000</td></tr>
+    <tr class="sub"><td>Danh sách nhân sự, tìm / lọc, thống kê cơ bản</td><td class="r">4.000.000</td></tr>
+
+    <tr class="mrow"><td>M9 · Master admin — doanh nghiệp</td><td class="r">7.000.000</td></tr>
+    <tr class="sub"><td>Quản lý DN + mã của từng doanh nghiệp</td><td class="r">4.000.000</td></tr>
+    <tr class="sub"><td>Cấp / duyệt lô cho DN + theo dõi cấp master</td><td class="r">3.000.000</td></tr>
+
+    <tr class="total"><td>TỔNG CỘNG (chưa gồm VAT)</td><td class="r">170.000.000</td></tr>
+  </tbody>
+</table>
+<p class="small">Dòng <strong>in đậm</strong> là cộng của từng hạng mục; các dòng bên dưới là chi tiết công việc cấu thành. Triển khai bởi đội <strong>2 Dev · 1 BA/QC</strong> trong ~2 tháng, tương đương <strong>~6 man-month</strong> — đơn giá tham chiếu ~28 triệu/man-month.</p>
+<p class="muted"><strong>Chi phí cố định</strong> — chắc chắn có trong mức 170 triệu: toàn bộ hạng mục M1–M9 theo mô tả ở Mục 3, và nghiệm thu theo Mục 8.</p>
+<p class="muted"><strong>Chi phí linh hoạt</strong> — điều chỉnh theo nhu cầu: số template ngành, độ sâu tùy biến builder, số chỉ số dashboard, các phần trau chuốt giao diện. Tùy nhu cầu, phạm vi có thể tối giản bớt hoặc làm sâu thêm — hai bên trao đổi để chốt mức phù hợp.</p>
+<p class="small">Giá chưa bao gồm VAT. Chưa bao gồm hạ tầng vận hành (hosting / CDN / tên miền, ~50–100 triệu/năm tùy quy mô), phí bên thứ ba (Zalo ZNS / email) và chi phí triển khai — điều phối. Phương án hóa đơn trao đổi khi ký hợp đồng.</p>
+
+<!-- ===================== 7. TIẾN ĐỘ ===================== -->
+<h2><span class="n">7.</span>Tiến độ và điều khoản thanh toán</h2>
+<p>Tiến độ dự kiến <strong>~1,5–2 tháng</strong> với đội <strong>2 Dev · 1 BA/QC</strong>, chạy theo sprint 2 tuần; cuối mỗi sprint có bản demo để MHG xem tiến độ thật. Mốc tính theo nghiệm thu từng giai đoạn.</p>
+<table class="t bx">
+  <thead><tr><th style="width:90px">Giai đoạn</th><th>Nội dung</th><th class="r" style="width:80px">Thời gian</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Giai đoạn 1</strong></td><td>Hạ tầng mã, kích hoạt &amp; định tuyến, trình dựng hồ sơ, template ngành, trang hồ sơ công khai + master admin quản trị mã &amp; cá nhân (M1–M6). <b>Vận hành thực tế phần cá nhân độc lập.</b></td><td class="r">~4–5 tuần</td></tr>
+    <tr><td><strong>Giai đoạn 2</strong></td><td>Cổng doanh nghiệp, bảng theo dõi, master admin phần doanh nghiệp (M7–M9), và tinh chỉnh theo phản hồi.</td><td class="r">~3 tuần</td></tr>
+  </tbody>
+</table>
+<p>Thanh toán chia theo đợt gắn với tiến độ:</p>
+<table class="t bx">
+  <thead><tr><th style="width:70px">Đợt</th><th>Thời điểm</th><th class="r" style="width:60px">Tỷ lệ</th><th class="r" style="width:100px">Số tiền (triệu)</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Đợt 1</strong></td><td>Khi ký hợp đồng</td><td class="r">40%</td><td class="r">68</td></tr>
+    <tr><td><strong>Đợt 2</strong></td><td>Nghiệm thu Giai đoạn 1 (go-live phần cá nhân)</td><td class="r">40%</td><td class="r">68</td></tr>
+    <tr><td><strong>Đợt 3</strong></td><td>Nghiệm thu Giai đoạn 2, bàn giao</td><td class="r">20%</td><td class="r">34</td></tr>
+  </tbody>
+</table>
+
+<!-- ===================== 8. NGHIỆM THU ===================== -->
+<h2><span class="n">8.</span>Tiêu chí nghiệm thu</h2>
+<table class="t bx">
+  <thead><tr><th style="width:90px">Giai đoạn</th><th>Được nghiệm thu khi</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Giai đoạn 1</strong></td><td>Hệ thống chạy trên môi trường thật và thực hiện trọn một chu kỳ cá nhân: sinh lô mã → quét → kích hoạt OTP → chọn template &amp; dựng hồ sơ → đặt trang active → quét ra đúng hồ sơ + lưu danh bạ; master admin tra cứu &amp; khóa / mở được mã. Các hạng mục M1–M6 hoạt động đúng mô tả ở Mục 3 — <b>đủ để đưa phần cá nhân ra thị trường</b>.</td></tr>
+    <tr><td><strong>Giai đoạn 2</strong></td><td>Doanh nghiệp đặt lô → gán nhân sự → hồ sơ công việc hiển thị đúng nhận diện → dashboard đúng số liệu; master admin quản trị được danh sách DN &amp; cấp lô cho DN. Các hạng mục M7–M9 hoạt động đúng mô tả; xử lý xong phản hồi trong phạm vi từ giai đoạn 1.</td></tr>
+  </tbody>
+</table>
+<p class="small">Lỗi nghiêm trọng (chặn nghiệp vụ) phải được xử lý trước khi nghiệm thu; lỗi nhỏ đưa vào giai đoạn bảo hành.</p>
+
+<!-- ===================== 9. BÀN GIAO ===================== -->
+<h2><span class="n">9.</span>Bàn giao và bảo hành</h2>
+<p>Khi bàn giao, MHG nhận: <strong>ứng dụng chạy thật</strong> truy cập qua đường link trên điện thoại và máy tính; <strong>toàn bộ mã nguồn</strong> sản phẩm; <strong>tài liệu hướng dẫn sử dụng</strong> cho người vận hành; và 01 buổi hướng dẫn sử dụng khi bàn giao.</p>
+<p class="muted"><strong>Bảo hành:</strong> sửa lỗi miễn phí trong <strong>3 tháng</strong> kể từ ngày nghiệm thu, áp dụng cho lỗi kỹ thuật thuộc phạm vi đã bàn giao; không bao gồm yêu cầu thêm tính năng mới hay hạng mục ngoài phạm vi ở Mục 3.</p>
+<p class="muted"><strong>Bảo mật:</strong> sẵn sàng ký NDA trước khi trao đổi chi tiết. Dữ liệu và mã nguồn được giữ bảo mật.</p>
+
+<!-- ===================== 10. CÁCH LÀM VIỆC ===================== -->
+<h2><span class="n">10.</span>Cách làm việc và xử lý phát sinh</h2>
+<p>Dự án chạy theo sprint 2 tuần, có demo định kỳ — MHG luôn thấy sản phẩm đang ở đâu chứ không chờ tới cuối.</p>
+<p>Mọi yêu cầu nằm ngoài phạm vi ở Mục 3 được xử lý như sau: <strong>ghi nhận bằng văn bản</strong> (email / tin nhắn) <span class="arrow">→</span> ước lượng khối lượng công việc, chi phí và ảnh hưởng tiến độ <span class="arrow">→</span> MHG duyệt trước khi thực hiện. Không thực hiện thay đổi chưa được duyệt, nhằm giữ đúng tiến độ và ngân sách của phần đã thống nhất.</p>
+<p class="muted">Báo giá này có hiệu lực 30 ngày kể từ ngày lập. Rất mong được đồng hành cùng MHG trong dự án.</p>
+
+<div class="foot">MHG Connect · Báo giá MHG-2026-CONNECT-01 · 20/08/2026 — mọi hạng mục có thể điều chỉnh phạm vi / giá theo trao đổi.</div>
+
+</div>
+</body>
+</html>

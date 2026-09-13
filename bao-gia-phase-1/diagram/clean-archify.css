@@ -1,0 +1,53 @@
+html[data-clean="true"],
+html[data-clean="true"] body {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+html[data-clean="true"] body {
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: var(--bg) !important;
+  background-image: none !important;
+}
+
+html[data-clean="true"] .toolbar,
+html[data-clean="true"] .header,
+html[data-clean="true"] .cards,
+html[data-clean="true"] .diagram-nav,
+html[data-clean="true"] .overview-map,
+html[data-clean="true"] .focus-chip,
+html[data-clean="true"] .route-probe,
+html[data-clean="true"] .semantic-lens,
+html[data-clean="true"] .diagram-guide,
+html[data-clean="true"] .node-finder,
+html[data-clean="true"] .guided-views {
+  display: none !important;
+}
+
+html[data-clean="true"] .container {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+html[data-clean="true"] .diagram-container {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0.5rem !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+html[data-clean="true"] .diagram-container > svg {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+}

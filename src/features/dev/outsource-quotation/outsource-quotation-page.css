@@ -1,0 +1,502 @@
+.quotation-page {
+  --quotation-bg: #0a0a0a;
+  --quotation-surface: #121212;
+  --quotation-surface-raised: #171717;
+  --quotation-text: #f5f5f5;
+  --quotation-muted: #a3a3a3;
+  --quotation-gold: #e5c16b;
+  --quotation-cost-01: var(--quotation-gold);
+  --quotation-cost-02: var(--quotation-text);
+  --quotation-cost-03: #737373;
+  --quotation-cost-04: #525252;
+  --quotation-radius: 1.5rem;
+  --quotation-section-space-before: 7rem;
+  --quotation-section-space-after: 3rem;
+  background: var(--quotation-bg);
+  color: var(--quotation-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.quotation-shell {
+  width: min(100%, 1200px);
+  margin-inline: auto;
+  padding-inline: 2rem;
+}
+
+.quotation-hero {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-block: 3rem 4rem;
+}
+
+.quotation-document-bar,
+.quotation-package-header,
+.quotation-footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.quotation-document-meta,
+.quotation-muted,
+.quotation-copy {
+  color: var(--quotation-muted);
+}
+
+.quotation-document-meta {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+}
+
+.quotation-hero-copy {
+  padding-block: 6rem;
+}
+
+.quotation-hero-copy h1 {
+  max-width: 68rem;
+  font-family: var(--font-heading);
+  font-size: clamp(3.5rem, 8vw, 6rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.04;
+}
+
+.quotation-hero-copy h1 span {
+  display: block;
+}
+
+.quotation-hero-copy h1 em {
+  color: var(--quotation-gold);
+  font-weight: 400;
+}
+
+.quotation-hero-copy > p {
+  max-width: 44rem;
+  margin-top: 2rem;
+  color: var(--quotation-muted);
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+
+.quotation-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.quotation-metric {
+  min-width: 0;
+  gap: 0;
+  padding: 2rem;
+}
+
+.quotation-metric dd {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.quotation-metric:last-child dt {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.quotation-metric dt,
+.quotation-label,
+.quotation-package-index {
+  color: var(--quotation-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.quotation-metric dt {
+  margin-top: 1rem;
+}
+
+.quotation-section {
+  scroll-margin-top: 3rem;
+  padding-block: var(--quotation-section-space-before)
+    var(--quotation-section-space-after);
+}
+
+.quotation-section-heading {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 5rem;
+}
+
+.quotation-section-heading > span,
+.quotation-package-index {
+  color: var(--quotation-gold);
+}
+
+.quotation-section-heading > span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.quotation-section-heading h2 {
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 6vw, 5rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+}
+
+.quotation-objective-intro {
+  display: grid;
+  grid-template-columns: minmax(16rem, 4fr) minmax(0, 8fr);
+  align-items: end;
+  gap: 4rem;
+}
+
+.quotation-scale-block {
+  padding-bottom: 0.5rem;
+}
+
+.quotation-scale-value {
+  margin-top: 2rem;
+  font-family: var(--font-heading);
+  font-size: clamp(3.5rem, 7vw, 5.5rem);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.quotation-lead {
+  max-width: 50rem;
+  font-family: var(--font-heading);
+  font-size: clamp(2.25rem, 4vw, 3.75rem);
+  line-height: 1.16;
+}
+
+.quotation-copy {
+  max-width: 65ch;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.quotation-journey-card,
+.quotation-package,
+.quotation-pricing-card,
+.quotation-info-card,
+.quotation-milestone {
+  background: var(--quotation-surface);
+  border-radius: var(--quotation-radius);
+}
+
+.quotation-journey-card {
+  gap: 4rem;
+  margin-top: 6rem;
+  padding: 3rem;
+}
+
+.quotation-journey-heading {
+  display: grid;
+  gap: 1rem;
+}
+
+.quotation-journey-summary {
+  max-width: 40rem;
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+.quotation-principle {
+  display: grid;
+  grid-template-columns: minmax(12rem, 4fr) minmax(0, 8fr);
+  gap: 4rem;
+  margin-top: 6rem;
+}
+
+.quotation-principle span {
+  color: var(--quotation-muted);
+  font-size: 0.875rem;
+}
+
+.quotation-principle p {
+  max-width: 46rem;
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 3vw, 2.75rem);
+  line-height: 1.3;
+}
+
+.quotation-package {
+  padding: 3rem;
+}
+
+.quotation-package-header h3 {
+  max-width: 44rem;
+  margin-top: 0.75rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.quotation-package-price {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.quotation-package-price p {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.quotation-package-price span {
+  color: var(--quotation-muted);
+  font-size: 0.875rem;
+}
+
+.quotation-package-body {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(17rem, 5fr);
+  gap: 5rem;
+  margin-top: 4rem;
+}
+
+.quotation-check-list,
+.quotation-tech-list,
+.quotation-info-card ul {
+  margin-top: 1.5rem;
+}
+
+.quotation-check-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.quotation-check-list li {
+  display: flex;
+  gap: 0.75rem;
+  color: var(--quotation-muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.quotation-check-list svg {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.25rem;
+  flex-shrink: 0;
+  color: var(--quotation-gold);
+}
+
+.quotation-package-definitions {
+  display: grid;
+  gap: 2rem;
+}
+
+.quotation-tech-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.quotation-pricing-card {
+  display: grid;
+  grid-template-columns: minmax(20rem, 5fr) minmax(0, 7fr);
+  gap: 4rem;
+  padding: 3rem;
+}
+
+.quotation-pricing-summary {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 3rem;
+}
+
+.quotation-total-price {
+  color: var(--quotation-gold);
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 3.5vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.quotation-paired-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.quotation-info-card {
+  padding: 3rem;
+}
+
+.quotation-info-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.quotation-info-card ul {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.quotation-info-card li {
+  display: flex;
+  gap: 1rem;
+  color: var(--quotation-muted);
+  font-size: 0.9375rem;
+  line-height: 1.7;
+}
+
+.quotation-info-card li > span {
+  display: block;
+  width: 0.25rem;
+  height: 0.25rem;
+  margin-top: 0.75rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: var(--quotation-gold);
+}
+
+.quotation-footer {
+  align-items: flex-end;
+  padding-block: 10rem 5rem;
+}
+
+.quotation-footer h2 {
+  max-width: 48rem;
+  margin-top: 1.5rem;
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+}
+
+.quotation-footer .quotation-copy {
+  margin-top: 2rem;
+}
+
+.quotation-footer-action {
+  display: grid;
+  flex-shrink: 0;
+  justify-items: end;
+  gap: 1rem;
+  text-align: right;
+}
+
+.quotation-footer-action p {
+  color: var(--quotation-muted);
+  font-size: 0.75rem;
+  line-height: 1.75;
+}
+
+@media (max-width: 900px) {
+  .quotation-pricing-card,
+  .quotation-package-body {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .quotation-page {
+    --quotation-section-space-before: 5rem;
+    --quotation-section-space-after: 2rem;
+    --quotation-radius: 1.25rem;
+  }
+
+  .quotation-shell {
+    padding-inline: 1.25rem;
+  }
+
+  .quotation-document-bar {
+    gap: 1rem;
+  }
+
+  .quotation-pdf-label > span {
+    display: none;
+  }
+
+  .quotation-hero {
+    min-height: auto;
+    padding-block: 2rem 3rem;
+  }
+
+  .quotation-package-header,
+  .quotation-footer,
+  .quotation-journey-heading {
+    flex-direction: column;
+  }
+
+  .quotation-footer-action,
+  .quotation-footer-action a {
+    width: 100%;
+  }
+
+  .quotation-hero-copy {
+    padding-block: 4rem;
+  }
+
+  .quotation-hero-copy h1 {
+    font-size: clamp(3rem, 14vw, 4.25rem);
+  }
+
+  .quotation-objective-intro,
+  .quotation-principle,
+  .quotation-paired-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quotation-metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .quotation-metrics-grid,
+  .quotation-paired-grid {
+    gap: 0.75rem;
+  }
+
+  .quotation-metric {
+    padding: 1.5rem;
+  }
+
+  .quotation-section-heading {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    margin-bottom: 3rem;
+  }
+
+  .quotation-section-heading h2 {
+    font-size: clamp(2.75rem, 13vw, 4rem);
+  }
+
+  .quotation-objective-intro,
+  .quotation-principle {
+    gap: 3rem;
+  }
+
+  .quotation-journey-card,
+  .quotation-package,
+  .quotation-pricing-card,
+  .quotation-info-card {
+    padding: 2rem;
+  }
+
+  .quotation-package-price {
+    text-align: left;
+  }
+
+  .quotation-total-price {
+    white-space: normal;
+  }
+
+  .quotation-footer-action {
+    justify-items: start;
+    text-align: left;
+  }
+}

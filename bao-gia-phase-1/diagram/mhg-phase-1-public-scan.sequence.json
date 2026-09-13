@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "MHG Connect — Khách quét QR công khai",
+    "output": "mhg-phase-1-public-scan.html",
+    "viewBox": [1080, 740],
+    "column_fit": "spread",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "views": [
+      { "id": "cache-hit", "label": "Cache HIT", "focus": ["visitor", "edgeCache"], "note": "Cloudflare trả HTML hồ sơ active ngay từ /q/{publicToken}; origin không tham gia." },
+      { "id": "cache-miss", "label": "Cache MISS", "focus": ["edgeCache", "web", "api", "redis", "db"], "note": "Next.js gọi API tra trạng thái. Hồ sơ active được cache; ActivationView, LockedView và lỗi dùng no-store." },
+      { "id": "analytics", "label": "Đo traffic", "focus": ["visitor", "web", "api"], "note": "Frontend gửi scan_event khi route mở và profile_view khi hồ sơ active hiển thị. Đây là số liệu gần đúng, không làm chậm HTML." }
+    ]
+  },
+  "participants": [
+    { "id": "visitor", "type": "external", "label": "Khách quét", "sublabel": "mobile browser" },
+    { "id": "edgeCache", "type": "cloud", "label": "Edge Cache", "sublabel": "Cache API · CDN" },
+    { "id": "web", "type": "frontend", "label": "Next.js /q", "sublabel": "SSR · UI theo trạng thái" },
+    { "id": "api", "type": "backend", "label": "NestJS API", "sublabel": "Prisma · nghiệp vụ" },
+    { "id": "redis", "type": "database", "label": "Redis", "sublabel": "mapping cache" },
+    { "id": "db", "type": "database", "label": "PostgreSQL", "sublabel": "source of truth" }
+  ],
+  "segments": [
+    { "from": 150, "to": 255, "label": "Đường đẹp: chỉ Cloudflare" },
+    { "from": 275, "to": 545, "label": "Chỉ chạy khi cache miss" },
+    { "from": 565, "to": 656, "label": "Analytics phía browser" }
+  ],
+  "messages": [
+    { "id": "scanQr", "from": "visitor", "to": "edgeCache", "y": 165, "label": "GET /q/{publicToken}", "variant": "emphasis" },
+    { "id": "cacheHit", "from": "edgeCache", "to": "visitor", "y": 220, "label": "HIT: active profile HTML", "variant": "return" },
+    { "id": "renderOnMiss", "from": "edgeCache", "to": "web", "y": 300, "label": "MISS: SSR /q/{publicToken}", "variant": "dashed" },
+    { "id": "lookupState", "from": "web", "to": "api", "y": 335, "label": "tra trạng thái + snapshot" },
+    { "id": "readRedis", "from": "api", "to": "redis", "y": 370, "label": "lookup public state" },
+    { "id": "redisResult", "from": "redis", "to": "api", "y": 405, "label": "hit hoặc miss / stale", "variant": "return" },
+    { "id": "readDb", "from": "api", "to": "db", "y": 440, "label": "fallback: QR + trang active" },
+    { "id": "stateResult", "from": "api", "to": "web", "y": 475, "label": "status + published snapshot", "variant": "return" },
+    { "id": "cacheHtml", "from": "web", "to": "edgeCache", "y": 510, "label": "active: cache HTML · khác: no-store", "variant": "emphasis" },
+    { "id": "htmlResponse", "from": "edgeCache", "to": "visitor", "y": 540, "label": "HTML theo trạng thái", "variant": "return" },
+    { "id": "recordTraffic", "from": "visitor", "to": "api", "y": 600, "label": "sendBeacon: scan/view", "variant": "dashed" }
+  ]
+}

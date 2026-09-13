@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "MHG Connect — Cloudflare: ranh giới và trách nhiệm",
+    "output": "mhg-phase-1-cloudflare-responsibilities.html",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "viewBox": [1390, 744],
+    "views": [
+      { "id": "cacheHit", "label": "Quét cache HIT", "focus": ["visitor", "dnsTls", "edgeSecurity", "edgeCache"], "note": "DNS/TLS/WAF bảo vệ request; CDN trả HTML hồ sơ active từ /q/{publicToken} mà không gọi origin." },
+      { "id": "cacheMiss", "label": "Quét cache MISS", "focus": ["edgeCache", "nextWeb", "api", "dataOrigin"], "note": "Cache MISS mới tới Next.js. Web gọi NestJS tra trạng thái; chỉ response hồ sơ active được đưa lại lên CDN cache." },
+      { "id": "invalidation", "label": "Xóa cache sau write", "focus": ["nextWeb", "api", "dataOrigin", "purgeWorker", "edgeCache"], "note": "Publish, đổi trang active, khóa hoặc mở mã: commit dữ liệu trước, gọi Purge API sau; BullMQ retry nếu purge thất bại." },
+      { "id": "protection", "label": "Security + telemetry", "focus": ["visitor", "turnstile", "api", "edgeSecurity", "observability"], "note": "Browser gửi Turnstile token; API xác minh bằng Siteverify. Cloudflare Analytics/Logs thu telemetry theo kênh song song." }
+    ]
+  },
+  "components": [
+    { "id": "visitor", "type": "external", "label": "Người dùng", "sublabel": "quét QR · browser", "pos": [20, 330], "size": [160, 76] },
+    { "id": "dnsTls", "type": "cloud", "label": "DNS + TLS Proxy", "sublabel": "HTTPS · Full strict", "pos": [220, 332], "size": [180, 76], "tag": "Cloudflare" },
+    { "id": "edgeSecurity", "type": "security", "label": "Edge Security", "sublabel": "DDoS · WAF · rate limit", "pos": [440, 332], "size": [190, 76], "tag": "Cloudflare" },
+    { "id": "edgeCache", "type": "cloud", "label": "CDN Edge Cache", "sublabel": "/q active HTML", "pos": [680, 330], "size": [200, 80], "tag": "Cloudflare" },
+    { "id": "turnstile", "type": "security", "label": "Turnstile", "sublabel": "browser token · Siteverify", "pos": [440, 100], "size": [190, 76], "tag": "khuyến nghị" },
+    { "id": "observability", "type": "cloud", "label": "Cloudflare Analytics", "sublabel": "traffic · cache · security logs", "pos": [680, 100], "size": [210, 76], "tag": "side-channel" },
+    { "id": "nextWeb", "type": "frontend", "label": "Next.js /q Route", "sublabel": "activation · active profile", "pos": [1140, 100], "size": [220, 82], "tag": "origin" },
+    { "id": "api", "type": "backend", "label": "NestJS API", "sublabel": "Prisma · M1–M6", "pos": [1140, 329], "size": [220, 82], "tag": "origin" },
+    { "id": "dataOrigin", "type": "database", "label": "Redis + PostgreSQL", "sublabel": "runtime cache · source of truth", "pos": [840, 550], "size": [230, 76], "tag": "không thuộc Cloudflare" },
+    { "id": "purgeWorker", "type": "messagebus", "label": "Purge Retry Worker", "sublabel": "BullMQ · backoff", "pos": [1140, 550], "size": [220, 76], "tag": "code dự án" }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Cloudflare managed · tài khoản MHG", "wraps": ["dnsTls", "edgeSecurity", "edgeCache", "turnstile", "observability"], "pad": 22 },
+    { "kind": "region", "label": "Ứng dụng do đội dự án vận hành", "wraps": ["nextWeb", "api", "purgeWorker"], "pad": 22 },
+    { "kind": "region", "label": "Dữ liệu managed · không thuộc Cloudflare", "wraps": ["dataOrigin"], "pad": 18 }
+  ],
+  "connections": [
+    { "id": "visitorToDns", "from": "visitor", "to": "dnsTls", "label": "HTTPS", "variant": "emphasis" },
+    { "id": "dnsToSecurity", "from": "dnsTls", "to": "edgeSecurity", "label": "proxied traffic", "variant": "security", "route": "straight", "fromSide": "right", "toSide": "left", "labelAt": [420, 420] },
+    { "id": "securityToCache", "from": "edgeSecurity", "to": "edgeCache", "label": "GET /q/{publicToken}", "variant": "emphasis", "route": "straight", "fromSide": "right", "toSide": "left", "labelAt": [650, 424] },
+    { "id": "cacheToWeb", "from": "edgeCache", "to": "nextWeb", "label": "MISS: SSR origin", "variant": "dashed" },
+    { "id": "webToApi", "from": "nextWeb", "to": "api", "label": "trạng thái + snapshot", "variant": "emphasis", "route": "straight", "fromSide": "bottom", "toSide": "top", "labelAt": [1270, 196] },
+    { "id": "apiToData", "from": "api", "to": "dataOrigin", "label": "Prisma · Redis", "variant": "emphasis", "fromSide": "bottom", "toSide": "right", "via": [[1250, 480], [1085, 480], [1085, 588]], "labelAt": [1170, 500] },
+    { "id": "apiToPurgeWorker", "from": "api", "to": "purgeWorker", "label": "enqueue purge sau commit", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "labelAt": [1270, 500] },
+    { "id": "purgeRetry", "from": "purgeWorker", "to": "edgeCache", "label": "Purge API · retry", "variant": "security", "fromSide": "left", "toSide": "bottom", "via": [[1100, 588], [1100, 650], [780, 650]], "labelAt": [940, 670] },
+    { "id": "edgeTelemetry", "from": "edgeSecurity", "to": "observability", "label": "traffic + security events", "variant": "dashed" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Cloudflare làm gì", "items": ["DNS, TLS, WAF và DDoS protection", "CDN cache HTML active tại /q/{publicToken}", "Analytics/Logs quan sát traffic và cache"] },
+    { "dot": "amber", "title": "Đội dự án làm gì", "items": ["Cấu hình Cache Rules và header theo trạng thái", "Browser gửi Turnstile token; API xác minh Siteverify", "Gọi Purge API sau commit và retry bằng BullMQ"] },
+    { "dot": "rose", "title": "Không cache", "items": ["OTP, claim, login, admin và draft", "Response theo session hoặc quyền riêng", "Không dùng stale-while-revalidate cho trạng thái khóa"] }
+  ]
+}

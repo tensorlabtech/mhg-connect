@@ -1,0 +1,287 @@
+.quotation-journey-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.quotation-journey-grid::before {
+  position: absolute;
+  top: 1.25rem;
+  right: 10%;
+  left: 10%;
+  height: 1px;
+  background: #2b2b2b;
+  content: "";
+}
+
+.quotation-journey-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.quotation-journey-icon {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--quotation-surface-raised);
+  color: var(--quotation-gold);
+}
+
+.quotation-journey-icon svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.quotation-journey-step > span:last-child {
+  max-width: 8rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.quotation-timeline-list {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.quotation-milestone {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 14rem;
+  gap: 4rem;
+  padding: 2.5rem 3rem;
+}
+
+.quotation-milestone-main {
+  min-width: 0;
+}
+
+.quotation-milestone-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.quotation-milestone-meta span {
+  display: flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--quotation-surface-raised);
+  color: var(--quotation-gold);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.quotation-milestone-meta p,
+.quotation-milestone-main > p,
+.quotation-milestone-payment span,
+.quotation-cost-name span {
+  color: var(--quotation-muted);
+}
+
+.quotation-milestone-meta p,
+.quotation-milestone-main > p,
+.quotation-milestone-payment span {
+  font-size: 0.875rem;
+}
+
+.quotation-milestone h3 {
+  margin-top: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.quotation-milestone-main > p {
+  margin-top: 0.75rem;
+  line-height: 1.7;
+}
+
+.quotation-milestone-payment {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.quotation-milestone-payment p {
+  font-size: clamp(2.25rem, 3.5vw, 3.25rem);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.quotation-milestone-payment span {
+  max-width: none;
+  line-height: 1.6;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.quotation-cost-breakdown {
+  display: grid;
+  align-content: space-between;
+  gap: 3rem;
+}
+
+.quotation-allocation-bar {
+  display: grid;
+  grid-template-columns: 55fr 55fr 35fr 25fr;
+  height: 0.75rem;
+  margin-top: 1.5rem;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: var(--quotation-surface-raised);
+}
+
+.quotation-allocation-segment-01 {
+  background: var(--quotation-cost-01);
+}
+
+.quotation-allocation-segment-02 {
+  background: var(--quotation-cost-02);
+}
+
+.quotation-allocation-segment-03 {
+  background: var(--quotation-cost-03);
+}
+
+.quotation-allocation-segment-04 {
+  background: var(--quotation-cost-04);
+}
+
+.quotation-cost-list {
+  display: grid;
+  gap: 2rem;
+}
+
+.quotation-cost-row {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) 4rem 9rem;
+  align-items: end;
+  gap: 1rem;
+}
+
+.quotation-cost-row[data-package="01"] {
+  --quotation-package-color: var(--quotation-cost-01);
+}
+
+.quotation-cost-row[data-package="02"] {
+  --quotation-package-color: var(--quotation-cost-02);
+}
+
+.quotation-cost-row[data-package="03"] {
+  --quotation-package-color: var(--quotation-cost-03);
+}
+
+.quotation-cost-row[data-package="04"] {
+  --quotation-package-color: var(--quotation-cost-04);
+}
+
+.quotation-cost-index {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quotation-cost-swatch {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: var(--quotation-package-color);
+}
+
+.quotation-cost-index,
+.quotation-cost-percentage {
+  color: var(--quotation-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.quotation-cost-name p,
+.quotation-cost-price {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.quotation-cost-name span {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.quotation-cost-percentage,
+.quotation-cost-price {
+  text-align: right;
+}
+
+.quotation-cost-percentage {
+  color: var(--quotation-package-color);
+}
+
+@media (max-width: 640px) {
+  .quotation-journey-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .quotation-journey-grid::before {
+    top: 1.25rem;
+    bottom: 1.25rem;
+    left: 1.25rem;
+    width: 1px;
+    height: auto;
+  }
+
+  .quotation-journey-step {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+  }
+
+  .quotation-milestone {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 2rem;
+  }
+
+  .quotation-milestone-payment {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: flex-start;
+  }
+
+  .quotation-milestone-payment span {
+    max-width: 7rem;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .quotation-cost-row {
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    align-items: start;
+    column-gap: 0.75rem;
+    row-gap: 0.25rem;
+  }
+
+  .quotation-cost-percentage {
+    display: none;
+  }
+
+  .quotation-cost-price {
+    grid-column: 2;
+    font-size: 0.75rem;
+    text-align: left;
+  }
+}

@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MHG Connect | Sơ đồ kỹ thuật</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #12100c;
+      --surface: #221e18;
+      --line: #453b29;
+      --gold: #d4a93c;
+      --text: #ece6d9;
+      --muted: #aaa292;
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --radius: 0.75rem;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 20rem;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+
+    main {
+      width: min(calc(100% - 3rem), 90rem);
+      margin: 0 auto;
+      padding: var(--space-8) 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      min-height: 2.75rem;
+      margin-bottom: var(--space-4);
+      padding: var(--space-2) var(--space-3);
+      color: var(--muted);
+      font-size: 0.875rem;
+      text-underline-offset: var(--space-1);
+    }
+
+    .back-link:hover { color: var(--text); }
+
+    .back-link:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    .heading-line {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-4);
+    }
+
+    .section-number {
+      flex: 0 0 auto;
+      color: var(--gold);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+
+    .summary {
+      max-width: 58ch;
+      margin: var(--space-2) 0 0 calc(3.75rem + var(--space-4));
+      color: var(--muted);
+    }
+
+    .play-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin: var(--space-4) 0 var(--space-6) calc(3.75rem + var(--space-4));
+    }
+
+    button {
+      min-height: 2.75rem;
+      padding: var(--space-2) var(--space-3);
+      border: 1px solid var(--line);
+      border-radius: calc(var(--radius) - var(--space-1));
+      background: var(--surface);
+      color: var(--muted);
+      font: 600 0.8125rem/1.25 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    button:hover { color: var(--text); }
+    button:active { transform: translateY(2px); }
+    button[aria-pressed="true"] { border-color: var(--gold); background: var(--gold); color: var(--bg); }
+    button[data-stop] { background: transparent; }
+
+    .status {
+      width: 100%;
+      min-height: 1.25rem;
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .diagram-shell {
+      height: auto;
+      aspect-ratio: var(--diagram-aspect);
+      overflow: auto;
+      overscroll-behavior: contain;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #070b18;
+    }
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #070b18;
+    }
+
+    @media (max-width: 40rem) {
+      main { width: calc(100% - 1.5rem); }
+      .heading-line { gap: var(--space-3); }
+      .summary,
+      .play-controls { margin-left: 0; }
+      .diagram-shell { height: var(--mobile-height); aspect-ratio: auto; }
+      iframe { width: 60rem; max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back-link" href="index.html">← Về 10 sơ đồ</a>
+    <div class="heading-line">
+      <span class="section-number" id="number"></span>
+      <h1 id="title">Sơ đồ kỹ thuật</h1>
+    </div>
+    <p class="summary" id="summary"></p>
+    <div class="play-controls" id="controls"></div>
+    <div class="diagram-shell" id="shell">
+      <iframe id="diagram-frame" title="Sơ đồ kỹ thuật MHG Connect"></iframe>
+    </div>
+  </main>
+  <script src="diagram-learning-content.js"></script>
+  <script src="diagram-learning-popovers.js"></script>
+  <script>
+    var diagrams = {
+      "architecture": {
+        number: "01 / 10",
+        title: "Kiến trúc tổng thể",
+        summary: "Kiến trúc đề xuất để triển khai MVP M1–M6; tách rõ Cloudflare edge, ứng dụng và dữ liệu của dự án.",
+        file: "mhg-phase-1-system-architecture.html",
+        aspect: "1395 / 818",
+        mobileHeight: "36.5rem",
+        views: [["scan-path", "Luồng quét QR"], ["cache-miss", "Cache MISS"], ["owner-path", "Chủ hồ sơ"], ["operations", "Vận hành MHG"]]
+      },
+      "cloudflare": {
+        number: "02 / 10",
+        title: "Cloudflare trong hệ thống",
+        summary: "Edge security, CDN cache, purge và observability; phân biệt rõ Cloudflare với origin của dự án.",
+        file: "mhg-phase-1-cloudflare-responsibilities.html",
+        aspect: "1390 / 744",
+        mobileHeight: "32rem",
+        views: [["cacheHit", "Cache HIT"], ["cacheMiss", "Cache MISS"], ["invalidation", "Purge sau write"], ["protection", "Security + telemetry"]]
+      },
+      "activation": {
+        number: "03 / 10",
+        title: "Kích hoạt lần đầu",
+        summary: "First verified claim: kiểm tra trạng thái mã, xác thực Email OTP và claim atomically cho một tài khoản.",
+        file: "mhg-phase-1-activation.html",
+        aspect: "920 / 580",
+        mobileHeight: "33rem",
+        views: [["request-otp", "Yêu cầu OTP"], ["claim-owner", "Xác nhận chủ sở hữu"]]
+      },
+      "public-scan": {
+        number: "04 / 10",
+        title: "Khách quét QR",
+        summary: "Đường HIT chỉ nằm ở edge; đường MISS mới vào origin. scan_event và profile_view được đo riêng.",
+        file: "mhg-phase-1-public-scan.html",
+        aspect: "1080 / 740",
+        mobileHeight: "33rem",
+        views: [["cache-hit", "Cache HIT"], ["cache-miss", "Cache MISS"], ["analytics", "Đo traffic"]]
+      },
+      "publishing": {
+        number: "05 / 10",
+        title: "Dựng và xuất bản",
+        summary: "Publish snapshot, purge URL/Cache-Tag và phục vụ HTML, media công khai qua Cloudflare edge.",
+        file: "mhg-phase-1-profile-publishing.html",
+        aspect: "1068 / 680",
+        mobileHeight: "34.5rem",
+        views: [["authoring", "Soạn và xuất bản"], ["media", "Luồng media"], ["edgePublish", "Đưa lên edge"]]
+      },
+      "lifecycle": {
+        number: "06 / 10",
+        title: "Vòng đời QR",
+        summary: "Các trạng thái từ lúc tạo mã, xuất in, kích hoạt, phục vụ đến khóa, gỡ chủ và vô hiệu vĩnh viễn.",
+        file: "mhg-phase-1-qr-lifecycle.html",
+        aspect: "1080 / 650",
+        mobileHeight: "37.5rem",
+        views: [["normalLifecycle", "Vòng đời chuẩn"], ["controlExceptions", "Khóa và phục hồi"]]
+      },
+      "domain-model": {
+        number: "07 / 10",
+        title: "Mô hình dữ liệu lõi",
+        summary: "QR cá nhân, trang active, snapshot published cùng hai metric scan_event và profile_view.",
+        file: "mhg-phase-1-domain-model.html",
+        aspect: "1180 / 680",
+        mobileHeight: "38rem",
+        views: [["ownership", "Cá nhân và mã QR"], ["publishing", "Nháp và xuất bản"], ["traceability", "Quét và lượt xem"]]
+      },
+      "access-security": {
+        number: "08 / 10",
+        title: "Truy cập và bảo mật",
+        summary: "Ranh giới public và authenticated, OTP/session, ownership check, RBAC, làm sạch nội dung và audit.",
+        file: "mhg-phase-1-access-security.html",
+        aspect: "1180 / 672",
+        mobileHeight: "38rem",
+        views: [["publicAccess", "Khách quét"], ["ownerAccess", "Chủ hồ sơ"], ["adminAccess", "Quản trị MHG"]]
+      },
+      "deployment": {
+        number: "09 / 10",
+        title: "Triển khai và vận hành",
+        summary: "Topology production đề xuất, tác vụ nền, dịch vụ dữ liệu, quan sát hệ thống và phương án backup.",
+        file: "mhg-phase-1-deployment-operations.html",
+        aspect: "1320 / 752",
+        mobileHeight: "39rem",
+        views: [["servingPath", "Phục vụ công khai"], ["writePath", "Write và purge"], ["operations", "Quan sát và backup"]]
+      },
+      "admin-batch": {
+        number: "10 / 10",
+        title: "Vận hành lô QR",
+        summary: "Trình tự Admin tạo lô, sinh token nền, xuất file cho nhà in, đánh dấu đã in, tra cứu và khóa mã.",
+        file: "mhg-phase-1-admin-qr-batch.html",
+        aspect: "1080 / 650",
+        mobileHeight: "62rem",
+        views: [["issueBatch", "Tạo và sinh lô"], ["printHandoff", "Xuất file nhà in"], ["controlCode", "Tra cứu và khóa"]]
+      }
+    };
+
+    var key = new URLSearchParams(location.search).get("diagram") || "architecture";
+    var current = diagrams[key] || diagrams.architecture;
+    var frame = document.getElementById("diagram-frame");
+    document.getElementById("number").textContent = current.number;
+    document.getElementById("title").textContent = current.title;
+    document.getElementById("summary").textContent = current.summary;
+    document.getElementById("shell").style.setProperty("--diagram-aspect", current.aspect);
+    document.getElementById("shell").style.setProperty("--mobile-height", current.mobileHeight);
+    frame.title = current.title;
+    frame.src = current.file + "?embed=1&theme=dark";
+    document.title = current.title + " | MHG Connect";
+
+    var controls = document.getElementById("controls");
+    current.views.forEach(function (view) {
+      var button = document.createElement("button");
+      button.type = "button";
+      button.dataset.playView = view[0];
+      button.setAttribute("aria-pressed", "false");
+      button.textContent = "▶ " + view[1];
+      controls.appendChild(button);
+    });
+    var stop = document.createElement("button");
+    stop.type = "button";
+    stop.dataset.stop = "";
+    stop.textContent = "Dừng";
+    controls.appendChild(stop);
+    var statusMessage = document.createElement("p");
+    statusMessage.className = "status";
+    statusMessage.setAttribute("aria-live", "polite");
+    statusMessage.textContent = "Chọn một kịch bản để chạy.";
+    controls.appendChild(statusMessage);
+
+    function getGuidedController() {
+      try {
+        var archify = frame.contentWindow.Archify;
+        var guided = archify && archify.guidedViews;
+        if (!guided || typeof guided.activate !== "function" || typeof guided.playCurrent !== "function") return null;
+        return guided;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function playView(view) {
+      frame.src = current.file + "?embed=1&theme=dark&play=1&run=" + Date.now() + "#view=" + encodeURIComponent(view);
+    }
+
+    function stopPlayback() {
+      var guided = getGuidedController();
+      if (!guided) {
+        frame.src = current.file + "?embed=1&theme=dark";
+        return;
+      }
+      if (typeof guided.isPlaying === "function" && guided.isPlaying()) guided.pause();
+      guided.showAll();
+    }
+
+    controls.addEventListener("click", function (event) {
+      var button = event.target.closest("button");
+      if (!button) return;
+      controls.querySelectorAll("[data-play-view]").forEach(function (item) {
+        item.setAttribute("aria-pressed", "false");
+      });
+      if (button.hasAttribute("data-stop")) {
+        stopPlayback();
+        statusMessage.textContent = "Đã dừng. Sơ đồ trở về toàn cảnh.";
+        return;
+      }
+      button.setAttribute("aria-pressed", "true");
+      playView(button.dataset.playView);
+      statusMessage.textContent = "Đang chạy: " + button.textContent.replace("▶", "").trim() + ".";
+    });
+  </script>
+</body>
+</html>

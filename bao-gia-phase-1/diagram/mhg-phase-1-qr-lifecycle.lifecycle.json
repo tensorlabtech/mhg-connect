@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "MHG Connect — Vòng đời một mã QR",
+    "output": "mhg-phase-1-qr-lifecycle.html",
+    "viewBox": [1080, 650],
+    "quality_profile": "showcase",
+    "views": [
+      { "id": "normalLifecycle", "label": "Vòng đời chuẩn", "focus": ["created", "printed", "activated", "serving"], "note": "Mã đi từ tạo lô đến phục vụ đúng một trang active; activate hoặc đổi trang active đều purge cache public sau commit." },
+      { "id": "controlExceptions", "label": "Khóa và vô hiệu", "focus": ["serving", "locked", "disabled"], "note": "MHG khóa, mở hoặc vô hiệu mã phải ghi audit và purge /q/{publicToken} để edge không phục vụ trạng thái cũ." }
+    ]
+  },
+  "lanes": [
+    { "id": "main", "label": "Vòng đời chính" },
+    { "id": "control", "label": "Kiểm soát và phục hồi" },
+    { "id": "terminal", "label": "Kết thúc" }
+  ],
+  "states": [
+    { "id": "created", "type": "start", "label": "Mới tạo", "sublabel": "publicToken ngẫu nhiên", "lane": "main", "col": 0, "step": "01" },
+    { "id": "printed", "type": "active", "label": "Đã xuất in", "sublabel": "node-qrcode · PDF", "lane": "main", "col": 1, "step": "02" },
+    { "id": "activated", "type": "active", "label": "Đã kích hoạt", "sublabel": "OTP · atomic claim", "lane": "main", "col": 2, "step": "03" },
+    { "id": "serving", "type": "success", "label": "Đang phục vụ", "sublabel": "một trang active", "lane": "main", "col": 4, "step": "04" },
+    { "id": "locked", "type": "waiting", "label": "Bị khóa", "sublabel": "tạm ngừng phân giải", "lane": "control", "col": 2, "tag": "admin" },
+    { "id": "disabled", "type": "failure", "label": "Đã vô hiệu", "sublabel": "giữ audit, không xóa", "lane": "terminal", "col": 2, "tag": "terminal" }
+  ],
+  "transitions": [
+    { "id": "createToPrint", "from": "created", "to": "printed", "label": "xuất file + đánh dấu lô", "variant": "emphasis", "labelDy": -36 },
+    { "id": "printToActivate", "from": "printed", "to": "activated", "label": "OTP + claim atomic", "variant": "security", "labelDy": -36 },
+    { "id": "activateToServe", "from": "activated", "to": "serving", "label": "publish + active + purge cache", "variant": "emphasis", "labelDy": -28 },
+    { "id": "serveToLock", "from": "serving", "to": "locked", "label": "commit khóa + purge", "variant": "security", "labelAt": [760, 224] },
+    { "id": "lockToServe", "from": "locked", "to": "serving", "label": "commit mở + purge", "variant": "emphasis", "route": "right-channel", "channelX": 900, "labelAt": [900, 258] },
+    { "id": "lockToDisable", "from": "locked", "to": "disabled", "label": "Master Admin vô hiệu mã", "variant": "security", "labelDy": 24 }
+  ]
+}

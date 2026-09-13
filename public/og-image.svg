@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0a0a0a"/>
+  <path d="M0 504h1200" stroke="#262626"/>
+  <path d="M888 0v630" stroke="#262626"/>
+  <rect x="80" y="72" width="72" height="72" rx="12" fill="#e5c16b"/>
+  <path d="M98 126V90l18 20 18-20v36" fill="none" stroke="#0a0a0a" stroke-width="6"/>
+  <text x="176" y="119" fill="#e5c16b" font-family="Arial, sans-serif" font-size="30" font-weight="700" letter-spacing="5">MHG CONNECT</text>
+  <text x="80" y="300" fill="#fff" font-family="Georgia, serif" font-size="76" font-weight="600">Kết nối sản phẩm</text>
+  <text x="80" y="390" fill="#fff" font-family="Georgia, serif" font-size="76" font-weight="600">với con người.</text>
+  <text x="80" y="555" fill="#a3a3a3" font-family="Arial, sans-serif" font-size="28">Hồ sơ số từ QR định danh</text>
+  <g fill="#e5c16b" opacity=".72">
+    <rect x="960" y="88" width="68" height="68" rx="8"/><rect x="1048" y="88" width="68" height="68" rx="8"/>
+    <rect x="960" y="176" width="28" height="28" rx="4"/><rect x="1000" y="176" width="28" height="28" rx="4"/>
+    <rect x="1048" y="176" width="28" height="28" rx="4"/><rect x="1088" y="176" width="28" height="28" rx="4"/>
+    <rect x="960" y="216" width="28" height="28" rx="4"/><rect x="1048" y="216" width="68" height="68" rx="8"/>
+  </g>
+</svg>

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "MHG Connect — Mô hình dữ liệu lõi",
+    "quality_profile": "showcase",
+    "views": [
+      { "id": "ownership", "label": "Cá nhân và mã QR", "focus": ["user", "qrBatch", "qrCode", "profile"], "note": "Hệ thống quản mã cá nhân: QR thuộc một lô, sau kích hoạt được claim cho một user và trỏ đúng một trang active." },
+      { "id": "publishing", "label": "Nháp và bản xuất bản", "focus": ["profile", "profileBlock", "publishedSnapshot"], "note": "Bản công khai đọc snapshot bất biến thay vì nội dung đang chỉnh sửa." },
+      { "id": "traceability", "label": "Quét và lượt xem", "focus": ["qrBatch", "qrCode", "scanEvent", "profileView", "adminUser", "auditLog"], "note": "Frontend gửi scan_event khi /q mở và profile_view khi hồ sơ active hiển thị. Cả hai là số liệu gần đúng và không được cộng lẫn." }
+    ],
+    "viewBox": [1180, 680]
+  },
+  "components": [
+    { "id": "qrBatch", "type": "database", "label": "QR Batch", "sublabel": "loại · số lượng · trạng thái", "pos": [280, 60], "size": [190, 76] },
+    { "id": "adminUser", "type": "security", "label": "Admin User", "sublabel": "super / vận hành", "pos": [740, 70], "size": [190, 76] },
+    { "id": "auditLog", "type": "database", "label": "Audit Log", "sublabel": "ai · làm gì · khi nào", "pos": [970, 200], "size": [180, 76] },
+    { "id": "user", "type": "security", "label": "User Account", "sublabel": "email / số điện thoại", "pos": [40, 300], "size": [180, 76] },
+    { "id": "qrCode", "type": "database", "label": "QR Code", "sublabel": "token · trạng thái · active page", "pos": [280, 300], "size": [200, 76] },
+    { "id": "profile", "type": "database", "label": "Profile Page", "sublabel": "draft / published · active", "pos": [540, 300], "size": [200, 76] },
+    { "id": "profileBlock", "type": "database", "label": "Profile Block", "sublabel": "type · content · order", "pos": [810, 300], "size": [190, 76] },
+    { "id": "otpChallenge", "type": "security", "label": "OTP Challenge", "sublabel": "TTL · attempts · consumed", "pos": [40, 510], "size": [180, 76] },
+    { "id": "scanEvent", "type": "database", "label": "Scan Event", "sublabel": "browser beacon · approximate", "pos": [300, 510], "size": [180, 76] },
+    { "id": "profileView", "type": "database", "label": "Profile View", "sublabel": "browser · approximate", "pos": [930, 510], "size": [180, 76] },
+    { "id": "publishedSnapshot", "type": "database", "label": "Published Snapshot", "sublabel": "immutable profile JSON", "pos": [650, 510], "size": [220, 76] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "PostgreSQL · Prisma · dữ liệu nghiệp vụ", "wraps": ["qrBatch", "adminUser", "auditLog", "user", "qrCode", "profile", "profileBlock", "otpChallenge", "scanEvent", "profileView", "publishedSnapshot"], "pad": 24 }
+  ],
+  "connections": [
+    { "id": "batchIssuesCodes", "from": "qrBatch", "to": "qrCode", "label": "phát hành 1..N", "variant": "emphasis", "fromSide": "bottom", "toSide": "top" },
+    { "id": "userOwnsCodes", "from": "user", "to": "qrCode", "label": "mã cá nhân", "variant": "security", "labelAt": [250, 390] },
+    { "id": "codeHasPages", "from": "qrCode", "to": "profile", "label": "có 0..N trang", "labelAt": [510, 390] },
+    { "id": "profileHasBlocks", "from": "profile", "to": "profileBlock", "label": "gồm 0..N khối" },
+    { "id": "profilePublishes", "from": "profile", "to": "publishedSnapshot", "label": "xuất bản version", "variant": "emphasis", "fromSide": "bottom", "toSide": "top" },
+    { "id": "otpVerifiesUser", "from": "otpChallenge", "to": "user", "label": "xác thực claim", "variant": "security" },
+    { "id": "codeRecordsScans", "from": "qrCode", "to": "scanEvent", "label": "browser báo 0..N", "fromSide": "bottom", "toSide": "top" },
+    { "id": "profileRecordsViews", "from": "profile", "to": "profileView", "label": "browser báo 0..N", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "id": "adminWritesAudit", "from": "adminUser", "to": "auditLog", "label": "tạo nhật ký", "variant": "security" }
+  ],
+  "cards": [
+    { "dot": "violet", "title": "Source of truth", "items": ["QRCode giữ trạng thái và con trỏ trang active", "ProfileBlock là nội dung đang biên tập", "PublishedSnapshot là bản phục vụ công khai"] },
+    { "dot": "rose", "title": "Các bất biến", "items": ["publicToken QR duy nhất toàn hệ thống", "Một QR có đúng một trang active tại một thời điểm", "scan_event và profile_view là hai metric khác nhau"] }
+  ]
+}
