@@ -1,12 +1,12 @@
-import { AlertCircle, ArrowRight } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { ProductSurface } from "@/components/product/product-page";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { claimQrAction } from "@/features/qr/claim-qr";
 import { createPublicQrSvg } from "@/features/qr/create-public-qr-svg";
 import { QrVisualCard } from "@/features/qr/qr-visual-card";
+import { QrClaimSubmitButton } from "@/features/qr/qr-claim-submit-button";
 
 type OwnedProfile = {
   id: string;
@@ -98,9 +98,7 @@ export async function QrActivationClaim({
               </p>
             </>
           )}
-          <Button className="w-full" size="lg" type="submit">
-            Kích hoạt mã <ArrowRight />
-          </Button>
+          <QrClaimSubmitButton />
         </form>
       </ProductSurface>
     </main>

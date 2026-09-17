@@ -27,7 +27,9 @@ export function AuthForm({
   const [showConfirmation, setShowConfirmation] = useState(false);
   const idPrefix = `auth-${mode}`;
 
-  async function submit(formData: FormData) {
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
     setError("");
     setPending(true);
     const email = String(formData.get("email") ?? "")
@@ -60,14 +62,14 @@ export function AuthForm({
             ? "Email hoặc mật khẩu chưa đúng. Vui lòng thử lại."
             : "Chưa thể tạo tài khoản. Email có thể đã được sử dụng.",
         );
+        setPending(false);
         return;
       }
 
-      router.push(returnTo);
-      router.refresh();
+      router.replace(returnTo);
+      return;
     } catch {
       setError("Không thể kết nối tới máy chủ. Vui lòng thử lại.");
-    } finally {
       setPending(false);
     }
   }
@@ -75,7 +77,7 @@ export function AuthForm({
   const otherHref = `${mode === "login" ? "/register" : "/login"}?returnTo=${encodeURIComponent(returnTo)}`;
 
   return (
-    <form action={submit} className="grid gap-6">
+    <form className="grid gap-6" onSubmit={submit}>
       {error ? (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
@@ -170,7 +172,13 @@ export function AuthForm({
         type="submit"
       >
         {pending ? <LoaderCircle className="animate-spin" /> : null}
-        {mode === "login" ? "Đăng nhập" : "Tạo tài khoản"}
+        {pending
+          ? mode === "login"
+            ? "Đang đăng nhập…"
+            : "Đang tạo tài khoản…"
+          : mode === "login"
+            ? "Đăng nhập"
+            : "Tạo tài khoản"}
       </Button>
       {showModeLink ? (
         <p className="text-center text-sm text-muted-foreground">

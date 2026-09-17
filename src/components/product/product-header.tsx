@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import { LoaderCircle, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -27,13 +27,13 @@ export function ProductHeader({
       const response = await authClient.signOut();
       if (response.error) {
         setError("Chưa thể đăng xuất. Vui lòng thử lại.");
+        setPending(false);
         return;
       }
-      router.push("/login");
-      router.refresh();
+      router.replace("/login");
+      return;
     } catch {
       setError("Không thể kết nối tới máy chủ.");
-    } finally {
       setPending(false);
     }
   }
@@ -61,10 +61,14 @@ export function ProductHeader({
             disabled={pending}
             onClick={signOut}
             size="icon-sm"
-            tooltip="Đăng xuất"
+            tooltip={pending ? "Đang đăng xuất" : "Đăng xuất"}
             variant="secondary"
           >
-            <LogOut aria-hidden="true" />
+            {pending ? (
+              <LoaderCircle aria-hidden="true" className="animate-spin" />
+            ) : (
+              <LogOut aria-hidden="true" />
+            )}
           </IconButton>
         </div>
       </div>

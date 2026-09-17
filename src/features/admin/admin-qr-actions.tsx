@@ -1,4 +1,12 @@
-import { LockKeyhole, RotateCcw, UnlockKeyhole } from "lucide-react";
+"use client";
+
+import {
+  LoaderCircle,
+  LockKeyhole,
+  RotateCcw,
+  UnlockKeyhole,
+} from "lucide-react";
+import { useFormStatus } from "react-dom";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -107,16 +115,28 @@ function ConfirmAction({
             <input name="expectedVersion" type="hidden" value={version} />
             <input name="id" type="hidden" value={id} />
             <input name="operation" type="hidden" value={operation} />
-            <Button
-              className="w-full"
-              type="submit"
-              variant={destructive ? "destructive" : "default"}
-            >
-              Xác nhận
-            </Button>
+            <AdminQrSubmitButton destructive={destructive} />
           </form>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  );
+}
+
+function AdminQrSubmitButton({ destructive }: { destructive: boolean }) {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button
+      className="w-full"
+      disabled={pending}
+      type="submit"
+      variant={destructive ? "destructive" : "default"}
+    >
+      {pending ? (
+        <LoaderCircle aria-hidden="true" className="animate-spin" />
+      ) : null}
+      {pending ? "Đang cập nhật…" : "Xác nhận"}
+    </Button>
   );
 }
