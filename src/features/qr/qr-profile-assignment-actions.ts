@@ -23,7 +23,7 @@ export async function assignProfileToQrAction(formData: FormData) {
   });
   if (!parsed.success) redirect("/dashboard?error=invalid-assignment");
 
-  const session = await requireSession(`/dashboard/qr/${parsed.data.qrId}`);
+  const session = await requireSession("/dashboard");
   const [profile] = await db
     .select({ id: profiles.id })
     .from(profiles)
@@ -37,7 +37,7 @@ export async function assignProfileToQrAction(formData: FormData) {
     .limit(1);
 
   if (!profile) {
-    redirect(`/dashboard/qr/${parsed.data.qrId}?error=profile-unavailable`);
+    redirect("/dashboard?error=profile-unavailable");
   }
 
   const [updated] = await db
@@ -58,12 +58,11 @@ export async function assignProfileToQrAction(formData: FormData) {
     .returning({ publicToken: qrCodes.publicToken });
 
   if (!updated) {
-    redirect(`/dashboard/qr/${parsed.data.qrId}?error=assignment-conflict`);
+    redirect("/dashboard?error=assignment-conflict");
   }
 
   revalidatePath("/dashboard");
-  revalidatePath(`/dashboard/qr/${parsed.data.qrId}`);
   revalidatePath(`/profiles/${profile.id}/edit`);
   revalidatePath(`/q/${updated.publicToken}`);
-  redirect(`/dashboard/qr/${parsed.data.qrId}?updated=profile`);
+  redirect("/dashboard?updated=profile");
 }

@@ -40,6 +40,23 @@ export default async function DashboardPage({
     <>
       <ProductHeader email={session.user.email} />
       <ProductPage className="pt-6 sm:pt-8">
+        {query.updated === "profile" ? (
+          <Alert className="mb-6">
+            <AlertDescription>
+              Hồ sơ hiển thị của mã QR đã được cập nhật.
+            </AlertDescription>
+          </Alert>
+        ) : null}
+        {query.error === "profile-unavailable" ||
+        query.error === "assignment-conflict" ? (
+          <Alert className="mb-6" variant="destructive">
+            <AlertDescription>
+              {query.error === "profile-unavailable"
+                ? "Hồ sơ đã chọn không còn sẵn sàng để gắn."
+                : "Liên kết vừa được thay đổi ở nơi khác. Hãy thử lại."}
+            </AlertDescription>
+          </Alert>
+        ) : null}
         {query.error === "admin-only" ? (
           <Alert className="mb-6">
             <AlertDescription>

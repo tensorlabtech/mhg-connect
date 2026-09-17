@@ -64,6 +64,13 @@
       "when": 1789136800468,
       "tag": "0008_quick_nova",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789613624233,
+      "tag": "0009_amused_jimmy_woo",
+      "breakpoints": true
     }
   ]
 }

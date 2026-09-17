@@ -1,0 +1,1 @@
+ALTER TABLE "qr_codes" ADD COLUMN "card_background_url" text;

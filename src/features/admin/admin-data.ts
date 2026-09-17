@@ -9,6 +9,7 @@ export async function getAdminQrList() {
   return db
     .select({
       id: qrCodes.id,
+      cardBackgroundUrl: qrCodes.cardBackgroundUrl,
       publicToken: qrCodes.publicToken,
       status: qrCodes.status,
       ownerEmail: user.email,

@@ -114,6 +114,7 @@ export const qrCodes = pgTable(
       onDelete: "restrict",
     }),
     activeProfileId: uuid("active_profile_id"),
+    cardBackgroundUrl: text("card_background_url"),
     activatedAt: productTimestamp("activated_at"),
     version: integer("version").default(1).notNull(),
     createdAt: productTimestamp("created_at").defaultNow().notNull(),

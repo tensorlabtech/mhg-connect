@@ -30,7 +30,8 @@ export default async function AdminQrPrintPage({
       </div>
       <main className="mx-auto max-w-lg [print-color-adjust:exact]">
         <QrVisualCard
-          className="min-h-72 print:min-h-80"
+          backgroundUrl={qr.cardBackgroundUrl}
+          className="print:w-[85.6mm]"
           description="Quét để mở hồ sơ"
           heading={qr.publicToken}
           headingClassName="text-nowrap"

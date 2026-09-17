@@ -58,6 +58,7 @@ export async function getOwnedQr(ownerId: string) {
     .select({
       id: qrCodes.id,
       activatedAt: qrCodes.activatedAt,
+      cardBackgroundUrl: qrCodes.cardBackgroundUrl,
       publicToken: qrCodes.publicToken,
       status: qrCodes.status,
       profileId: profiles.id,
@@ -81,6 +82,7 @@ export async function getOwnedQrById(ownerId: string, id: string) {
     .select({
       id: qrCodes.id,
       activatedAt: qrCodes.activatedAt,
+      cardBackgroundUrl: qrCodes.cardBackgroundUrl,
       publicToken: qrCodes.publicToken,
       status: qrCodes.status,
       profileId: profiles.id,

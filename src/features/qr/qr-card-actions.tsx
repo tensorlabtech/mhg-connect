@@ -6,6 +6,7 @@ import {
   MoreHorizontal,
   PencilLine,
   Plus,
+  QrCode,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -26,6 +27,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { QrProfileAssignment } from "@/features/qr/qr-profile-assignment";
+import { QrCardPreviewDialog } from "@/features/qr/qr-card-preview-dialog";
 
 type AssignmentProfile = {
   company: string | null;
@@ -38,22 +40,33 @@ type AssignmentProfile = {
 
 export function QrCardActions({
   activatedAt,
+  backgroundUrl,
+  description,
+  heading,
   profileId,
   profiles,
   publicToken,
   qrId,
   scanCount,
+  status,
+  svg,
   version,
 }: {
   activatedAt: Date | null;
+  backgroundUrl: string | null;
+  description: string;
+  heading: string;
   profileId: string | null;
   profiles: AssignmentProfile[];
   publicToken: string;
   qrId: string;
   scanCount: number;
+  status: string;
+  svg: string;
   version: number;
 }) {
   const [assignmentOpen, setAssignmentOpen] = useState(false);
+  const [cardOpen, setCardOpen] = useState(false);
   const [statisticsOpen, setStatisticsOpen] = useState(false);
 
   return (
@@ -87,6 +100,18 @@ export function QrCardActions({
         open={statisticsOpen}
         scanCount={scanCount}
       />
+      <QrCardPreviewDialog
+        backgroundUrl={backgroundUrl}
+        description={description}
+        heading={heading}
+        onOpenChange={setCardOpen}
+        open={cardOpen}
+        publicToken={publicToken}
+        qrId={qrId}
+        status={status}
+        svg={svg}
+        version={version}
+      />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button className="w-full" variant="secondary">
@@ -94,6 +119,9 @@ export function QrCardActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem onSelect={() => setCardOpen(true)}>
+            <QrCode /> Xem mã QR
+          </DropdownMenuItem>
           {profiles.length ? (
             <DropdownMenuItem onSelect={() => setAssignmentOpen(true)}>
               <PencilLine />

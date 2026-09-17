@@ -1,0 +1,130 @@
+"use server";
+
+import { and, eq, sql } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { z } from "zod";
+
+import { db } from "@/db";
+import { qrCodes } from "@/db/schema";
+import {
+  deleteProfileMedia,
+  uploadProfileMedia,
+} from "@/lib/profile-media-storage";
+import { requireSession } from "@/lib/session";
+
+export type SaveQrCardBackgroundResult = {
+  error?: string;
+  success: boolean;
+  url?: string | null;
+  version?: number;
+};
+
+const inputSchema = z.object({
+  expectedVersion: z.coerce.number().int().positive(),
+  intent: z.enum(["save", "remove"]),
+  qrId: z.uuid(),
+});
+
+const acceptedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+const maxFileSize = 5 * 1024 * 1024;
+
+export async function saveQrCardBackgroundAction(
+  _previous: SaveQrCardBackgroundResult,
+  formData: FormData,
+): Promise<SaveQrCardBackgroundResult> {
+  const parsed = inputSchema.safeParse({
+    expectedVersion: formData.get("expectedVersion"),
+    intent: formData.get("intent") ?? "save",
+    qrId: formData.get("qrId"),
+  });
+  if (!parsed.success) {
+    return { error: "Thông tin mã QR không hợp lệ.", success: false };
+  }
+
+  const session = await requireSession("/dashboard");
+  const [current] = await db
+    .select({ backgroundUrl: qrCodes.cardBackgroundUrl })
+    .from(qrCodes)
+    .where(
+      and(
+        eq(qrCodes.id, parsed.data.qrId),
+        eq(qrCodes.ownerId, session.user.id),
+      ),
+    )
+    .limit(1);
+  if (!current) {
+    return { error: "Không tìm thấy mã QR.", success: false };
+  }
+
+  let uploadedUrl: string | null = null;
+  if (parsed.data.intent === "save") {
+    const file = formData.get("background");
+    if (!(file instanceof File) || file.size === 0) {
+      return { error: "Hãy chọn một ảnh nền trước khi lưu.", success: false };
+    }
+    if (!acceptedTypes.has(file.type)) {
+      return { error: "Ảnh nền chỉ hỗ trợ JPG, PNG hoặc WebP.", success: false };
+    }
+    if (file.size > maxFileSize) {
+      return { error: "Ảnh nền phải nhỏ hơn 5 MB.", success: false };
+    }
+    try {
+      uploadedUrl = (await uploadProfileMedia(file, "card-background")).url;
+    } catch (error) {
+      return {
+        error: error instanceof Error ? error.message : "Chưa thể tải ảnh nền.",
+        success: false,
+      };
+    }
+  }
+
+  const [updated] = await db
+    .update(qrCodes)
+    .set({
+      cardBackgroundUrl: uploadedUrl,
+      updatedAt: new Date(),
+      version: sql`${qrCodes.version} + 1`,
+    })
+    .where(
+      and(
+        eq(qrCodes.id, parsed.data.qrId),
+        eq(qrCodes.ownerId, session.user.id),
+        eq(qrCodes.version, parsed.data.expectedVersion),
+      ),
+    )
+    .returning({
+      publicToken: qrCodes.publicToken,
+      version: qrCodes.version,
+    });
+
+  if (!updated) {
+    if (uploadedUrl) await deleteProfileMedia(uploadedUrl).catch(() => undefined);
+    return {
+      error: "Thiết kế thẻ đã được thay đổi ở nơi khác. Hãy tải lại trang.",
+      success: false,
+    };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/admin/qr/${parsed.data.qrId}`);
+  revalidatePath(`/admin/qr/${parsed.data.qrId}/print`);
+  revalidatePath(`/q/${updated.publicToken}`);
+
+  const replacedUrl = current.backgroundUrl;
+  if (replacedUrl && replacedUrl !== uploadedUrl) {
+    after(() =>
+      deleteProfileMedia(replacedUrl).catch((error) =>
+        console.error("QR card background cleanup failed", error),
+      ),
+    );
+  }
+
+  return {
+    success: true,
+    url: uploadedUrl
+      ? `/api/qr-card-background/${parsed.data.qrId}?v=${updated.version}`
+      : null,
+    version: updated.version,
+  };
+}

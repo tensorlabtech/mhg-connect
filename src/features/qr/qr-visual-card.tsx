@@ -1,17 +1,18 @@
 import { cn } from "cn";
+import Image from "next/image";
 
 import { BrandLockup } from "@/components/product/brand-lockup";
 
 export function QrVisualCard({
+  backgroundUrl,
   className,
-  compact = false,
   description,
   heading,
   headingClassName,
   svg,
 }: {
+  backgroundUrl?: string | null;
   className?: string;
-  compact?: boolean;
   description?: string;
   heading: string;
   headingClassName?: string;
@@ -21,37 +22,71 @@ export function QrVisualCard({
     <section
       aria-label={`Thẻ QR: ${heading}`}
       className={cn(
-        "relative grid overflow-hidden rounded-md bg-gold-deep text-background",
-        compact
-          ? "min-h-56 grid-cols-[minmax(0,1fr)_6rem] gap-4 p-5 sm:grid-cols-[minmax(0,1fr)_6rem] sm:gap-4"
-          : "min-h-64 grid-cols-[minmax(0,1fr)_7rem] gap-4 p-6 sm:grid-cols-[minmax(0,1fr)_8rem] sm:gap-6",
+        "relative isolate aspect-[85.6/53.98] w-full [container-type:inline-size]",
+        backgroundUrl ? "text-white" : "text-background",
         className,
       )}
     >
-      <QrCardMatrixMotif />
-      <div className="relative z-10 flex min-w-0 flex-col">
-        <BrandLockup className="text-background [&_path]:stroke-gold-deep [&_svg]:size-5 [&_svg]:text-background" />
-        <div className="mt-auto pt-8">
-          <h3
-            className={cn(
-              "text-2xl leading-tight font-semibold text-balance",
-              headingClassName,
-            )}
-          >
-            {heading}
-          </h3>
-          {description ? <p className="mt-2 text-sm">{description}</p> : null}
-        </div>
-      </div>
       <div
-        aria-label={`Mã QR mở ${heading}`}
+        aria-hidden="true"
         className={cn(
-          "relative z-10 self-end overflow-hidden rounded-lg bg-white [&_svg]:size-full",
-          compact ? "size-24 p-2.5 sm:size-24" : "size-28 p-3 sm:size-32",
+          "absolute inset-0 overflow-hidden rounded-[3.7cqw]",
+          backgroundUrl ? "bg-background" : "bg-gold-deep",
         )}
-        dangerouslySetInnerHTML={{ __html: svg }}
-        role="img"
-      />
+        style={{
+          WebkitMaskImage: "-webkit-radial-gradient(white, black)",
+          maskImage: "linear-gradient(white, black)",
+        }}
+      >
+        {backgroundUrl ? (
+          <>
+            <Image
+              alt=""
+              className="object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 640px"
+              src={backgroundUrl}
+              unoptimized
+            />
+            <div className="absolute inset-0 bg-[linear-gradient(105deg,rgba(4,4,4,0.82)_0%,rgba(4,4,4,0.56)_55%,rgba(4,4,4,0.32)_100%)]" />
+          </>
+        ) : (
+          <QrCardMatrixMotif />
+        )}
+      </div>
+      <div className="absolute inset-0 z-10 grid grid-cols-[minmax(0,1fr)_27cqw] gap-[4.5cqw] p-[5cqw]">
+        <div className="flex min-w-0 flex-col">
+          <BrandLockup
+            className={cn(
+              "gap-[2cqw] text-[3.05cqw] leading-none tracking-[0.14em] [&_svg]:size-[5.5cqw]",
+              backgroundUrl
+                ? "text-white [&_path]:stroke-gold [&_svg]:text-white"
+                : "text-background [&_path]:stroke-gold-deep [&_svg]:text-background",
+            )}
+          />
+          <div className="mt-auto min-w-0">
+            <h3
+              className={cn(
+                "line-clamp-2 text-[6cqw] leading-[1.05] font-semibold text-balance",
+                headingClassName,
+              )}
+            >
+              {heading}
+            </h3>
+            {description ? (
+              <p className="mt-[1.8cqw] line-clamp-2 text-[3.15cqw] leading-[1.25]">
+                {description}
+              </p>
+            ) : null}
+          </div>
+        </div>
+        <div
+          aria-label={`Mã QR mở ${heading}`}
+          className="size-[27cqw] self-end overflow-hidden rounded-[1.6cqw] bg-white p-[2.7cqw] [&_svg]:size-full"
+          dangerouslySetInnerHTML={{ __html: svg }}
+          role="img"
+        />
+      </div>
     </section>
   );
 }
@@ -60,7 +95,7 @@ function QrCardMatrixMotif() {
   return (
     <svg
       aria-hidden="true"
-      className="pointer-events-none absolute top-6 right-6 size-24 text-gold/45"
+      className="pointer-events-none absolute top-[5cqw] right-[5cqw] size-[24cqw] text-gold/45"
       fill="currentColor"
       viewBox="0 0 96 96"
     >

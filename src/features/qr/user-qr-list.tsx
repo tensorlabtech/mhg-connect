@@ -7,6 +7,7 @@ import { runtimeEnv } from "@/lib/runtime-env";
 
 type QrItem = {
   activatedAt: Date | null;
+  cardBackgroundUrl: string | null;
   id: string;
   profileCompany: string | null;
   profileId: string | null;
@@ -71,7 +72,12 @@ function QrOwnershipCard({
 
   return (
     <article className="grid gap-3 rounded-surface bg-card p-3 lg:grid-cols-2">
-      <QrVisualCard description={role} heading={profileName} svg={item.svg} />
+      <QrVisualCard
+        backgroundUrl={item.cardBackgroundUrl}
+        description={role}
+        heading={profileName}
+        svg={item.svg}
+      />
 
       <section className="flex min-h-64 flex-col p-6">
         <div className="flex items-start justify-between gap-4">
@@ -101,11 +107,20 @@ function QrOwnershipCard({
         </dl>
         <QrCardActions
           activatedAt={item.activatedAt}
+          backgroundUrl={
+            item.cardBackgroundUrl
+              ? `/api/qr-card-background/${item.id}?v=${item.version}`
+              : null
+          }
+          description={role || "Quét để mở hồ sơ"}
+          heading={profileName}
           profileId={item.profileId}
           profiles={profiles}
           publicToken={item.publicToken}
           qrId={item.id}
           scanCount={item.scanCount}
+          status={item.status}
+          svg={item.svg}
           version={item.version}
         />
       </section>

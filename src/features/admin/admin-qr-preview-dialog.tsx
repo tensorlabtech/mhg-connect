@@ -18,6 +18,7 @@ import {
 import { QrVisualCard } from "@/features/qr/qr-visual-card";
 
 export function AdminQrPreviewDialog({
+  backgroundUrl,
   className,
   defaultOpen = false,
   id,
@@ -25,6 +26,7 @@ export function AdminQrPreviewDialog({
   status,
   svg,
 }: {
+  backgroundUrl?: string | null;
   className?: string;
   defaultOpen?: boolean;
   id: string;
@@ -63,7 +65,7 @@ export function AdminQrPreviewDialog({
           </DialogDescription>
         </DialogHeader>
         <QrVisualCard
-          className="min-h-56 p-5"
+          backgroundUrl={backgroundUrl}
           description="Quét để mở mã"
           heading={publicToken}
           headingClassName="text-nowrap"

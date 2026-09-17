@@ -75,6 +75,7 @@ export default async function AdminQrDetailPage({
                 </div>
                 <div className="mt-6 grid gap-2">
                   <AdminQrPreviewDialog
+                    backgroundUrl={qr.cardBackgroundUrl}
                     className="w-full"
                     defaultOpen={created}
                     id={qr.id}

@@ -3,10 +3,12 @@
 import { and, eq, isNotNull, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { z } from "zod";
 
 import { db } from "@/db";
 import { adminActions, qrCodes } from "@/db/schema";
+import { deleteProfileMedia } from "@/lib/profile-media-storage";
 import { requireAdmin } from "@/lib/session";
 
 const createSchema = z.object({
@@ -72,6 +74,7 @@ export async function adminQrAction(formData: FormData) {
       ? {
           activeProfileId: null,
           activatedAt: null,
+          cardBackgroundUrl: null,
           ownerId: null,
           status: "available" as const,
           updatedAt: new Date(),
@@ -86,9 +89,21 @@ export async function adminQrAction(formData: FormData) {
           version: sql`${qrCodes.version} + 1`,
         };
 
-  let updated: { id: string; publicToken: string };
+  let updated: {
+    id: string;
+    previousBackgroundUrl: string | null;
+    publicToken: string;
+  };
   try {
     updated = await db.transaction(async (tx) => {
+      const [current] =
+        parsed.data.operation === "reset"
+          ? await tx
+              .select({ cardBackgroundUrl: qrCodes.cardBackgroundUrl })
+              .from(qrCodes)
+              .where(eq(qrCodes.id, parsed.data.id))
+              .limit(1)
+          : [{ cardBackgroundUrl: null }];
       const expectedStatus =
         parsed.data.operation === "lock"
           ? "active"
@@ -112,14 +127,20 @@ export async function adminQrAction(formData: FormData) {
                 isNotNull(qrCodes.ownerId),
               ),
         )
-        .returning({ id: qrCodes.id, publicToken: qrCodes.publicToken });
+        .returning({
+          id: qrCodes.id,
+          publicToken: qrCodes.publicToken,
+        });
       if (!changed) throw new InvalidQrTransitionError();
       await tx.insert(adminActions).values({
         adminId: session.user.id,
         qrCodeId: changed.id,
         action: parsed.data.operation,
       });
-      return changed;
+      return {
+        ...changed,
+        previousBackgroundUrl: current?.cardBackgroundUrl ?? null,
+      };
     });
   } catch (error) {
     if (error instanceof InvalidQrTransitionError) {
@@ -131,5 +152,12 @@ export async function adminQrAction(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath(`/admin/qr/${updated.id}`);
   revalidatePath(`/q/${updated.publicToken}`);
+  if (parsed.data.operation === "reset" && updated.previousBackgroundUrl) {
+    after(() =>
+      deleteProfileMedia(updated.previousBackgroundUrl!).catch((error) =>
+        console.error("QR card background cleanup failed", error),
+      ),
+    );
+  }
   redirect(`/admin/qr/${updated.id}?updated=${parsed.data.operation}`);
 }

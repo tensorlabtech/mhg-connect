@@ -10,6 +10,8 @@ Luồng nền tảng đã được kiểm tra end-to-end với PostgreSQL thật
 
 Trình dựng hồ sơ dùng sidebar full-height bên trái, gộp `Các Block` và `Cài đặt hồ sơ` thành một luồng cuộn: kéo-thả cấu trúc block, chỉnh chi tiết, hoàn tác, đặt tên nội bộ, chọn một trong năm style pack bằng thumbnail và lưu thủ công. Thư viện nền tách riêng thành modal gồm hiệu ứng CSS, màu, ảnh có sẵn và upload ảnh nền. Canvas bên phải dùng cùng renderer với Profile View, chỉ bổ sung khả năng chọn block; block có thể ẩn bằng nút con mắt, còn field trống tự ẩn. Khi có thay đổi chưa lưu, rời Builder sẽ cần xác nhận.
 
+Thẻ QR là tài sản riêng của từng mã, tách khỏi giao diện hồ sơ. Card dùng tỉ lệ vật lý cố định và toàn bộ nội dung co giãn đồng bộ theo kích thước hiển thị. Chủ sở hữu xem, tải xuống và đổi ảnh nền thẻ ngay trong modal tại dashboard; thiết kế này được dùng thống nhất ở dashboard, modal xem QR của admin và bản in. Reset mã sẽ trả thẻ về nền mặc định trước khi chuyển cho chủ sở hữu mới.
+
 Build, typecheck, unit test, migration/seed lặp lại và browser E2E local đã pass. Deployment Vercel, resource Neon/Blob production, QR trỏ production và rehearsal trên thiết bị vật lý chưa được thực hiện vì dự án chưa được nối credentials, resources và domain production. Bằng chứng chi tiết nằm tại [full product test report](./plans/260910-1521-mhg-connect-product-foundation/reports/full-product-test.md).
 
 ## Chạy local
@@ -53,7 +55,6 @@ Không trỏ command này vào database production.
 | `/q/[token]`           | Public         | Resolve QR, kích hoạt hoặc hiển thị hồ sơ        |
 | `/login`, `/register`  | Public         | Auth tab email/password, giữ context QR          |
 | `/dashboard`           | User           | Quản lý nhiều QR và nhiều hồ sơ                  |
-| `/dashboard/qr/[id]`   | Owner          | Xem và gắn/đổi hồ sơ công khai cho mã QR         |
 | `/profiles/new`        | User           | Tạo hồ sơ bằng sidebar Builder và nối QR khi lưu |
 | `/profiles/[id]/edit`  | Owner          | Chỉnh và lưu hồ sơ bằng sidebar Builder          |
 | `/admin`               | Admin          | Tạo thủ công, tìm/lọc và theo dõi QR             |
