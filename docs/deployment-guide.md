@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-Production hiện chạy tại [mhg-connect.vercel.app](https://mhg-connect.vercel.app) trong Vercel account `lethai2597` (scope `le-thais-projects`). Project đã nối Neon Free và Vercel Blob tại Singapore (`sin1`), chạy đủ migration, seed admin/QR demo và smoke test server-side ngày 13/09/2026.
+Production hiện chạy tại [mhg-connect.vercel.app](https://mhg-connect.vercel.app) trong Vercel account `lethai2597` (scope `le-thais-projects`). Project đã nối Neon Free tại Singapore (`sin1`), chạy đủ migration, seed admin/QR demo và smoke test server-side ngày 13/09/2026. Media hồ sơ dùng Backblaze B2 qua S3-compatible API; Vercel Blob chỉ còn là fallback cho môi trường cũ.
 
 Source được lưu tại repository private `tensorlabtech/mhg-connect`. Hobby plan không hỗ trợ nối tự động private repository thuộc organization, vì vậy production hiện deploy bằng Vercel CLI từ checkout đã xác thực thay vì auto-deploy theo GitHub push.
 
@@ -12,7 +12,7 @@ Smoke test đã xác nhận landing/login, ba QR demo, vCard, admin authenticati
 
 1. Một Vercel project trỏ tới root repository này.
 2. Một PostgreSQL database production, dự kiến Neon qua Vercel Marketplace.
-3. Một Vercel Blob store.
+3. Một bucket Backblaze B2 public-read và application key read/write giới hạn đúng bucket đó.
 4. Domain ổn định, có thể dùng domain `*.vercel.app` của project.
 5. Admin credential được chuyển qua kênh riêng, không ghi vào repo/tài liệu/screenshot.
 
@@ -27,7 +27,11 @@ Executable owner là template environment tại root và [`scripts/validate-depl
 | `DATABASE_URL`                                | Runtime, migration, seed | PostgreSQL connection string                                             |
 | `BETTER_AUTH_SECRET`                          | Runtime                  | Secret server-only, tối thiểu 32 ký tự                                   |
 | `BETTER_AUTH_URL`                             | Runtime                  | URL HTTPS chính xác; đồng thời là base URL cho canonical/social metadata |
-| `BLOB_READ_WRITE_TOKEN`                       | Runtime                  | Token server-only cho avatar upload                                      |
+| `B2_S3_ENDPOINT`, `B2_REGION`                 | Runtime                  | Endpoint HTTPS và region S3-compatible của bucket B2                     |
+| `B2_BUCKET_NAME`                              | Runtime                  | Bucket public-read chứa avatar, cover và background hồ sơ                |
+| `B2_KEY_ID`, `B2_APPLICATION_KEY`             | Runtime                  | Credential server-only, giới hạn read/write đúng bucket                  |
+| `B2_PUBLIC_URL_BASE`                          | Runtime tùy chọn         | Public base URL nếu không dùng dạng `https://<bucket>.<endpoint>`        |
+| `BLOB_READ_WRITE_TOKEN`                       | Runtime tùy chọn         | Fallback xóa/đọc media cũ trên Vercel Blob                               |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` | Seed                     | Admin cố định; name có default                                           |
 | `DEMO_USER_EMAIL`, `DEMO_USER_PASSWORD`       | Seed tùy chọn            | Phải có đủ cả cặp và khác admin email                                    |
 | `APP_URL`                                     | Sinh QR                  | Base URL ổn định, không dùng localhost/preview cho QR phát hành          |
@@ -43,7 +47,7 @@ npm run env:check
 ## Trình tự release
 
 1. Tạo/link Vercel project và chọn root directory hiện tại.
-2. Provision database và Blob; gán resource/variables đúng Production. Nếu dùng Preview, tạo mapping tách biệt.
+2. Provision database và bucket B2; gán variables đúng Production. Nếu dùng Preview, tạo bucket/key tách biệt.
 3. Đặt `BETTER_AUTH_URL` bằng domain HTTPS ổn định của project và tạo `BETTER_AUTH_SECRET` riêng cho môi trường.
 4. Trong một shell an toàn đã nạp production variables, chạy migration trước khi app nhận traffic:
 
@@ -82,7 +86,7 @@ Migration và seed không chạy tự động trong build để tránh mutation 
 - `/q/DEMO-LOCKED` hiện trạng thái khóa.
 - User không xem/sửa dữ liệu account khác; non-admin không vào được `/admin`.
 - Admin lock → public locked; unlock → profile trở lại; reset → available và profile vẫn còn.
-- Avatar upload thật qua Blob hoạt động.
+- Avatar và cover upload thật qua B2 hoạt động; URL public tải được khi không đăng nhập.
 - Không có horizontal overflow ở 375 px; admin dùng được ở 1280 px.
 - `_dev` và PDF nội bộ đúng access policy.
 - Test ít nhất Safari/iPhone và Chrome/Android nếu có thiết bị.

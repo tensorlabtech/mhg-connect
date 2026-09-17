@@ -9,7 +9,11 @@ if (!shouldValidate) {
     "DATABASE_URL",
     "BETTER_AUTH_SECRET",
     "BETTER_AUTH_URL",
-    "BLOB_READ_WRITE_TOKEN",
+    "B2_S3_ENDPOINT",
+    "B2_REGION",
+    "B2_BUCKET_NAME",
+    "B2_KEY_ID",
+    "B2_APPLICATION_KEY",
   ];
   const missing = required.filter((name) => !runtime[name]);
   if (missing.length) {
@@ -22,6 +26,13 @@ if (!shouldValidate) {
   const authUrl = new URL(runtime["BETTER_AUTH_URL"]!);
   if (authUrl.protocol !== "https:") {
     throw new Error("BETTER_AUTH_URL must use HTTPS for deployment.");
+  }
+  const b2Endpoint = new URL(runtime["B2_S3_ENDPOINT"]!);
+  if (
+    b2Endpoint.protocol !== "https:" ||
+    !b2Endpoint.hostname.endsWith(".backblazeb2.com")
+  ) {
+    throw new Error("B2_S3_ENDPOINT must be a Backblaze HTTPS S3 endpoint.");
   }
   console.info("Deployment environment is complete.");
 }

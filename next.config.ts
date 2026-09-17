@@ -1,6 +1,25 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname:
+          "tensorlabtech-mhg-connect-media.s3.us-east-005.backblazeb2.com",
+        port: "",
+        pathname: "/**",
+        search: "",
+      },
+      {
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+        port: "",
+        pathname: "/**",
+        search: "",
+      },
+    ],
+  },
   outputFileTracingIncludes: {
     "/api/internal/quotation-pdf": [
       "./private-assets/mhg-connect-outsource-quotation.pdf",

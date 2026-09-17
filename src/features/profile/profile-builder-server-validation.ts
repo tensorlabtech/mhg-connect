@@ -50,17 +50,26 @@ export function validatePublishDocument(
 export function validateDocumentMedia(
   document: ProfileDocument,
   previousAvatarUrl: string | null,
+  previousCoverUrl: string | null = null,
   previousBackgroundUrl: string | null = null,
+  hasAvatarUpload = false,
+  hasCoverUpload = false,
   hasBackgroundUpload = false,
 ) {
   const identity = getProfileBlock(document, "identity");
   const avatarAllowed =
     !identity.data.avatarUrl ||
     identity.data.avatarUrl === previousAvatarUrl ||
-    allowedAvatarPresetUrls.has(identity.data.avatarUrl);
+    allowedAvatarPresetUrls.has(identity.data.avatarUrl) ||
+    hasAvatarUpload;
   const coverUrl = identity.data.coverUrl || defaultCoverUrl;
   if (!avatarAllowed) return "Ảnh đại diện không hợp lệ.";
-  if (!allowedCoverPresetUrls.has(coverUrl)) return "Ảnh bìa không hợp lệ.";
+  if (
+    !allowedCoverPresetUrls.has(coverUrl) &&
+    coverUrl !== previousCoverUrl &&
+    !hasCoverUpload
+  )
+    return "Ảnh bìa không hợp lệ.";
   const background = document.theme.background;
   const isBundledBackground =
     background.type === "image" &&
@@ -79,6 +88,7 @@ export function validateDocumentMedia(
 export function replaceDocumentMedia(
   document: ProfileDocument,
   avatarUrl: string | null,
+  coverUrl?: string,
   backgroundUrl?: string,
 ) {
   const blocks = document.blocks.map((block) =>
@@ -88,7 +98,7 @@ export function replaceDocumentMedia(
           data: {
             ...block.data,
             avatarUrl,
-            coverUrl: block.data.coverUrl || defaultCoverUrl,
+            coverUrl: coverUrl || block.data.coverUrl || defaultCoverUrl,
           },
         }
       : block,

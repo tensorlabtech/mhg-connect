@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, SlidersHorizontal } from "lucide-react";
+import { ArrowLeft, LoaderCircle, SlidersHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   useCallback,
@@ -172,8 +172,9 @@ function ProfileBuilderEditor({
     );
   }
 
-  async function handleSave() {
+  async function handleSave({ exitAfterSave = false } = {}) {
     if (saving) return false;
+    let navigating = false;
     setSaving(true);
     setSaveError(null);
     setSaveErrorField(null);
@@ -194,6 +195,13 @@ function ProfileBuilderEditor({
         return false;
       }
       const saved = normalizeProfileDocumentVisibility(result.document);
+      const shouldReturnToDashboard = exitAfterSave || !profileId;
+      if (shouldReturnToDashboard) {
+        setExitDialogOpen(false);
+        router.replace("/dashboard");
+        navigating = true;
+        return true;
+      }
       if (!documentsEqual(saved, editorDocument)) history.update(saved);
       setSavedDocument(saved);
       setSavedLabel(profileLabel);
@@ -202,7 +210,15 @@ function ProfileBuilderEditor({
       const backgroundInput = formRef.current?.querySelector<HTMLInputElement>(
         'input[name="background"]',
       );
+      const avatarInput = formRef.current?.querySelector<HTMLInputElement>(
+        'input[name="avatar"]',
+      );
+      const coverInput = formRef.current?.querySelector<HTMLInputElement>(
+        'input[name="cover"]',
+      );
       if (backgroundInput) backgroundInput.value = "";
+      if (avatarInput) avatarInput.value = "";
+      if (coverInput) coverInput.value = "";
       window.history.replaceState(
         window.history.state,
         "",
@@ -213,7 +229,7 @@ function ProfileBuilderEditor({
       setSaveError("Không thể lưu hồ sơ lúc này. Vui lòng thử lại.");
       return false;
     } finally {
-      setSaving(false);
+      if (!navigating) setSaving(false);
     }
   }
 
@@ -226,7 +242,7 @@ function ProfileBuilderEditor({
     router.push("/dashboard");
   }
   async function saveAndExit() {
-    if (await handleSave()) router.push("/dashboard");
+    await handleSave({ exitAfterSave: true });
   }
   function handleSelect(next: BuilderSelection) {
     setSelection(next);
@@ -289,7 +305,10 @@ function ProfileBuilderEditor({
               onClick={() => void saveAndExit()}
               type="button"
             >
-              Lưu và rời
+              {saving ? (
+                <LoaderCircle aria-hidden="true" className="animate-spin" />
+              ) : null}
+              {saving ? "Đang lưu…" : "Lưu và rời"}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

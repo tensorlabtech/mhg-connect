@@ -80,4 +80,21 @@ describe("profile builder server validation", () => {
 
     expect(validateDocumentMedia(document, null)).toBeNull();
   });
+
+  test("accepts custom avatar and cover only when matching upload files exist", () => {
+    const document = createValidDocument();
+    const identity = document.blocks.find((block) => block.type === "identity");
+    if (!identity || identity.type !== "identity") {
+      throw new Error("Invalid fixture");
+    }
+    identity.data.avatarUrl = "blob:avatar-preview";
+    identity.data.coverUrl = "blob:cover-preview";
+
+    expect(validateDocumentMedia(document, null, null)).toBe(
+      "Ảnh đại diện không hợp lệ.",
+    );
+    expect(
+      validateDocumentMedia(document, null, null, null, true, true),
+    ).toBeNull();
+  });
 });

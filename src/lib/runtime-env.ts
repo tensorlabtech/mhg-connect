@@ -12,6 +12,12 @@ export const runtimeEnv = {
     runtime["BETTER_AUTH_URL"] ??
     (isProductionBuild ? "http://localhost:3000" : undefined),
   blobToken: runtime["BLOB_READ_WRITE_TOKEN"],
+  b2ApplicationKey: runtime["B2_APPLICATION_KEY"],
+  b2BucketName: runtime["B2_BUCKET_NAME"],
+  b2KeyId: runtime["B2_KEY_ID"],
+  b2PublicUrlBase: runtime["B2_PUBLIC_URL_BASE"],
+  b2Region: runtime["B2_REGION"],
+  b2S3Endpoint: runtime["B2_S3_ENDPOINT"],
   adminEmail: runtime["ADMIN_EMAIL"],
   adminPassword: runtime["ADMIN_PASSWORD"],
   adminName: runtime["ADMIN_NAME"],

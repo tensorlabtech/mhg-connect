@@ -1,8 +1,8 @@
 "use server";
 
-import { del, put } from "@vercel/blob";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 
 import { db } from "@/db";
 import { profiles, qrCodes } from "@/db/schema";
@@ -16,32 +16,39 @@ import {
 import { profileDocumentToFlat } from "@/features/profile/profile-document";
 import { getProfileBlock } from "@/features/profile/profile-document";
 import { parseProfileDocument } from "@/features/profile/profile-document-schema";
-import { runtimeEnv } from "@/lib/runtime-env";
+import {
+  deleteProfileMedia,
+  type ProfileMediaKind,
+  uploadProfileMedia,
+} from "@/lib/profile-media-storage";
 import { requireSession } from "@/lib/session";
 
 class ExpectedBuilderError extends Error {}
 
 async function uploadProfileImage(
   file: FormDataEntryValue | null,
-  kind: "avatar" | "background",
+  kind: ProfileMediaKind,
 ) {
   if (!(file instanceof File) || file.size === 0) return null;
   const limit = kind === "avatar" ? 2 : 5;
-  const label = kind === "avatar" ? "Ảnh đại diện" : "Ảnh nền";
+  const label =
+    kind === "avatar"
+      ? "Ảnh đại diện"
+      : kind === "cover"
+        ? "Ảnh bìa"
+        : "Ảnh nền";
   if (file.size > limit * 1024 * 1024)
     throw new ExpectedBuilderError(`${label} phải nhỏ hơn ${limit} MB.`);
   if (!new Set(["image/jpeg", "image/png", "image/webp"]).has(file.type)) {
+    throw new ExpectedBuilderError(`${label} chỉ hỗ trợ JPG, PNG hoặc WebP.`);
+  }
+  try {
+    return await uploadProfileMedia(file, kind);
+  } catch (error) {
     throw new ExpectedBuilderError(
-      `${label} chỉ hỗ trợ JPG, PNG hoặc WebP.`,
+      error instanceof Error ? error.message : "Chưa thể tải ảnh.",
     );
   }
-  if (!runtimeEnv.blobToken)
-    throw new ExpectedBuilderError("Chưa cấu hình kho ảnh cho môi trường này.");
-  return put(`${kind === "avatar" ? "avatars" : "backgrounds"}/${file.name}`, file, {
-    access: "public",
-    addRandomSuffix: true,
-    token: runtimeEnv.blobToken,
-  });
 }
 
 async function findOwnedProfile(profileId: string, ownerId: string) {
@@ -89,35 +96,57 @@ export async function saveProfileAction(
     previousDocument?.theme.background.type === "image"
       ? previousDocument.theme.background.imageUrl
       : null;
+  const previousIdentity = previousDocument
+    ? getProfileBlock(previousDocument, "identity")
+    : null;
+  const avatarFile = formData.get("avatar");
+  const coverFile = formData.get("cover");
   const backgroundFile = formData.get("background");
+  const hasAvatarUpload = avatarFile instanceof File && avatarFile.size > 0;
+  const hasCoverUpload = coverFile instanceof File && coverFile.size > 0;
   const hasSelectedBackgroundFile =
     backgroundFile instanceof File && backgroundFile.size > 0;
   const wantsBackgroundImage =
     validation.document.theme.background.type === "image" &&
     hasSelectedBackgroundFile;
-  const hasBackgroundUpload =
-    wantsBackgroundImage;
+  const hasBackgroundUpload = wantsBackgroundImage;
   const mediaError = validateDocumentMedia(
     validation.document,
     previous?.avatarUrl ?? null,
+    previousIdentity?.data.coverUrl ?? null,
     previousBackground,
+    hasAvatarUpload,
+    hasCoverUpload,
     hasBackgroundUpload,
   );
   if (mediaError) return { error: mediaError, success: false };
 
   let uploadedAvatar: Awaited<ReturnType<typeof uploadProfileImage>> = null;
+  let uploadedCover: Awaited<ReturnType<typeof uploadProfileImage>> = null;
   let uploadedBackground: Awaited<ReturnType<typeof uploadProfileImage>> = null;
   try {
-    uploadedAvatar = await uploadProfileImage(formData.get("avatar"), "avatar");
-    uploadedBackground = wantsBackgroundImage
-      ? await uploadProfileImage(backgroundFile, "background")
-      : null;
+    const uploads = await Promise.allSettled([
+      uploadProfileImage(avatarFile, "avatar"),
+      uploadProfileImage(coverFile, "cover"),
+      wantsBackgroundImage
+        ? uploadProfileImage(backgroundFile, "background")
+        : null,
+    ]);
+    uploadedAvatar =
+      uploads[0].status === "fulfilled" ? uploads[0].value : null;
+    uploadedCover = uploads[1].status === "fulfilled" ? uploads[1].value : null;
+    uploadedBackground =
+      uploads[2].status === "fulfilled" ? uploads[2].value : null;
+    const failed = uploads.find((upload) => upload.status === "rejected");
+    if (failed?.status === "rejected") throw failed.reason;
   } catch (error) {
-    if (uploadedAvatar && runtimeEnv.blobToken) {
-      await del(uploadedAvatar.url, { token: runtimeEnv.blobToken }).catch(
-        () => undefined,
-      );
-    }
+    await Promise.all(
+      [uploadedAvatar, uploadedCover, uploadedBackground]
+        .filter(Boolean)
+        .map((uploaded) =>
+          deleteProfileMedia(uploaded!.url).catch(() => undefined),
+        ),
+    );
     return {
       error: error instanceof Error ? error.message : "Chưa thể tải ảnh.",
       success: false,
@@ -127,6 +156,7 @@ export async function saveProfileAction(
     validation.document,
     uploadedAvatar?.url ??
       getProfileBlock(validation.document, "identity").data.avatarUrl,
+    uploadedCover?.url,
     uploadedBackground?.url,
   );
   const flat = profileDocumentToFlat(document);
@@ -198,17 +228,13 @@ export async function saveProfileAction(
       return { id: savedProfileId, version };
     });
   } catch (error) {
-    if (runtimeEnv.blobToken) {
-      await Promise.all(
-        [uploadedAvatar, uploadedBackground]
-          .filter(Boolean)
-          .map((uploaded) =>
-            del(uploaded!.url, { token: runtimeEnv.blobToken }).catch(
-              () => undefined,
-            ),
-          ),
-      );
-    }
+    await Promise.all(
+      [uploadedAvatar, uploadedCover, uploadedBackground]
+        .filter(Boolean)
+        .map((uploaded) =>
+          deleteProfileMedia(uploaded!.url).catch(() => undefined),
+        ),
+    );
     if (error instanceof ExpectedBuilderError) {
       return {
         conflict: error.message === "VERSION_CONFLICT",
@@ -223,52 +249,48 @@ export async function saveProfileAction(
     return { error: "Chưa thể lưu hồ sơ.", success: false };
   }
 
-  const publishedAvatarUrl = getProfileBlock(document, "identity").data
-    .avatarUrl;
-  if (
-    previous?.avatarUrl &&
-    previous.avatarUrl !== publishedAvatarUrl &&
-    previous.avatarUrl.startsWith("https://") &&
-    runtimeEnv.blobToken
-  ) {
-    await del(previous.avatarUrl, { token: runtimeEnv.blobToken }).catch(
-      () => undefined,
-    );
-  }
+  const publishedIdentity = getProfileBlock(document, "identity").data;
   const savedBackground =
     document.theme.background.type === "image"
       ? document.theme.background.imageUrl
       : null;
-  if (
-    previousBackground &&
-    previousBackground !== savedBackground &&
-    previousBackground.startsWith("https://") &&
-    runtimeEnv.blobToken
-  ) {
-    await del(previousBackground, { token: runtimeEnv.blobToken }).catch(
-      () => undefined,
+  revalidatePath("/dashboard");
+  revalidatePath(`/profiles/${saved.id}/edit`);
+  after(async () => {
+    const replacedUrls = [
+      previous?.avatarUrl && previous.avatarUrl !== publishedIdentity.avatarUrl
+        ? previous.avatarUrl
+        : null,
+      previousIdentity?.data.coverUrl &&
+      previousIdentity.data.coverUrl !== publishedIdentity.coverUrl
+        ? previousIdentity.data.coverUrl
+        : null,
+      previousBackground && previousBackground !== savedBackground
+        ? previousBackground
+        : null,
+    ].filter((url): url is string => Boolean(url?.startsWith("https://")));
+    await Promise.all(
+      replacedUrls.map((url) =>
+        deleteProfileMedia(url).catch((error) =>
+          console.error("Profile media cleanup failed", error),
+        ),
+      ),
     );
-  }
-
-  let linkedQr: Array<{ token: string }> = [];
-  try {
-    revalidatePath("/dashboard");
-    revalidatePath(`/profiles/${saved.id}/edit`);
-    linkedQr = await db
-      .select({ token: qrCodes.publicToken })
-      .from(qrCodes)
-      .where(eq(qrCodes.activeProfileId, saved.id));
-    linkedQr.forEach(({ token }) => revalidatePath(`/q/${token}`));
-  } catch (error) {
-    // Saving is already committed. Cache invalidation/query failures must
-    // not turn that success into a false failure or delete its uploaded media.
-    console.error("Profile save revalidation failed", error);
-  }
+    try {
+      const linkedQr = await db
+        .select({ token: qrCodes.publicToken })
+        .from(qrCodes)
+        .where(eq(qrCodes.activeProfileId, saved.id));
+      linkedQr.forEach(({ token }) => revalidatePath(`/q/${token}`));
+    } catch (error) {
+      console.error("Profile save revalidation failed", error);
+    }
+  });
 
   return {
     document,
     profileId: saved.id,
-    publicToken: qrToken || linkedQr[0]?.token,
+    publicToken: qrToken || undefined,
     success: true,
     version: saved.version,
   };
