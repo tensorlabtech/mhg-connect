@@ -20,6 +20,12 @@ Trừ file chat-up-to-date.md ra, Mọi file để được đánh tiền tố t
 
 ## UI/UX và design system
 
+## Git và triển khai
+
+- Repository đã được kết nối với Git remote và Vercel. Không tự động commit, push, tạo pull request hoặc deploy chỉ vì đã hoàn tất thay đổi local.
+- Chỉ thực hiện từng hành động `commit`, `push` hoặc `deploy` khi người dùng yêu cầu rõ ràng hành động đó trong cuộc trao đổi hiện tại. Việc cho phép một hành động không mặc nhiên cho phép các hành động còn lại.
+- Trước khi push hoặc deploy, báo cáo rõ trạng thái kiểm thử và phạm vi thay đổi sẽ được đưa lên; không đưa secret hoặc file môi trường vào Git.
+
 ### Nguồn chuẩn trong dự án
 
 - Catalogue component: `/_dev/design-system`.
