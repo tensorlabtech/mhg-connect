@@ -22,6 +22,9 @@ export function AdminQrPreviewDialog({
   className,
   defaultOpen = false,
   id,
+  location,
+  profileDescription,
+  profileName,
   publicToken,
   status,
   svg,
@@ -30,6 +33,9 @@ export function AdminQrPreviewDialog({
   className?: string;
   defaultOpen?: boolean;
   id: string;
+  location?: string | null;
+  profileDescription?: string;
+  profileName?: string | null;
   publicToken: string;
   status: string;
   svg: string;
@@ -56,7 +62,7 @@ export function AdminQrPreviewDialog({
           <QrCode /> Xem mã QR
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Mã QR {publicToken}</DialogTitle>
           <DialogDescription>
@@ -64,37 +70,44 @@ export function AdminQrPreviewDialog({
             nhận quyền quản lý.
           </DialogDescription>
         </DialogHeader>
-        <QrVisualCard
-          backgroundUrl={backgroundUrl}
-          description="Quét để mở mã"
-          heading={publicToken}
-          headingClassName="text-nowrap"
-          svg={svg}
-        />
-        <dl className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <dt className="text-xs text-muted-foreground">Token</dt>
-            <dd className="mt-1 font-medium text-gold">{publicToken}</dd>
+        <div className="grid gap-6 sm:grid-cols-[16rem_minmax(0,1fr)] sm:items-stretch">
+          <QrVisualCard
+            backgroundUrl={backgroundUrl}
+            description={profileDescription || "Quét để mở mã"}
+            heading={profileName || publicToken}
+            headingClassName={profileName ? undefined : "text-nowrap"}
+            location={location}
+            svg={svg}
+          />
+          <div className="flex min-w-0 flex-col">
+            <dl className="grid gap-6 text-sm sm:grid-cols-2">
+              <div>
+                <dt className="text-xs text-muted-foreground">Token</dt>
+                <dd className="mt-2 break-words font-medium text-gold">
+                  {publicToken}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted-foreground">Trạng thái</dt>
+                <dd className="mt-2">
+                  <StatusBadge status={status} />
+                </dd>
+              </div>
+            </dl>
+            <DialogFooter className="mt-auto grid grid-cols-2 gap-2 pt-8 sm:grid sm:grid-cols-2">
+              <Button asChild variant="outline">
+                <Link href={`/q/${publicToken}`} target="_blank">
+                  Mở trang mã <ArrowUpRight />
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link href={`/admin/qr/${id}/print`} target="_blank">
+                  <Printer /> Bản in
+                </Link>
+              </Button>
+            </DialogFooter>
           </div>
-          <div>
-            <dt className="text-xs text-muted-foreground">Trạng thái</dt>
-            <dd className="mt-1">
-              <StatusBadge status={status} />
-            </dd>
-          </div>
-        </dl>
-        <DialogFooter showCloseButton>
-          <Button asChild variant="outline">
-            <Link href={`/q/${publicToken}`} target="_blank">
-              Mở trang mã <ArrowUpRight />
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link href={`/admin/qr/${id}/print`} target="_blank">
-              <Printer /> Bản in
-            </Link>
-          </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -19,6 +19,9 @@ export default async function AdminQrPrintPage({
   const qr = await getAdminQrDetail(id);
   if (!qr) notFound();
   const svg = await createPublicQrSvg(qr.publicToken);
+  const description = [qr.profileTitle, qr.profileCompany]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <ProductPage className="print:max-w-none print:p-0" width="narrow">
@@ -28,13 +31,14 @@ export default async function AdminQrPrintPage({
         </Button>
         <AdminQrPrintButton />
       </div>
-      <main className="mx-auto max-w-lg [print-color-adjust:exact]">
+      <main className="mx-auto max-w-[20rem] [print-color-adjust:exact]">
         <QrVisualCard
           backgroundUrl={qr.cardBackgroundUrl}
-          className="print:w-[85.6mm]"
-          description="Quét để mở hồ sơ"
-          heading={qr.publicToken}
-          headingClassName="text-nowrap"
+          className="print:w-[53.98mm]"
+          description={description || "Quét để mở hồ sơ"}
+          heading={qr.profileName || qr.publicToken}
+          headingClassName={qr.profileName ? undefined : "text-nowrap"}
+          location={qr.profileLocation}
           svg={svg}
         />
       </main>

@@ -11,6 +11,7 @@ type QrItem = {
   id: string;
   profileCompany: string | null;
   profileId: string | null;
+  profileLocation: string | null;
   profileName: string | null;
   profileTitle: string | null;
   publicToken: string;
@@ -71,15 +72,16 @@ function QrOwnershipCard({
     .join(" · ");
 
   return (
-    <article className="grid gap-3 rounded-surface bg-card p-3 lg:grid-cols-2">
+    <article className="grid gap-4 rounded-surface bg-card p-4 lg:grid-cols-[17rem_minmax(0,1fr)]">
       <QrVisualCard
         backgroundUrl={item.cardBackgroundUrl}
         description={role}
         heading={profileName}
+        location={item.profileLocation}
         svg={item.svg}
       />
 
-      <section className="flex min-h-64 flex-col p-6">
+      <section className="flex min-h-80 flex-col p-6 sm:p-8">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xl font-semibold tracking-[-0.02em] text-gold">
@@ -114,6 +116,7 @@ function QrOwnershipCard({
           }
           description={role || "Quét để mở hồ sơ"}
           heading={profileName}
+          location={item.profileLocation}
           profileId={item.profileId}
           profiles={profiles}
           publicToken={item.publicToken}

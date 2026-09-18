@@ -79,6 +79,11 @@ export default async function AdminQrDetailPage({
                     className="w-full"
                     defaultOpen={created}
                     id={qr.id}
+                    location={qr.profileLocation}
+                    profileDescription={[qr.profileTitle, qr.profileCompany]
+                      .filter(Boolean)
+                      .join(" · ")}
+                    profileName={qr.profileName}
                     publicToken={qr.publicToken}
                     status={qr.status}
                     svg={svg}

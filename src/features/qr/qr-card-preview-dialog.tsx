@@ -30,6 +30,7 @@ export function QrCardPreviewDialog({
   backgroundUrl,
   description,
   heading,
+  location,
   onOpenChange,
   open,
   publicToken,
@@ -41,6 +42,7 @@ export function QrCardPreviewDialog({
   backgroundUrl: string | null;
   description: string;
   heading: string;
+  location: string | null;
   onOpenChange: (open: boolean) => void;
   open: boolean;
   publicToken: string;
@@ -76,53 +78,51 @@ export function QrCardPreviewDialog({
     <>
       <Dialog onOpenChange={handleOpenChange} open={open}>
         <DialogContent className="sm:max-w-5xl" showCloseButton={!isSaving}>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 pr-10">
-            <QrCode aria-hidden="true" className="size-5" />
-            Mã QR {publicToken}
-          </DialogTitle>
-          <DialogDescription>
-            Xem, tải xuống hoặc đổi ảnh nền của thẻ trước khi gửi cho người
-            nhận quét.
-          </DialogDescription>
-        </DialogHeader>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 pr-10">
+              <QrCode aria-hidden="true" className="size-5" />
+              Mã QR {publicToken}
+            </DialogTitle>
+            <DialogDescription>
+              Xem, tải xuống hoặc đổi ảnh nền của thẻ trước khi gửi cho người
+              nhận quét.
+            </DialogDescription>
+          </DialogHeader>
 
-        <QrCardBackgroundEditor
-          backgroundUrl={backgroundUrl}
-          description={description}
-          downloadName={publicToken}
-          heading={heading}
-          onPendingChange={setIsSaving}
-          onUnsavedChange={setHasUnsavedChanges}
-          qrId={qrId}
-          svg={svg}
-          version={version}
-        />
+          <QrCardBackgroundEditor
+            backgroundUrl={backgroundUrl}
+            description={description}
+            downloadName={publicToken}
+            heading={heading}
+            location={location}
+            onPendingChange={setIsSaving}
+            onUnsavedChange={setHasUnsavedChanges}
+            qrId={qrId}
+            svg={svg}
+            version={version}
+          />
 
-        <DialogFooter className="items-center sm:justify-between">
-          <StatusBadge status={status} />
-          <div className="flex flex-col-reverse gap-3 sm:flex-row">
-            <Button asChild variant="outline">
-              <Link href={`/q/${publicToken}`} target="_blank">
-                Mở trang mã <ArrowUpRight />
-              </Link>
-            </Button>
-            <Button
-              disabled={isSaving}
-              onClick={() => handleOpenChange(false)}
-              type="button"
-            >
-              {isSaving ? "Đang lưu ảnh…" : "Xong"}
-            </Button>
-          </div>
-        </DialogFooter>
+          <DialogFooter className="items-center sm:justify-between">
+            <StatusBadge status={status} />
+            <div className="flex flex-col-reverse gap-3 sm:flex-row">
+              <Button asChild variant="outline">
+                <Link href={`/q/${publicToken}`} target="_blank">
+                  Mở trang mã <ArrowUpRight />
+                </Link>
+              </Button>
+              <Button
+                disabled={isSaving}
+                onClick={() => handleOpenChange(false)}
+                type="button"
+              >
+                {isSaving ? "Đang lưu ảnh…" : "Xong"}
+              </Button>
+            </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <AlertDialog
-        onOpenChange={setDiscardDialogOpen}
-        open={discardDialogOpen}
-      >
+      <AlertDialog onOpenChange={setDiscardDialogOpen} open={discardDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Ảnh nền chưa được lưu</AlertDialogTitle>

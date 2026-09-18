@@ -65,6 +65,7 @@ export async function getOwnedQr(ownerId: string) {
       profileName: profiles.name,
       profileTitle: profiles.title,
       profileCompany: profiles.company,
+      profileLocation: profiles.location,
       profileStatus: profiles.status,
       version: qrCodes.version,
       scanCount: count(scanEvents.id),
@@ -89,6 +90,7 @@ export async function getOwnedQrById(ownerId: string, id: string) {
       profileName: profiles.name,
       profileTitle: profiles.title,
       profileCompany: profiles.company,
+      profileLocation: profiles.location,
       version: qrCodes.version,
       scanCount: count(scanEvents.id),
     })

@@ -25,6 +25,7 @@ export function QrCardBackgroundEditor({
   description,
   downloadName,
   heading,
+  location,
   onPendingChange,
   onUnsavedChange,
   qrId,
@@ -35,6 +36,7 @@ export function QrCardBackgroundEditor({
   description?: string;
   downloadName: string;
   heading: string;
+  location: string | null;
   onPendingChange?: (pending: boolean) => void;
   onUnsavedChange?: (unsaved: boolean) => void;
   qrId: string;
@@ -169,19 +171,20 @@ export function QrCardBackgroundEditor({
   const error = clientError ?? (!state.success ? state.error : undefined);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(15rem,0.7fr)] lg:items-start">
-      <div ref={cardRef}>
+    <div className="grid gap-8 lg:grid-cols-[18rem_minmax(15rem,1fr)] lg:items-start">
+      <div className="w-full" ref={cardRef}>
         <QrVisualCard
           backgroundUrl={activeBackground}
           description={description}
           heading={heading}
+          location={location}
           svg={svg}
         />
       </div>
 
       <form
         action={action}
-        className="grid min-w-0 gap-5 overflow-hidden"
+        className="grid min-w-0 gap-5 self-start"
         ref={formRef}
       >
         <input name="expectedVersion" type="hidden" value={currentVersion} />
@@ -195,16 +198,15 @@ export function QrCardBackgroundEditor({
           ref={inputRef}
           type="file"
         />
-        <div className="max-w-sm">
+        <div className="max-w-md">
           <h3 className="text-sm font-medium">Ảnh nền thẻ</h3>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Ảnh ngang dùng khi chia sẻ hoặc in. Hệ thống tự phủ lớp tương phản
-            để mã luôn dễ quét.
+            Ảnh phủ toàn bộ thẻ. Ảnh ngang sẽ được cắt theo trung tâm để phù hợp
+            tỷ lệ badge.
           </p>
         </div>
-        <div className="grid min-w-0 gap-2">
+        <div className="grid min-w-0 gap-2 sm:grid-cols-2">
           <Button
-            className="w-full"
             disabled={isSaving}
             onClick={() => inputRef.current?.click()}
             type="button"
@@ -221,7 +223,6 @@ export function QrCardBackgroundEditor({
                 : "Tải ảnh nền"}
           </Button>
           <Button
-            className="w-full"
             disabled={isDownloading || isSaving}
             onClick={handleDownload}
             type="button"
@@ -235,7 +236,7 @@ export function QrCardBackgroundEditor({
             {isDownloading ? "Đang tạo ảnh…" : "Tải ảnh thẻ"}
           </Button>
         </div>
-        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-4">
           <p className="min-w-0 flex-1 text-xs leading-5 text-muted-foreground">
             {isSaving && savingIntent === "save"
               ? "Ảnh đang được lưu tự động."

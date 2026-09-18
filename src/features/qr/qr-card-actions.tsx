@@ -43,6 +43,7 @@ export function QrCardActions({
   backgroundUrl,
   description,
   heading,
+  location,
   profileId,
   profiles,
   publicToken,
@@ -56,6 +57,7 @@ export function QrCardActions({
   backgroundUrl: string | null;
   description: string;
   heading: string;
+  location: string | null;
   profileId: string | null;
   profiles: AssignmentProfile[];
   publicToken: string;
@@ -70,83 +72,89 @@ export function QrCardActions({
   const [statisticsOpen, setStatisticsOpen] = useState(false);
 
   return (
-    <div className="mt-auto grid grid-cols-2 gap-2 pt-8">
-      <Button asChild className="w-full">
-        <Link
-          href={
-            profileId
-              ? `/profiles/${profileId}/edit`
-              : `/profiles/new?qr=${encodeURIComponent(publicToken)}`
-          }
-        >
-          {profileId ? <PencilLine /> : <Plus />}
-          {profileId ? "Cập nhật hồ sơ" : "Tạo hồ sơ"}
-        </Link>
-      </Button>
-      <QrProfileAssignment
-        currentProfileId={profileId}
-        hideTrigger
-        onOpenChange={setAssignmentOpen}
-        open={assignmentOpen}
-        profiles={profiles}
-        qrId={qrId}
-        qrToken={publicToken}
-        version={version}
-      />
-      <QrStatisticsDialog
-        activatedAt={activatedAt}
-        hideTrigger
-        onOpenChange={setStatisticsOpen}
-        open={statisticsOpen}
-        scanCount={scanCount}
-      />
-      <QrCardPreviewDialog
-        backgroundUrl={backgroundUrl}
-        description={description}
-        heading={heading}
-        onOpenChange={setCardOpen}
-        open={cardOpen}
-        publicToken={publicToken}
-        qrId={qrId}
-        status={status}
-        svg={svg}
-        version={version}
-      />
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button className="w-full" variant="secondary">
-            Thao tác <MoreHorizontal />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onSelect={() => setCardOpen(true)}>
-            <QrCode /> Xem mã QR
-          </DropdownMenuItem>
-          {profiles.length ? (
-            <DropdownMenuItem onSelect={() => setAssignmentOpen(true)}>
-              <PencilLine />
-              {profileId ? "Đổi hồ sơ" : "Gắn hồ sơ"}
+    <>
+      {backgroundUrl ? (
+        <link as="image" href={backgroundUrl} rel="preload" />
+      ) : null}
+      <div className="mt-auto grid grid-cols-2 gap-2 pt-8">
+        <Button asChild className="w-full">
+          <Link
+            href={
+              profileId
+                ? `/profiles/${profileId}/edit`
+                : `/profiles/new?qr=${encodeURIComponent(publicToken)}`
+            }
+          >
+            {profileId ? <PencilLine /> : <Plus />}
+            {profileId ? "Cập nhật hồ sơ" : "Tạo hồ sơ"}
+          </Link>
+        </Button>
+        <QrProfileAssignment
+          currentProfileId={profileId}
+          hideTrigger
+          onOpenChange={setAssignmentOpen}
+          open={assignmentOpen}
+          profiles={profiles}
+          qrId={qrId}
+          qrToken={publicToken}
+          version={version}
+        />
+        <QrStatisticsDialog
+          activatedAt={activatedAt}
+          hideTrigger
+          onOpenChange={setStatisticsOpen}
+          open={statisticsOpen}
+          scanCount={scanCount}
+        />
+        <QrCardPreviewDialog
+          backgroundUrl={backgroundUrl}
+          description={description}
+          heading={heading}
+          location={location}
+          onOpenChange={setCardOpen}
+          open={cardOpen}
+          publicToken={publicToken}
+          qrId={qrId}
+          status={status}
+          svg={svg}
+          version={version}
+        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="w-full" variant="secondary">
+              Thao tác <MoreHorizontal />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onSelect={() => setCardOpen(true)}>
+              <QrCode /> Xem mã QR
             </DropdownMenuItem>
-          ) : (
+            {profiles.length ? (
+              <DropdownMenuItem onSelect={() => setAssignmentOpen(true)}>
+                <PencilLine />
+                {profileId ? "Đổi hồ sơ" : "Gắn hồ sơ"}
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem asChild>
+                <Link
+                  href={`/profiles/new?qr=${encodeURIComponent(publicToken)}`}
+                >
+                  <Plus /> Tạo hồ sơ để gắn
+                </Link>
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem onSelect={() => setStatisticsOpen(true)}>
+              <BarChart3 /> Thống kê
+            </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link
-                href={`/profiles/new?qr=${encodeURIComponent(publicToken)}`}
-              >
-                <Plus /> Tạo hồ sơ để gắn
+              <Link href={`/q/${publicToken}`} target="_blank">
+                <ExternalLink /> Xem trang đích
               </Link>
             </DropdownMenuItem>
-          )}
-          <DropdownMenuItem onSelect={() => setStatisticsOpen(true)}>
-            <BarChart3 /> Thống kê
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href={`/q/${publicToken}`} target="_blank">
-              <ExternalLink /> Xem trang đích
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </>
   );
 }
 

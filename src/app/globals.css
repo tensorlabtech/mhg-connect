@@ -36,6 +36,10 @@
   --accent-foreground: #f5f5f5;
   --gold: #e5c16b;
   --gold-deep: #b78f3b;
+  --qr-card-information: #b78f3b;
+  --qr-card-information-foreground: #12110e;
+  --qr-card-information-muted: #3f351f;
+  --qr-card-photo-fallback: #d7b861;
   --success: #86c99a;
   --info: #8db5de;
   --warning: #d6a75f;
