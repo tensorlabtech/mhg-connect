@@ -31,6 +31,7 @@ import {
   ArticleFactsList,
   ProfileLanguageSwitcher,
   visibleArticleFacts,
+  visibleArticleLinks,
   visibleArticleReferences,
 } from "@/features/profile/public-profile-article";
 import {
@@ -580,6 +581,7 @@ function IdentityBlockView({
         {isWikipedia ? (
           <ProfileWikipediaArticleNavigation
             hasContact={hasVisibleBlockContent(contact)}
+            hasExternalLinks={visibleArticleLinks(article).length > 0}
             hasSocial={hasVisibleBlockContent(social)}
             labels={{
               article: profileText(locale, "article"),
@@ -721,7 +723,8 @@ function OptionalBlockView({
       preview={preview}
       section="social"
       title={
-        document.theme.themeId === "wikipedia"
+        document.theme.themeId === "wikipedia" &&
+        !visibleArticleLinks(getArticleBlock(document)).length
           ? profileText(locale, "externalLinks")
           : profileText(locale, "social")
       }

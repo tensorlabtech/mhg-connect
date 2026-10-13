@@ -3,6 +3,8 @@ import QRCode from "qrcode";
 import { StatusBadge } from "@/components/product/status-badge";
 import type { QrCardTextStyle } from "@/db/schema/product";
 import { QrCardActions } from "@/features/qr/qr-card-actions";
+import type { QrCardDesign } from "@/features/qr/qr-card-design";
+import { getQrCardDesigns } from "@/features/qr/qr-data";
 import { QrVisualCard } from "@/features/qr/qr-visual-card";
 import { runtimeEnv } from "@/lib/runtime-env";
 
@@ -31,7 +33,7 @@ type AssignmentProfile = {
   title: string | null;
 };
 
-type QrCardItem = QrItem & { svg: string };
+type QrCardItem = QrItem & { designs: QrCardDesign[]; svg: string };
 
 export async function UserQrList({
   items,
@@ -40,9 +42,11 @@ export async function UserQrList({
   items: QrItem[];
   profiles: AssignmentProfile[];
 }) {
+  const designs = await getQrCardDesigns(items.map((item) => item.id));
   const cards = await Promise.all(
     items.map(async (item) => ({
       ...item,
+      designs: designs.get(item.id) ?? [],
       svg: await QRCode.toString(buildPublicQrUrl(item.publicToken), {
         color: { dark: "#0a0a0a", light: "#ffffff" },
         errorCorrectionLevel: "H",
@@ -96,12 +100,20 @@ function QrOwnershipCard({
           </div>
           <StatusBadge status={item.status} />
         </div>
-        <dl className="mt-8 grid gap-6 sm:grid-cols-2">
+        <dl className="mt-8 grid gap-6 sm:grid-cols-3">
           <div>
             <dt className="text-xs text-muted-foreground">
               Hồ sơ đang hiển thị
             </dt>
             <dd className="mt-2 text-sm font-medium">{profileName}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-muted-foreground">Mẫu thẻ</dt>
+            <dd className="mt-2 text-sm font-medium tabular-nums">
+              {item.designs.length
+                ? `Thẻ chính + ${item.designs.length} mẫu`
+                : "Thẻ chính"}
+            </dd>
           </div>
           <div>
             <dt className="text-xs text-muted-foreground">Lượt quét</dt>
@@ -118,6 +130,7 @@ function QrOwnershipCard({
               : null
           }
           description={role || "Quét để mở hồ sơ"}
+          designs={item.designs}
           heading={profileName}
           location={item.profileLocation}
           profileId={item.profileId}

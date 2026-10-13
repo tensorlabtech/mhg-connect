@@ -28,6 +28,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import type { QrCardTextStyle } from "@/db/schema/product";
+import type { QrCardDesign } from "@/features/qr/qr-card-design";
 import { QrProfileAssignment } from "@/features/qr/qr-profile-assignment";
 import { QrCardPreviewDialog } from "@/features/qr/qr-card-preview-dialog";
 
@@ -44,6 +45,7 @@ export function QrCardActions({
   activatedAt,
   backgroundUrl,
   description,
+  designs,
   heading,
   location,
   profileId,
@@ -59,6 +61,7 @@ export function QrCardActions({
   activatedAt: Date | null;
   backgroundUrl: string | null;
   description: string;
+  designs: QrCardDesign[];
   heading: string;
   location: string | null;
   profileId: string | null;
@@ -113,6 +116,7 @@ export function QrCardActions({
         <QrCardPreviewDialog
           backgroundUrl={backgroundUrl}
           description={description}
+          designs={designs}
           heading={heading}
           location={location}
           onOpenChange={setCardOpen}

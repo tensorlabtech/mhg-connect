@@ -18,6 +18,7 @@ import { AdminQrActions } from "@/features/admin/admin-qr-actions";
 import { getAdminQrDetail } from "@/features/admin/admin-data";
 import { AdminQrPreviewDialog } from "@/features/admin/admin-qr-preview-dialog";
 import { createPublicQrSvg } from "@/features/qr/create-public-qr-svg";
+import { getQrCardDesigns } from "@/features/qr/qr-data";
 import { requireAdmin } from "@/lib/session";
 
 const dateFormatter = new Intl.DateTimeFormat("vi-VN", {
@@ -41,6 +42,7 @@ export default async function AdminQrDetailPage({
   const created = query.created === "1";
   const hasTransitionError = query.error === "invalid-transition";
   const svg = await createPublicQrSvg(qr.publicToken);
+  const designs = (await getQrCardDesigns([qr.id])).get(qr.id) ?? [];
   const rows = [
     { label: "Ngày tạo", value: dateFormatter.format(qr.createdAt) },
     {
@@ -94,6 +96,21 @@ export default async function AdminQrDetailPage({
                       <Printer /> Bản in mã QR
                     </Link>
                   </Button>
+                  {designs.map((design) => (
+                    <Button
+                      asChild
+                      className="w-full"
+                      key={design.id}
+                      variant="ghost"
+                    >
+                      <Link
+                        href={`/admin/qr/${qr.id}/print?design=${design.id}`}
+                        target="_blank"
+                      >
+                        <Printer /> In mẫu “{design.name}”
+                      </Link>
+                    </Button>
+                  ))}
                 </div>
               </DashboardBentoSidebarCard>
             </>

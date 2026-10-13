@@ -7,13 +7,17 @@ import type {
   ArticleBlock,
   ArticleFact,
   ArticleImage,
+  ArticleLink,
+  ArticleLinkKind,
   ProfileDocument,
   ProfileLocale,
 } from "@/features/profile/profile-document-types";
 import {
   profileLocaleLabels,
   profileText,
+  type ProfileStringKey,
 } from "@/features/profile/profile-i18n";
+import { parseVideoEmbed } from "@/features/profile/profile-video";
 import {
   ProfileRichInline,
   ProfileRichText,
@@ -25,6 +29,18 @@ export function visibleArticleFacts(block: ArticleBlock | null) {
     (fact) => fact.label.trim() && fact.value.trim(),
   );
 }
+
+export function visibleArticleLinks(block: ArticleBlock | null) {
+  if (!block || !block.visible) return [] as ArticleLink[];
+  return (block.data.links ?? []).filter((link) => link.url.trim());
+}
+
+const linkKindText: Record<ArticleLinkKind, ProfileStringKey> = {
+  article: "linkArticle",
+  news: "linkNews",
+  video: "linkVideo",
+  website: "linkWebsite",
+};
 
 export function visibleArticleReferences(block: ArticleBlock | null) {
   if (!block || !block.visible) return [];
@@ -78,9 +94,17 @@ export function ArticleBlockView({
   const facts = visibleArticleFacts(block);
   const sections = visibleArticleSections(block);
   const references = visibleArticleReferences(block);
+  const links = visibleArticleLinks(block);
   const referenceCount = references.length;
-  if (!facts.length && !sections.length && !references.length)
+  if (!facts.length && !sections.length && !references.length && !links.length)
     return placeholder ?? null;
+  const videos = links.flatMap((link) => {
+    const embed = link.kind === "video" ? parseVideoEmbed(link.url) : null;
+    return embed ? [{ embed, link }] : [];
+  });
+  const listedLinks = links.filter(
+    (link) => !videos.some((video) => video.link.id === link.id),
+  );
 
   return (
     <div className="profile-article" data-profile-section="article">
@@ -128,25 +152,42 @@ export function ArticleBlockView({
                 )}
               </li>
             ))}
-            {references.length ? (
-              <li>
+            {[
+              ...(references.length
+                ? [
+                    {
+                      href: "#profile-references",
+                      label: profileText(locale, "references"),
+                    },
+                  ]
+                : []),
+              ...(links.length
+                ? [
+                    {
+                      href: "#profile-external-links",
+                      label: profileText(locale, "externalLinks"),
+                    },
+                  ]
+                : []),
+            ].map((item, index) => (
+              <li key={item.href}>
                 {inert ? (
                   <span>
                     <span className="profile-article-toc-number">
-                      {sections.length + 1}
+                      {sections.length + index + 1}
                     </span>
-                    {profileText(locale, "references")}
+                    {item.label}
                   </span>
                 ) : (
-                  <a href="#profile-references">
+                  <a href={item.href}>
                     <span className="profile-article-toc-number">
-                      {sections.length + 1}
+                      {sections.length + index + 1}
                     </span>
-                    {profileText(locale, "references")}
+                    {item.label}
                   </a>
                 )}
               </li>
-            ) : null}
+            ))}
           </ol>
         </nav>
       ) : null}
@@ -221,6 +262,83 @@ export function ArticleBlockView({
               </li>
             ))}
           </ol>
+        </section>
+      ) : null}
+
+      {links.length ? (
+        <section
+          className="profile-section profile-article-section"
+          data-profile-section="external-links"
+          id="profile-external-links"
+        >
+          <h2>{profileText(locale, "externalLinks")}</h2>
+          {videos.length ? (
+            <div className="profile-video-grid">
+              {videos.map(({ embed, link }) => (
+                <figure className="profile-video" key={link.id}>
+                  <div className="profile-video-frame">
+                    {inert ? (
+                      embed.thumbnailUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img alt="" loading="lazy" src={embed.thumbnailUrl} />
+                      ) : (
+                        <span className="profile-video-placeholder">▶</span>
+                      )
+                    ) : (
+                      <iframe
+                        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        loading="lazy"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        src={embed.embedUrl}
+                        title={link.title || "Video"}
+                      />
+                    )}
+                  </div>
+                  <figcaption>
+                    {inert ? (
+                      <span className="profile-rich-link">
+                        {link.title || link.url}
+                      </span>
+                    ) : (
+                      <a href={link.url} rel="noreferrer" target="_blank">
+                        {link.title || link.url}
+                      </a>
+                    )}
+                    {link.source ? <span> · {link.source}</span> : null}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          ) : null}
+          {listedLinks.length ? (
+            <ul className="profile-external-links">
+              {listedLinks.map((link) => (
+                <li key={link.id}>
+                  <span className="profile-external-kind">
+                    {profileText(locale, linkKindText[link.kind])}
+                  </span>
+                  <span className="min-w-0">
+                    {inert ? (
+                      <span className="profile-rich-link">
+                        {link.title || link.url}
+                      </span>
+                    ) : (
+                      <a href={link.url} rel="noreferrer" target="_blank">
+                        {link.title || link.url}
+                      </a>
+                    )}
+                    {link.source ? (
+                      <>
+                        {" — "}
+                        <em>{link.source}</em>
+                      </>
+                    ) : null}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </section>
       ) : null}
     </div>

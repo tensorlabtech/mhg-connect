@@ -158,6 +158,34 @@ export const qrCodes = pgTable(
   ],
 );
 
+export const qrCardDesigns = pgTable(
+  "qr_card_designs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    qrCodeId: uuid("qr_code_id")
+      .notNull()
+      .references(() => qrCodes.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    backgroundUrl: text("background_url"),
+    textStyle: text("text_style")
+      .$type<QrCardTextStyle>()
+      .default("shadow")
+      .notNull(),
+    heading: text("heading"),
+    description: text("description"),
+    location: text("location"),
+    createdAt: productTimestamp("created_at").defaultNow().notNull(),
+    updatedAt: productTimestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("qr_card_designs_qr_code_id_idx").on(table.qrCodeId),
+    check(
+      "qr_card_designs_text_style_check",
+      sql`${table.textStyle} in ('shadow', 'band', 'dark', 'light')`,
+    ),
+  ],
+);
+
 export const scanEvents = pgTable(
   "scan_events",
   {

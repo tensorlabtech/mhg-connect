@@ -43,6 +43,7 @@ import {
   getTranslation,
   imageKey,
   moveItem,
+  linkKey,
   referenceKey,
   removeArticleBlock,
   sectionKey,
@@ -54,14 +55,19 @@ import {
   BlockVisibilityButton,
   InspectorHeading,
 } from "@/features/profile/profile-builder-inspector-fields";
-import { articleLimits } from "@/features/profile/profile-document-schema";
+import {
+  articleLimits,
+  normalizeLinkUrl,
+} from "@/features/profile/profile-document-schema";
 import type {
   ArticleBlock,
   ArticleImageAlign,
+  ArticleLinkKind,
   ArticleSection,
   ProfileDocument,
   ProfileLocale,
 } from "@/features/profile/profile-document-types";
+import { parseVideoEmbed } from "@/features/profile/profile-video";
 import { TranslationField } from "@/features/profile/profile-builder-translation-field";
 import { profileLocaleLabels } from "@/features/profile/profile-i18n";
 
@@ -73,6 +79,13 @@ const sectionTemplates = [
   "Hoạt động",
   "Thành tựu và khen thưởng",
   "Đời tư",
+];
+
+const linkKindOptions: { id: ArticleLinkKind; label: string }[] = [
+  { id: "news", label: "Báo" },
+  { id: "article", label: "Bài viết" },
+  { id: "video", label: "Video" },
+  { id: "website", label: "Trang web" },
 ];
 
 const alignOptions: { id: ArticleImageAlign; label: string }[] = [
@@ -132,6 +145,7 @@ export function ArticleInspector({
           <FactsEditor block={block} update={update} />
           <SectionsEditor block={block} update={update} />
           <ReferencesEditor block={block} update={update} />
+          <ExternalLinksEditor block={block} update={update} />
           <RemoveArticleButton
             onConfirm={() => onChange(removeArticleBlock(document))}
           />
@@ -1088,6 +1102,197 @@ function ReferencesEditor({
   );
 }
 
+function ExternalLinksEditor({
+  block,
+  update,
+}: {
+  block: ArticleBlock;
+  update: Updater;
+}) {
+  const links = block.data.links ?? [];
+  const setLinks = (
+    mutate: (items: typeof links) => typeof links,
+    key?: string,
+  ) => update((data) => ({ ...data, links: mutate(data.links ?? []) }), key);
+
+  return (
+    <section
+      className="grid grid-cols-[minmax(0,1fr)] gap-4"
+      aria-label="Liên kết ngoài"
+    >
+      <GroupHeading
+        description="Báo, bài viết, video, trang web nói về bạn. Link YouTube hoặc Vimeo chọn loại Video sẽ phát ngay trên trang."
+        title="Liên kết ngoài"
+      />
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
+        {links.map((link, index) => {
+          const embeddable =
+            link.kind === "video" && Boolean(parseVideoEmbed(link.url));
+          return (
+            <div
+              className="grid grid-cols-[minmax(0,1fr)] gap-2 rounded-lg bg-muted/40 p-2"
+              key={link.id}
+            >
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-xs font-medium text-muted-foreground">
+                  Liên kết {index + 1}
+                </span>
+                <RowTools
+                  index={index}
+                  label="liên kết"
+                  length={links.length}
+                  onMove={(offset) =>
+                    setLinks((items) => moveItem(items, index, offset))
+                  }
+                  onRemove={() =>
+                    setLinks((items) =>
+                      items.filter((item) => item.id !== link.id),
+                    )
+                  }
+                />
+              </div>
+              <div
+                aria-label="Loại liên kết"
+                className="grid grid-cols-4 gap-1"
+                role="radiogroup"
+              >
+                {linkKindOptions.map((option) => (
+                  <button
+                    aria-checked={link.kind === option.id}
+                    className={cn(
+                      "truncate rounded-md px-1 py-1 text-xs transition-colors focus-visible:ring-2 focus-visible:ring-ring/60",
+                      link.kind === option.id
+                        ? "bg-secondary text-foreground ring-1 ring-gold/70"
+                        : "bg-muted text-muted-foreground hover:text-foreground",
+                    )}
+                    key={option.id}
+                    onClick={() =>
+                      setLinks((items) =>
+                        items.map((item) =>
+                          item.id === link.id
+                            ? { ...item, kind: option.id }
+                            : item,
+                        ),
+                      )
+                    }
+                    role="radio"
+                    type="button"
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+              <Input
+                aria-label={`Đường dẫn liên kết ${index + 1}`}
+                className="h-control-sm"
+                inputMode="url"
+                maxLength={600}
+                onBlur={(event) => {
+                  const normalized = normalizeLinkUrl(event.target.value);
+                  if (normalized !== link.url)
+                    setLinks((items) =>
+                      items.map((item) =>
+                        item.id === link.id
+                          ? { ...item, url: normalized }
+                          : item,
+                      ),
+                    );
+                }}
+                onChange={(event) => {
+                  const url = event.target.value;
+                  setLinks(
+                    (items) =>
+                      items.map((item) =>
+                        item.id === link.id
+                          ? {
+                              ...item,
+                              kind:
+                                parseVideoEmbed(normalizeLinkUrl(url)) &&
+                                item.kind !== "video"
+                                  ? "video"
+                                  : item.kind,
+                              url,
+                            }
+                          : item,
+                      ),
+                    `link.${link.id}.url`,
+                  );
+                }}
+                placeholder="https://..."
+                value={link.url}
+              />
+              <Input
+                aria-label={`Tiêu đề liên kết ${index + 1}`}
+                className="h-control-sm"
+                maxLength={300}
+                onChange={(event) =>
+                  setLinks(
+                    (items) =>
+                      items.map((item) =>
+                        item.id === link.id
+                          ? { ...item, title: event.target.value }
+                          : item,
+                      ),
+                    `link.${link.id}.title`,
+                  )
+                }
+                placeholder="Tiêu đề bài báo hoặc video"
+                value={link.title}
+              />
+              <Input
+                aria-label={`Nguồn liên kết ${index + 1}`}
+                className="h-control-sm"
+                maxLength={120}
+                onChange={(event) =>
+                  setLinks(
+                    (items) =>
+                      items.map((item) =>
+                        item.id === link.id
+                          ? { ...item, source: event.target.value || null }
+                          : item,
+                      ),
+                    `link.${link.id}.source`,
+                  )
+                }
+                placeholder="Tên báo hoặc kênh, ví dụ VTV, VnExpress"
+                value={link.source ?? ""}
+              />
+              {link.kind === "video" ? (
+                <p className="text-xs leading-5 text-muted-foreground">
+                  {embeddable
+                    ? "Video sẽ phát ngay trên trang."
+                    : "Chưa nhận ra link YouTube/Vimeo: sẽ hiện thành link để bấm mở."}
+                </p>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+      <Button
+        className="w-fit"
+        disabled={links.length >= articleLimits.links}
+        onClick={() =>
+          setLinks((items) => [
+            ...items,
+            {
+              id: createArticleItemId(),
+              kind: "news",
+              source: null,
+              title: "",
+              url: "",
+            },
+          ])
+        }
+        size="sm"
+        type="button"
+        variant="secondary"
+      >
+        <Plus aria-hidden="true" /> Thêm liên kết
+      </Button>
+    </section>
+  );
+}
+
 function RemoveArticleButton({ onConfirm }: { onConfirm: () => void }) {
   return (
     <AlertDialog>
@@ -1191,6 +1396,21 @@ function ArticleTranslationEditor({
           )}
         </section>
       ))}
+      {(block.data.links ?? []).length ? (
+        <section className="grid grid-cols-[minmax(0,1fr)] gap-4">
+          <h3 className="text-sm font-medium">Liên kết ngoài</h3>
+          {(block.data.links ?? []).map((link, index) => (
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-2" key={link.id}>
+              {field(linkKey(link.id, "title"), link.title, {
+                title: `Tiêu đề liên kết ${index + 1}`,
+              })}
+              {field(linkKey(link.id, "source"), link.source ?? "", {
+                title: "Tên báo, kênh",
+              })}
+            </div>
+          ))}
+        </section>
+      ) : null}
       {block.data.references.length ? (
         <section className="grid grid-cols-[minmax(0,1fr)] gap-4">
           <h3 className="text-sm font-medium">Nguồn tham khảo</h3>

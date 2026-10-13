@@ -249,3 +249,96 @@ describe("public profile article rendering", () => {
     expect(markup).toContain('lang="en"');
   });
 });
+
+describe("external links and videos", () => {
+  test("recognizes YouTube and Vimeo links", async () => {
+    const { parseVideoEmbed } =
+      await import("@/features/profile/profile-video");
+    expect(
+      parseVideoEmbed("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42")
+        ?.embedUrl,
+    ).toBe("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?start=42");
+    expect(parseVideoEmbed("https://youtu.be/dQw4w9WgXcQ")?.provider).toBe(
+      "youtube",
+    );
+    expect(
+      parseVideoEmbed("https://www.youtube.com/shorts/dQw4w9WgXcQ")?.provider,
+    ).toBe("youtube");
+    expect(parseVideoEmbed("https://vimeo.com/76979871")?.embedUrl).toBe(
+      "https://player.vimeo.com/video/76979871",
+    );
+    expect(parseVideoEmbed("https://example.test/video")).toBeNull();
+    expect(parseVideoEmbed("javascript:alert(1)")).toBeNull();
+  });
+
+  test("normalizes link urls and drops empty links when parsing", () => {
+    const document = updateArticleBlock(articleDocument(), (block) => ({
+      ...block,
+      data: {
+        ...block.data,
+        links: [
+          {
+            id: "link-news",
+            kind: "news",
+            source: "Báo mẫu",
+            title: "Tin",
+            url: "example.test/tin",
+          },
+          {
+            id: "link-empty",
+            kind: "article",
+            source: null,
+            title: "",
+            url: "  ",
+          },
+        ],
+      },
+    }));
+    const parsed = parseProfileDocument(document);
+    expect(getArticleBlock(parsed!)?.data.links).toEqual([
+      {
+        id: "link-news",
+        kind: "news",
+        source: "Báo mẫu",
+        title: "Tin",
+        url: "https://example.test/tin",
+      },
+    ]);
+  });
+
+  test("renders embedded video and news list on the public page", () => {
+    const document = updateArticleBlock(articleDocument(), (block) => ({
+      ...block,
+      data: {
+        ...block.data,
+        links: [
+          {
+            id: "link-video",
+            kind: "video",
+            source: "Kênh mẫu",
+            title: "Video mẫu",
+            url: "https://youtu.be/dQw4w9WgXcQ",
+          },
+          {
+            id: "link-news",
+            kind: "news",
+            source: "Báo mẫu",
+            title: "Tin mẫu",
+            url: "https://example.test/tin",
+          },
+        ],
+      },
+    }));
+    const markup = renderToStaticMarkup(
+      createElement(PublicProfile, {
+        document,
+        profile: { ...profile, publicToken: "DEMO" },
+      }),
+    );
+    expect(markup).toContain(
+      'src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"',
+    );
+    expect(markup).toContain("Tin mẫu");
+    expect(markup).toContain('id="profile-external-links"');
+  });
+});

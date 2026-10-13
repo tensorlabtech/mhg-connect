@@ -51,11 +51,13 @@ const defaultNavigationLabels = {
 
 export function ProfileWikipediaArticleNavigation({
   hasContact,
+  hasExternalLinks = false,
   hasSocial,
   labels = defaultNavigationLabels,
   onNavigate,
 }: {
   hasContact: boolean;
+  hasExternalLinks?: boolean;
   hasSocial: boolean;
   labels?: { article: string; contact: string; externalLinks: string };
   onNavigate?: (type: ProfileBlockType) => void;
@@ -75,15 +77,23 @@ export function ProfileWikipediaArticleNavigation({
           },
         ]
       : []),
-    ...(hasSocial
+    ...(hasExternalLinks
       ? [
           {
-            id: "profile-social",
+            id: "profile-external-links",
             label: labels.externalLinks,
-            type: "social" as const,
+            type: "article" as const,
           },
         ]
-      : []),
+      : hasSocial
+        ? [
+            {
+              id: "profile-social",
+              label: labels.externalLinks,
+              type: "social" as const,
+            },
+          ]
+        : []),
   ];
   const [activeId, setActiveId] = useState("profile-identity");
   const observerLocked = useRef(false);
@@ -94,7 +104,11 @@ export function ProfileWikipediaArticleNavigation({
     const ids = [
       "profile-identity",
       ...(hasContact ? ["profile-contact"] : []),
-      ...(hasSocial ? ["profile-social"] : []),
+      ...(hasExternalLinks
+        ? ["profile-external-links"]
+        : hasSocial
+          ? ["profile-social"]
+          : []),
     ];
     const syncHash = () => {
       const id = window.location.hash.slice(1);
@@ -128,7 +142,7 @@ export function ProfileWikipediaArticleNavigation({
       if (observerLockTimer.current) clearTimeout(observerLockTimer.current);
       if (highlightTimer.current) clearTimeout(highlightTimer.current);
     };
-  }, [hasContact, hasSocial]);
+  }, [hasContact, hasExternalLinks, hasSocial]);
 
   const activate = (id: string, type: ProfileBlockType) => {
     setActiveId(id);

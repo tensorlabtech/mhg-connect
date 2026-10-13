@@ -390,3 +390,134 @@
 .profile-page[data-style="wikipedia"] [data-profile-section="article"] {
   width: 100%;
 }
+
+/* Liên kết ngoài: video phát ngay trên trang, báo/bài viết/trang web dạng danh sách. */
+.profile-video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: 1rem 1.25rem;
+}
+
+.profile-video {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.profile-video-frame {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border-radius: calc(var(--profile-radius, 0.75rem) * 0.6);
+  background: #000;
+}
+
+.profile-video-frame iframe,
+.profile-video-frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: cover;
+}
+
+.profile-video-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 2rem;
+}
+
+.profile-video figcaption {
+  color: var(--muted-foreground);
+}
+
+.profile-video figcaption a,
+.profile-external-links a {
+  color: var(--profile-accent, var(--gold, currentColor));
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.profile-external-links {
+  display: grid;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.profile-video-grid + .profile-external-links {
+  margin-top: 1.25rem;
+}
+
+.profile-external-links li {
+  display: grid;
+  grid-template-columns: 4.75rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+.profile-external-kind {
+  justify-self: stretch;
+  text-align: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--foreground) 9%, transparent);
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.profile-page[data-style="wikipedia"] .profile-video,
+.profile-page[data-style="wikipedia"] .profile-external-links {
+  color: var(--profile-foreground);
+  font-family: var(--profile-body-font);
+}
+
+.profile-page[data-style="wikipedia"] .profile-video-frame {
+  border: 1px solid var(--profile-border-color);
+  border-radius: 0;
+}
+
+.profile-page[data-style="wikipedia"] .profile-video figcaption {
+  color: var(--profile-foreground);
+  font-size: 0.8125rem;
+}
+
+.profile-page[data-style="wikipedia"] .profile-video figcaption a,
+.profile-page[data-style="wikipedia"] .profile-external-links a {
+  color: var(--profile-accent);
+  text-decoration: none;
+}
+
+.profile-page[data-style="wikipedia"] .profile-external-links {
+  font-size: 0.875rem;
+}
+
+.profile-page[data-style="wikipedia"] .profile-external-kind {
+  border-radius: 0;
+  background: var(--profile-surface);
+  color: var(--profile-muted);
+  outline: 1px solid var(--profile-border-color);
+}
+
+@container (max-width: 34rem) {
+  .profile-external-links li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+  }
+
+  .profile-external-kind {
+    justify-self: start;
+  }
+}

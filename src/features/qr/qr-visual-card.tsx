@@ -15,21 +15,30 @@ export const qrCardTextStyleOptions: {
   { description: "Khung sáng, chữ đen", id: "light", label: "Khung sáng" },
 ];
 
-const headingTextClass: Record<QrCardTextStyle, string> = {
+const headingBoxClass: Record<QrCardTextStyle, string> = {
   band: "",
-  dark: "rounded-[1.2cqw] bg-[rgb(10_10_10/0.78)] px-[2.2cqw] py-[0.6cqw] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]",
+  dark: "w-fit rounded-[1.6cqw] bg-[rgb(10_10_10/0.8)] px-[3cqw] pt-[1.6cqw] pb-[1.2cqw]",
   light:
-    "rounded-[1.2cqw] bg-[rgb(255_255_255/0.92)] px-[2.2cqw] py-[0.6cqw] text-[#0a0a0a] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]",
+    "w-fit rounded-[1.6cqw] bg-[rgb(255_255_255/0.93)] px-[3cqw] pt-[1.6cqw] pb-[1.2cqw] text-[#0a0a0a]",
   shadow: "",
 };
 
 const detailPanelClass: Record<QrCardTextStyle, string> = {
   band: "",
-  dark: "rounded-[1.6cqw] bg-[rgb(10_10_10/0.78)] px-[2.4cqw] py-[1.8cqw]",
+  dark: "rounded-[1.6cqw] bg-[rgb(10_10_10/0.8)] px-[2.6cqw] py-[2cqw]",
   light:
-    "rounded-[1.6cqw] bg-[rgb(255_255_255/0.92)] px-[2.4cqw] py-[1.8cqw] text-[#0a0a0a]",
+    "rounded-[1.6cqw] bg-[rgb(255_255_255/0.93)] px-[2.6cqw] py-[2cqw] text-[#0a0a0a]",
   shadow: "",
 };
+
+/** Tách "Chức danh · Công ty" thành từng dòng để tên đơn vị không bị ngắt giữa chừng. */
+export function splitCardDescription(description?: string) {
+  return (description ?? "")
+    .split(/\s+·\s+|\n/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .slice(0, 3);
+}
 
 export function QrVisualCard({
   backgroundUrl,
@@ -51,11 +60,12 @@ export function QrVisualCard({
   textStyle?: QrCardTextStyle;
 }) {
   const shadowText = textStyle === "shadow" || textStyle === "band";
+  const descriptionLines = splitCardDescription(description);
   return (
     <section
       aria-label={`Thẻ QR: ${heading}`}
       className={cn(
-        "relative isolate aspect-[53.98/85.6] w-full text-white [container-type:inline-size]",
+        "relative isolate aspect-[53.98/85.6] w-full text-white select-none [container-type:inline-size]",
         className,
       )}
     >
@@ -104,15 +114,13 @@ export function QrVisualCard({
         >
           <h3
             className={cn(
-              "max-w-full py-[1cqw] text-[9.5cqw] leading-[1.08] font-bold tracking-[-0.025em] break-words text-balance uppercase",
+              "max-w-full py-[1cqw] text-[9.5cqw] leading-[1.14] font-bold tracking-[-0.025em] break-words text-balance uppercase",
               shadowText && "[text-shadow:0_1px_3px_rgb(0_0_0/0.45)]",
-              textStyle === "dark" || textStyle === "light"
-                ? "leading-[1.32]"
-                : "",
+              headingBoxClass[textStyle],
               headingClassName,
             )}
           >
-            <span className={headingTextClass[textStyle]}>{heading}</span>
+            {heading}
           </h3>
         </div>
 
@@ -131,29 +139,36 @@ export function QrVisualCard({
             role="img"
           />
 
-          {description || location ? (
+          {descriptionLines.length || location ? (
             <div
               className={cn(
-                "flex min-w-0 flex-1 flex-col items-start gap-[1.5cqw] pb-[0.5cqw] text-left",
+                "flex min-w-0 flex-1 flex-col items-start gap-[1.4cqw] pb-[0.5cqw] text-left",
                 shadowText &&
                   "[text-shadow:0_0_1px_rgb(0_0_0/0.95),0_1px_1px_rgb(0_0_0/0.95)]",
                 detailPanelClass[textStyle],
               )}
             >
-              {description ? (
+              {descriptionLines.length ? (
                 <p
                   className={cn(
-                    "line-clamp-3 text-[4.35cqw] leading-[1.16] font-semibold",
+                    "grid gap-[0.6cqw] text-[4.2cqw] leading-[1.3] font-semibold",
                     textStyle === "light" ? "text-[#0a0a0a]" : "text-white",
                   )}
                 >
-                  {description}
+                  {descriptionLines.map((line, index) => (
+                    <span
+                      className="line-clamp-2 pt-[0.15em] text-balance"
+                      key={index}
+                    >
+                      {line}
+                    </span>
+                  ))}
                 </p>
               ) : null}
               {location ? (
                 <p
                   className={cn(
-                    "flex min-w-0 items-center gap-[1cqw] text-[3.55cqw] leading-[1.22] font-medium",
+                    "flex min-w-0 items-center gap-[1cqw] pt-[0.15em] text-[3.55cqw] leading-[1.3] font-medium",
                     textStyle === "light"
                       ? "text-[#0a0a0a]/80"
                       : "text-white/90",

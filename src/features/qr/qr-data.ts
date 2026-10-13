@@ -1,9 +1,13 @@
 import "server-only";
 
-import { and, count, desc, eq, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { profiles, qrCodes, scanEvents } from "@/db/schema";
+import { profiles, qrCardDesigns, qrCodes, scanEvents } from "@/db/schema";
+import {
+  toClientQrCardDesign,
+  type QrCardDesign,
+} from "@/features/qr/qr-card-design";
 
 export async function getQrByToken(publicToken: string) {
   const [result] = await db
@@ -154,4 +158,20 @@ export async function findOwnedQrWithoutProfile(
     .limit(1);
 
   return qr ?? null;
+}
+
+export async function getQrCardDesigns(qrIds: string[]) {
+  const result = new Map<string, QrCardDesign[]>();
+  if (!qrIds.length) return result;
+  const rows = await db
+    .select()
+    .from(qrCardDesigns)
+    .where(inArray(qrCardDesigns.qrCodeId, qrIds))
+    .orderBy(asc(qrCardDesigns.createdAt));
+  for (const row of rows) {
+    const list = result.get(row.qrCodeId) ?? [];
+    list.push(toClientQrCardDesign(row.qrCodeId, row));
+    result.set(row.qrCodeId, list);
+  }
+  return result;
 }

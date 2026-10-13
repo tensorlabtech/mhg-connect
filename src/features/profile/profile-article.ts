@@ -103,6 +103,10 @@ export function articleTranslationKeys(article: ArticleBlock) {
       referenceKey(reference.id, "title"),
       referenceKey(reference.id, "source"),
     ]),
+    ...(article.data.links ?? []).flatMap((link) => [
+      linkKey(link.id, "title"),
+      linkKey(link.id, "source"),
+    ]),
   ];
 }
 
@@ -165,6 +169,8 @@ export const sectionKey = (id: string, field: "body" | "heading") =>
 export const imageKey = (id: string) => `image.${id}.caption`;
 export const referenceKey = (id: string, field: "source" | "title") =>
   `ref.${id}.${field}`;
+export const linkKey = (id: string, field: "source" | "title") =>
+  `link.${id}.${field}`;
 
 export function isProfileLocale(value: unknown): value is ProfileLocale {
   return (
@@ -247,6 +253,11 @@ export function localizeProfileDocument(
         return {
           ...block,
           data: {
+            links: block.data.links?.map((link) => ({
+              ...link,
+              source: pickNullable(linkKey(link.id, "source"), link.source),
+              title: pick(linkKey(link.id, "title"), link.title),
+            })),
             facts: block.data.facts.map((fact) => ({
               ...fact,
               label: pick(factKey(fact.id, "label"), fact.label),
@@ -301,7 +312,8 @@ export function hasArticleContent(block: ArticleBlock | null) {
       (section) =>
         section.heading.trim() || section.body.trim() || section.images.length,
     ) ||
-    block.data.references.some((reference) => reference.title.trim())
+    block.data.references.some((reference) => reference.title.trim()) ||
+    (block.data.links ?? []).some((link) => link.url.trim())
   );
 }
 

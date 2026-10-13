@@ -400,7 +400,7 @@ export function QrCardBackgroundEditor({
   );
 }
 
-function TextStyleSwatch({ style }: { style: QrCardTextStyle }) {
+export function TextStyleSwatch({ style }: { style: QrCardTextStyle }) {
   return (
     <span
       aria-hidden="true"

@@ -7,7 +7,7 @@ import { after } from "next/server";
 import { z } from "zod";
 
 import { db } from "@/db";
-import { adminActions, qrCodes } from "@/db/schema";
+import { adminActions, qrCardDesigns, qrCodes } from "@/db/schema";
 import { deleteProfileMedia } from "@/lib/profile-media-storage";
 import { requireAdmin } from "@/lib/session";
 
@@ -93,6 +93,7 @@ export async function adminQrAction(formData: FormData) {
   let updated: {
     id: string;
     previousBackgroundUrl: string | null;
+    previousDesignBackgrounds: string[];
     publicToken: string;
   };
   try {
@@ -133,6 +134,13 @@ export async function adminQrAction(formData: FormData) {
           publicToken: qrCodes.publicToken,
         });
       if (!changed) throw new InvalidQrTransitionError();
+      const removedDesigns =
+        parsed.data.operation === "reset"
+          ? await tx
+              .delete(qrCardDesigns)
+              .where(eq(qrCardDesigns.qrCodeId, changed.id))
+              .returning({ backgroundUrl: qrCardDesigns.backgroundUrl })
+          : [];
       await tx.insert(adminActions).values({
         adminId: session.user.id,
         qrCodeId: changed.id,
@@ -141,6 +149,9 @@ export async function adminQrAction(formData: FormData) {
       return {
         ...changed,
         previousBackgroundUrl: current?.cardBackgroundUrl ?? null,
+        previousDesignBackgrounds: removedDesigns
+          .map((design) => design.backgroundUrl)
+          .filter((url): url is string => Boolean(url)),
       };
     });
   } catch (error) {
@@ -153,12 +164,22 @@ export async function adminQrAction(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath(`/admin/qr/${updated.id}`);
   revalidatePath(`/q/${updated.publicToken}`);
-  if (parsed.data.operation === "reset" && updated.previousBackgroundUrl) {
-    after(() =>
-      deleteProfileMedia(updated.previousBackgroundUrl!).catch((error) =>
-        console.error("QR card background cleanup failed", error),
-      ),
-    );
+  if (parsed.data.operation === "reset") {
+    const urls = [
+      updated.previousBackgroundUrl,
+      ...updated.previousDesignBackgrounds,
+    ].filter((url): url is string => Boolean(url));
+    if (urls.length) {
+      after(() =>
+        Promise.all(
+          urls.map((url) =>
+            deleteProfileMedia(url).catch((error) =>
+              console.error("QR card background cleanup failed", error),
+            ),
+          ),
+        ),
+      );
+    }
   }
   redirect(`/admin/qr/${updated.id}?updated=${parsed.data.operation}`);
 }

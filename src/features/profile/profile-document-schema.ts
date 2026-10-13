@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import {
   articleImageAligns,
+  articleLinkKinds,
   profileBackgroundEffectIds,
   profileBackgroundPresetIds,
   profileBlockTypes,
@@ -28,10 +29,20 @@ const linkUrl = z
     "Đường dẫn không hợp lệ.",
   );
 
+/** Thêm https:// khi người dùng dán link thiếu giao thức; đổi http sang https. */
+export function normalizeLinkUrl(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return trimmed;
+  if (/^https:\/\//i.test(trimmed)) return trimmed;
+  if (/^http:\/\//i.test(trimmed)) return `https://${trimmed.slice(7)}`;
+  return `https://${trimmed}`;
+}
+
 export const articleLimits = {
   bodyLength: 6000,
   facts: 30,
   imagesPerSection: 6,
+  links: 40,
   references: 60,
   sections: 24,
   translationLength: 6000,
@@ -49,6 +60,30 @@ const articleBlockSchema = z.object({
         }),
       )
       .max(articleLimits.facts),
+    links: z
+      .preprocess(
+        (value) =>
+          Array.isArray(value)
+            ? value
+                .filter(
+                  (item) =>
+                    typeof item?.url === "string" && item.url.trim() !== "",
+                )
+                .map((item) => ({ ...item, url: normalizeLinkUrl(item.url) }))
+            : value,
+        z
+          .array(
+            z.object({
+              id: itemId,
+              kind: z.enum(articleLinkKinds),
+              source: nullableText(120),
+              title: z.string().trim().max(300),
+              url: httpsUrl,
+            }),
+          )
+          .max(articleLimits.links),
+      )
+      .optional(),
     references: z
       .array(
         z.object({

@@ -136,9 +136,25 @@ export type ArticleReference = {
   url: string | null;
 };
 
+export const articleLinkKinds = [
+  "news",
+  "article",
+  "video",
+  "website",
+] as const;
+export type ArticleLinkKind = (typeof articleLinkKinds)[number];
+export type ArticleLink = {
+  id: string;
+  kind: ArticleLinkKind;
+  source: string | null;
+  title: string;
+  url: string;
+};
+
 export type ArticleBlock = {
   data: {
     facts: ArticleFact[];
+    links?: ArticleLink[];
     references: ArticleReference[];
     sections: ArticleSection[];
   };
