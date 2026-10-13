@@ -72,7 +72,7 @@ describe("PublicProfile renderer boundary", () => {
     expect(markup).not.toContain("profile-editor-block");
   });
 
-  test("selection canvas is inert and omits empty block tab stops", () => {
+  test("keeps selection actions inert while preserving local article navigation", () => {
     const document = createProfileDocument({ ...profile, status: "draft" });
     const markup = renderToStaticMarkup(
       <PublicProfile
@@ -145,14 +145,14 @@ describe("PublicProfile renderer boundary", () => {
     document.theme = {
       background: { presetId: "forest", type: "preset" },
       headerLayout: "minimal",
-      themeId: "studio-light",
+      themeId: "wikipedia",
     };
 
     const markup = renderToStaticMarkup(
       <PublicProfile document={document} profile={profile} />,
     );
 
-    expect(markup).toContain('data-style="studio-light"');
+    expect(markup).toContain('data-style="wikipedia"');
     expect(markup).toContain('data-background="forest"');
   });
 
@@ -182,12 +182,88 @@ describe("PublicProfile renderer boundary", () => {
       },
     };
     const customBackgroundMarkup = renderToStaticMarkup(
-      <PublicProfile
-        document={customBackgroundDocument}
-        profile={profile}
-      />,
+      <PublicProfile document={customBackgroundDocument} profile={profile} />,
     );
 
     expect(customBackgroundMarkup).not.toContain("profile-living-surface");
+  });
+
+  test("renders encyclopedia-style navigation only for visible profile sections", () => {
+    const wikipediaDocument = createProfileDocument({
+      ...profile,
+      bio: "Một hồ sơ ngắn.",
+      location: "Hà Nội",
+      phone: "0901234567",
+      status: "published",
+      title: "Giám đốc sản phẩm",
+    });
+    wikipediaDocument.theme = {
+      background: { type: "style" },
+      headerLayout: "minimal",
+      themeId: "wikipedia",
+    };
+
+    const markup = renderToStaticMarkup(
+      <PublicProfile document={wikipediaDocument} profile={profile} />,
+    );
+
+    expect(markup).not.toContain("profile-wikipedia-notice");
+    expect(markup).not.toContain("profile-wikipedia-masthead");
+    expect(markup).toContain('href="#profile-identity"');
+    expect(markup).toContain('href="#profile-contact"');
+    expect(markup).not.toContain('href="#profile-social"');
+    expect(markup).toContain('aria-current="location"');
+    expect(markup.match(/Giám đốc sản phẩm/g)).toHaveLength(1);
+    expect(markup.match(/Hà Nội/g)).toHaveLength(1);
+    expect(markup.match(/id="profile-contact"/g)).toHaveLength(1);
+    expect(markup.match(/data-profile-section="contact"/g)).toHaveLength(1);
+    expect(markup).toContain("profile-wikipedia-infobox-actions");
+    expect(markup).toContain("Powered by");
+    expect(markup).toContain("MHG Connect");
+    expect(markup).not.toContain("Hồ sơ số cá nhân");
+    expect(markup).not.toContain("Wikipedia");
+    expect(markup).not.toContain("Tạo tài khoản");
+    expect(markup).not.toContain("Đăng nhập");
+    expect(markup).not.toContain("Tiếng Việt");
+
+    const hiddenContactDocument = {
+      ...wikipediaDocument,
+      blocks: wikipediaDocument.blocks.map((block) =>
+        block.type === "contact" ? { ...block, visible: false } : block,
+      ),
+    } as typeof wikipediaDocument;
+    const hiddenContactMarkup = renderToStaticMarkup(
+      <PublicProfile document={hiddenContactDocument} profile={profile} />,
+    );
+    expect(hiddenContactMarkup).not.toContain('id="profile-contact"');
+    expect(hiddenContactMarkup).not.toContain("0901234567");
+
+    const selectionMarkup = renderToStaticMarkup(
+      <PublicProfile
+        document={wikipediaDocument}
+        profile={profile}
+        selection={{
+          disabled: false,
+          onSelect: vi.fn(),
+          selectedBlock: "identity",
+        }}
+        showActions={false}
+      />,
+    );
+    expect(selectionMarkup).not.toContain("<a ");
+
+    const sparseDocument = createProfileDocument({
+      ...profile,
+      status: "published",
+    });
+    sparseDocument.theme = wikipediaDocument.theme;
+    const sparseMarkup = renderToStaticMarkup(
+      <PublicProfile document={sparseDocument} profile={profile} />,
+    );
+
+    expect(sparseMarkup).toContain('data-has-avatar="false"');
+    expect(sparseMarkup).toContain('href="#profile-identity"');
+    expect(sparseMarkup).not.toContain('href="#profile-contact"');
+    expect(sparseMarkup).not.toContain('href="#profile-social"');
   });
 });

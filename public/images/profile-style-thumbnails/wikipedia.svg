@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" role="img" aria-labelledby="title desc">
+  <title id="title">Bách khoa</title>
+  <desc id="desc">Bản xem trước hồ sơ MHG Connect theo bố cục tra cứu</desc>
+  <rect width="640" height="480" fill="#fff"/>
+  <path d="M40 90h560" stroke="#c8ccd1"/>
+  <text x="40" y="129" fill="#202122" font-family="Georgia,serif" font-size="34">Nguyễn Minh Anh</text>
+  <path d="M40 140h560M40 174h560" stroke="#a2a9b1"/>
+  <text x="40" y="163" fill="#202122" font-family="Arial,sans-serif" font-size="10">Bài viết</text>
+  <text x="96" y="163" fill="#36c" font-family="Arial,sans-serif" font-size="10">Liên hệ</text>
+  <path d="M40 172h42" stroke="#202122" stroke-width="2"/>
+  <text x="40" y="208" fill="#202122" font-family="Arial,sans-serif" font-size="11">Nhà thiết kế sản phẩm tại</text>
+  <text x="177" y="208" fill="#36c" font-family="Arial,sans-serif" font-size="11">Studio độc lập</text>
+  <path d="M40 232h330M40 250h344M40 268h302M40 286h332" stroke="#54595d" stroke-width="5" opacity=".42"/>
+  <text x="40" y="330" fill="#202122" font-family="Georgia,serif" font-size="20">Liên kết ngoài</text>
+  <path d="M40 340h344" stroke="#a2a9b1"/>
+  <text x="40" y="368" fill="#36c" font-family="Arial,sans-serif" font-size="10">Zalo</text>
+  <text x="40" y="392" fill="#36c" font-family="Arial,sans-serif" font-size="10">LinkedIn</text>
+  <rect x="400" y="196" width="200" height="240" fill="#f8f9fa" stroke="#a2a9b1"/>
+  <text x="500" y="216" fill="#36c" font-family="Arial,sans-serif" font-size="9" text-anchor="middle">Nhà thiết kế sản phẩm</text>
+  <text x="500" y="238" fill="#202122" font-family="Georgia,serif" font-size="17" font-weight="700" text-anchor="middle">Nguyễn Minh Anh</text>
+  <rect x="412" y="250" width="176" height="118" fill="#d9dadd"/>
+  <circle cx="500" cy="290" r="29" fill="#aaaeb3"/>
+  <path d="M468 356c7-29 22-44 32-44s25 15 32 44" fill="#898d91"/>
+  <rect x="412" y="380" width="176" height="22" fill="#eaecf0"/>
+  <text x="420" y="395" fill="#202122" font-family="Arial,sans-serif" font-size="9" font-weight="700">Thông tin liên hệ</text>
+  <text x="420" y="420" fill="#202122" font-family="Arial,sans-serif" font-size="8">Email</text>
+  <text x="470" y="420" fill="#36c" font-family="Arial,sans-serif" font-size="8">hello@example.com</text>
+</svg>

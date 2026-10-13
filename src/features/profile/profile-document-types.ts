@@ -11,6 +11,7 @@ export const profileStyleIds = [
   "signature-dark",
   "studio-light",
   "minimal-mono",
+  "wikipedia",
   "creator-bold",
   "cinematic",
 ] as const;

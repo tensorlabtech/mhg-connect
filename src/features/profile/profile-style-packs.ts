@@ -41,6 +41,14 @@ export const profileStylePacks: readonly ProfileStylePack[] = [
     tone: "light",
   },
   {
+    description: "Bố cục tra cứu tối giản với bài viết và hộp thông tin.",
+    headerLayout: "minimal",
+    id: "wikipedia",
+    label: "Bách khoa",
+    thumbnailUrl: "/images/profile-style-thumbnails/wikipedia.svg",
+    tone: "light",
+  },
+  {
     description: "Grid bất đối xứng, chữ lớn và điểm nhấn đỏ hiện đại.",
     headerLayout: "cover",
     id: "creator-bold",

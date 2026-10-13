@@ -75,6 +75,7 @@ describe("ProfileBuilderInspector fields", () => {
     expect(settings).toContain("Chữ ký đêm");
     expect(settings).toContain("Dòng sáng");
     expect(settings).toContain("Tối giản");
+    expect(settings).toContain("Bách khoa");
     expect(settings).toContain("Lưới biên tập");
     expect(settings).toContain("Điện ảnh");
     expect(settings).toContain("Mở thư viện nền");
@@ -86,6 +87,7 @@ describe("ProfileBuilderInspector fields", () => {
       "/images/profile-style-thumbnails/signature-dark.webp",
       "/images/profile-style-thumbnails/studio-light.webp",
       "/images/profile-style-thumbnails/minimal-mono.webp",
+      "/images/profile-style-thumbnails/wikipedia.svg",
       "/images/profile-style-thumbnails/creator-bold.webp",
       "/images/profile-style-thumbnails/cinematic.webp",
     ]);

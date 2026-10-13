@@ -24,6 +24,10 @@ import {
   socialPlatforms,
 } from "@/features/profile/profile-social-platforms";
 import {
+  ProfileWikipediaArticleNavigation,
+  PublicProfileWikipediaAttribution,
+} from "@/features/profile/public-profile-wikipedia-chrome";
+import {
   normalizeExternalUrl,
   type PublicProfileViewModel,
 } from "@/features/profile/profile-view-model";
@@ -99,17 +103,18 @@ export function PublicProfile({
   ) : null;
   const identityActions =
     document.theme.themeId === "cinematic" ||
-    document.theme.themeId === "studio-light"
+    document.theme.themeId === "studio-light" ||
+    document.theme.themeId === "wikipedia"
       ? actions
       : null;
   const showLivingSurface =
     document.theme.themeId === "studio-light" &&
     document.theme.background.type === "style";
-
   return (
     <div
       className={`profile-page ${preview ? "profile-page-preview" : "min-h-dvh"}`}
       data-background={backgroundKey}
+      data-editing={Boolean(editor) || undefined}
       data-preview={preview || undefined}
       data-style={document.theme.themeId}
       data-template={document.theme.headerLayout}
@@ -119,18 +124,30 @@ export function PublicProfile({
       <main className="profile-shell" id="profile">
         {ownerToolbar}
         <section className="profile-content" aria-label="Thông tin cá nhân">
-          <BlockFrame editor={editor} selection={selection} type="identity">
+          <BlockFrame
+            editor={editor}
+            hasNestedNavigation={document.theme.themeId === "wikipedia"}
+            selection={selection}
+            type="identity"
+          >
             <IdentityBlockView
               actions={identityActions}
               document={document}
               editor={editor}
+              inert={preview || Boolean(editor) || Boolean(selection)}
+              onNavigate={editor?.onSelect ?? selection?.onSelect}
+              showWikipediaInfoboxDetails={!editor && !selection}
             />
           </BlockFrame>
           <div className="profile-inner">
             {identityActions ? null : actions}
             <div className="profile-blocks">
               {document.blocks.slice(1).map((block) =>
-                selection && !hasVisibleBlockContent(block) ? null : (
+                (document.theme.themeId === "wikipedia" &&
+                  block.type === "contact" &&
+                  !editor &&
+                  !selection) ||
+                (selection && !hasVisibleBlockContent(block)) ? null : (
                   <BlockFrame
                     editor={editor}
                     key={block.id}
@@ -150,6 +167,9 @@ export function PublicProfile({
             </div>
           </div>
         </section>
+        {document.theme.themeId === "wikipedia" ? (
+          <PublicProfileWikipediaAttribution />
+        ) : null}
       </main>
     </div>
   );
@@ -165,11 +185,13 @@ const blockLabel: Record<ProfileBlockType, string> = {
 function BlockFrame({
   children,
   editor,
+  hasNestedNavigation = false,
   selection,
   type,
 }: {
   children: React.ReactNode;
   editor?: EditorMode;
+  hasNestedNavigation?: boolean;
   selection?: SelectionMode;
   type: ProfileBlockType;
 }) {
@@ -181,6 +203,13 @@ function BlockFrame({
       className="profile-editor-block"
       data-profile-block={type}
       onClickCapture={(event) => {
+        if (
+          hasNestedNavigation &&
+          event.target instanceof Element &&
+          event.target.closest("[data-profile-navigation-link]")
+        ) {
+          return;
+        }
         if (selection) event.preventDefault();
         if (!interaction.disabled) interaction.onSelect(type);
       }}
@@ -191,8 +220,8 @@ function BlockFrame({
           if (!selection.disabled) selection.onSelect(type);
         }
       }}
-      role={selection ? "button" : undefined}
-      tabIndex={selection ? 0 : undefined}
+      role={selection && !hasNestedNavigation ? "button" : undefined}
+      tabIndex={selection && !hasNestedNavigation ? 0 : undefined}
     >
       {children}
     </div>
@@ -203,10 +232,16 @@ function IdentityBlockView({
   actions,
   document,
   editor,
+  inert,
+  onNavigate,
+  showWikipediaInfoboxDetails,
 }: {
   actions?: React.ReactNode;
   document: ProfileDocument;
   editor?: EditorMode;
+  inert: boolean;
+  onNavigate?: (type: ProfileBlockType) => void;
+  showWikipediaInfoboxDetails: boolean;
 }) {
   const identity = getProfileBlock(document, "identity");
   const { company, location, name, title, visibleFields } = identity.data;
@@ -217,11 +252,15 @@ function IdentityBlockView({
       : defaultCoverUrl);
   const shownTitle = visibleFields.title ? title : null;
   const shownCompany = visibleFields.company ? company : null;
+  const isWikipedia = document.theme.themeId === "wikipedia";
+  const contact = getProfileBlock(document, "contact");
+  const social = getProfileBlock(document, "social");
   return (
     <div
       className="profile-identity-block"
       data-has-avatar={Boolean(identity.data.avatarUrl)}
       data-has-cover={Boolean(identity.data.coverUrl)}
+      id="profile-identity"
     >
       {document.theme.headerLayout === "cover" ? (
         <div className="profile-cover relative">
@@ -235,6 +274,11 @@ function IdentityBlockView({
         </div>
       ) : null}
       <div className="profile-avatar-wrap">
+        {isWikipedia ? (
+          <div className="profile-wikipedia-infobox-heading">
+            <strong>{name || "Tên của bạn"}</strong>
+          </div>
+        ) : null}
         <Avatar className="profile-avatar">
           {identity.data.avatarUrl ? (
             <AvatarImage
@@ -246,6 +290,91 @@ function IdentityBlockView({
             {(name || "MH").slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
+        {isWikipedia &&
+        ((visibleFields.title && (shownTitle || editor)) ||
+          (visibleFields.company && (shownCompany || editor)) ||
+          (visibleFields.location && (location || editor))) ? (
+          <dl className="profile-wikipedia-infobox-summary">
+            {visibleFields.title && (shownTitle || editor) ? (
+              <>
+                <dt>Chức danh</dt>
+                <dd>
+                  {editor ? (
+                    <InlineInput
+                      ariaLabel="Chức danh"
+                      disabled={editor.disabled}
+                      maxLength={120}
+                      onChange={(value) =>
+                        editor.onChange(
+                          updateIdentityValue(document, "title", value),
+                          "identity.title",
+                        )
+                      }
+                      placeholder="Thêm chức danh"
+                      value={title ?? ""}
+                    />
+                  ) : (
+                    shownTitle
+                  )}
+                </dd>
+              </>
+            ) : null}
+            {visibleFields.company && (shownCompany || editor) ? (
+              <>
+                <dt>Đơn vị</dt>
+                <dd>
+                  {editor ? (
+                    <InlineInput
+                      ariaLabel="Công ty"
+                      disabled={editor.disabled}
+                      maxLength={120}
+                      onChange={(value) =>
+                        editor.onChange(
+                          updateIdentityValue(document, "company", value),
+                          "identity.company",
+                        )
+                      }
+                      placeholder="Thêm công ty"
+                      value={company ?? ""}
+                    />
+                  ) : (
+                    shownCompany
+                  )}
+                </dd>
+              </>
+            ) : null}
+            {visibleFields.location && (location || editor) ? (
+              <>
+                <dt>Địa điểm</dt>
+                <dd>
+                  {editor ? (
+                    <InlineInput
+                      ariaLabel="Địa điểm"
+                      disabled={editor.disabled}
+                      maxLength={120}
+                      onChange={(value) =>
+                        editor.onChange(
+                          updateIdentityValue(document, "location", value),
+                          "identity.location",
+                        )
+                      }
+                      placeholder="Thêm địa điểm"
+                      value={location ?? ""}
+                    />
+                  ) : (
+                    location
+                  )}
+                </dd>
+              </>
+            ) : null}
+          </dl>
+        ) : null}
+        {isWikipedia && showWikipediaInfoboxDetails ? (
+          <WikipediaInfoboxContact block={contact} inert={inert} />
+        ) : null}
+        {isWikipedia && actions ? (
+          <div className="profile-wikipedia-infobox-actions">{actions}</div>
+        ) : null}
       </div>
       <div className="profile-inner profile-identity-copy">
         <div className="profile-heading">
@@ -275,57 +404,59 @@ function IdentityBlockView({
               name || "Tên của bạn"
             )}
           </h1>
-          <p className="profile-byline">
-            {visibleFields.title ? (
-              editor ? (
-                <InlineInput
-                  ariaLabel="Chức danh"
-                  disabled={editor.disabled}
-                  maxLength={120}
-                  size={Math.min(Math.max((title ?? "").length, 14), 42)}
-                  onChange={(value) =>
-                    editor.onChange(
-                      updateIdentityValue(document, "title", value),
-                      "identity.title",
-                    )
-                  }
-                  placeholder="Thêm chức danh"
-                  value={title ?? ""}
-                />
-              ) : shownTitle ? (
-                <span>{shownTitle}</span>
-              ) : null
-            ) : null}
-            {(
-              editor
-                ? visibleFields.title && visibleFields.company
-                : Boolean(shownTitle && shownCompany)
-            ) ? (
-              <span aria-hidden="true">·</span>
-            ) : null}
-            {visibleFields.company ? (
-              editor ? (
-                <InlineInput
-                  ariaLabel="Công ty"
-                  className="profile-inline-accent"
-                  disabled={editor.disabled}
-                  maxLength={120}
-                  size={Math.min(Math.max((company ?? "").length, 8), 32)}
-                  onChange={(value) =>
-                    editor.onChange(
-                      updateIdentityValue(document, "company", value),
-                      "identity.company",
-                    )
-                  }
-                  placeholder="Thêm công ty"
-                  value={company ?? ""}
-                />
-              ) : shownCompany ? (
-                <strong>{shownCompany}</strong>
-              ) : null
-            ) : null}
-          </p>
-          {visibleFields.location && (location || editor) ? (
+          {!isWikipedia ? (
+            <p className="profile-byline">
+              {visibleFields.title ? (
+                editor ? (
+                  <InlineInput
+                    ariaLabel="Chức danh"
+                    disabled={editor.disabled}
+                    maxLength={120}
+                    size={Math.min(Math.max((title ?? "").length, 14), 42)}
+                    onChange={(value) =>
+                      editor.onChange(
+                        updateIdentityValue(document, "title", value),
+                        "identity.title",
+                      )
+                    }
+                    placeholder="Thêm chức danh"
+                    value={title ?? ""}
+                  />
+                ) : shownTitle ? (
+                  <span>{shownTitle}</span>
+                ) : null
+              ) : null}
+              {(
+                editor
+                  ? visibleFields.title && visibleFields.company
+                  : Boolean(shownTitle && shownCompany)
+              ) ? (
+                <span aria-hidden="true">·</span>
+              ) : null}
+              {visibleFields.company ? (
+                editor ? (
+                  <InlineInput
+                    ariaLabel="Công ty"
+                    className="profile-inline-accent"
+                    disabled={editor.disabled}
+                    maxLength={120}
+                    size={Math.min(Math.max((company ?? "").length, 8), 32)}
+                    onChange={(value) =>
+                      editor.onChange(
+                        updateIdentityValue(document, "company", value),
+                        "identity.company",
+                      )
+                    }
+                    placeholder="Thêm công ty"
+                    value={company ?? ""}
+                  />
+                ) : shownCompany ? (
+                  <strong>{shownCompany}</strong>
+                ) : null
+              ) : null}
+            </p>
+          ) : null}
+          {!isWikipedia && visibleFields.location && (location || editor) ? (
             <p className="profile-location">
               <MapPin aria-hidden="true" />
               {editor ? (
@@ -348,12 +479,39 @@ function IdentityBlockView({
               )}
             </p>
           ) : null}
-          {actions ? (
+          {actions && !isWikipedia ? (
             <div className="profile-identity-actions">{actions}</div>
           ) : null}
         </div>
+        {isWikipedia ? (
+          <ProfileWikipediaArticleNavigation
+            hasContact={hasVisibleBlockContent(contact)}
+            hasSocial={hasVisibleBlockContent(social)}
+            onNavigate={onNavigate}
+          />
+        ) : null}
       </div>
     </div>
+  );
+}
+
+function WikipediaInfoboxContact({
+  block,
+  inert,
+}: {
+  block: ReturnType<typeof getProfileBlock<"contact">>;
+  inert: boolean;
+}) {
+  if (!block.visible) return null;
+  const items = buildContactItems(block);
+  if (!items.length) return null;
+  return (
+    <DirectorySection
+      items={items}
+      preview={inert}
+      section="contact"
+      title="Thông tin liên hệ"
+    />
   );
 }
 
@@ -383,7 +541,11 @@ function OptionalBlockView({
   if (block.type === "bio") {
     if (editing) {
       return (
-        <section className="profile-section" data-profile-section="bio">
+        <section
+          className="profile-section"
+          data-profile-section="bio"
+          id="profile-bio"
+        >
           <h2>Giới thiệu</h2>
           <InlineTextarea
             ariaLabel="Giới thiệu"
@@ -401,7 +563,11 @@ function OptionalBlockView({
     }
     if (!block.data.text) return null;
     return (
-      <section className="profile-section" data-profile-section="bio">
+      <section
+        className="profile-section"
+        data-profile-section="bio"
+        id="profile-bio"
+      >
         <h2>Giới thiệu</h2>
         <p className="profile-bio profile-bio-block">{block.data.text}</p>
       </section>
@@ -451,7 +617,11 @@ function OptionalBlockView({
       }
       preview={preview}
       section="social"
-      title="Mạng xã hội"
+      title={
+        document.theme.themeId === "wikipedia"
+          ? "Liên kết ngoài"
+          : "Mạng xã hội"
+      }
     />
   ) : editing ? (
     <EmptyBlockPlaceholder
@@ -619,7 +789,11 @@ function DirectorySection({
   title: string;
 }) {
   return (
-    <section className="profile-section" data-profile-section={section}>
+    <section
+      className="profile-section"
+      data-profile-section={section}
+      id={`profile-${section}`}
+    >
       <h2>{title}</h2>
       <Card className="profile-section-card profile-directory-card">
         <div className="profile-directory-list">

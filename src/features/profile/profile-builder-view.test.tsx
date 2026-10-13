@@ -29,9 +29,17 @@ const document = createProfileDocument({
 
 describe("Profile Builder canvas boundary", () => {
   test("keeps the profile static while exposing block selection", () => {
+    const encyclopediaDocument = {
+      ...document,
+      theme: {
+        background: { type: "style" as const },
+        headerLayout: "minimal" as const,
+        themeId: "wikipedia" as const,
+      },
+    };
     const markup = renderToStaticMarkup(
       <PublicProfile
-        document={document}
+        document={encyclopediaDocument}
         profile={{ ...profileDocumentToFlat(document), publicToken: "TEST" }}
         selection={{
           disabled: false,
@@ -45,6 +53,10 @@ describe("Profile Builder canvas boundary", () => {
     expect(markup).not.toContain("data-selected");
     expect(markup).toContain("Private draft");
     expect(markup).toContain("profile-actions");
+    expect(markup).toContain('data-style="wikipedia"');
+    expect(markup).not.toContain("profile-wikipedia-notice");
+    expect(markup).toContain("profile-wikipedia-article-nav");
+    expect(markup).toContain("Powered by");
     expect(markup).toContain("data-preview-actions");
     expect(markup).toContain("Lưu liên hệ");
     expect(markup).toContain("Gọi");

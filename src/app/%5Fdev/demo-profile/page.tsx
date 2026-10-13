@@ -19,8 +19,10 @@ export default async function DemoProfileRoute({
   const requestedStyle = Array.isArray(query.style)
     ? query.style[0]
     : query.style;
+  const normalizedStyle =
+    requestedStyle === "bach-khoa" ? "wikipedia" : requestedStyle;
   const styleId =
-    profileStylePacks.find((style) => style.id === requestedStyle)?.id ??
+    profileStylePacks.find((style) => style.id === normalizedStyle)?.id ??
     "studio-light";
 
   return <DemoProfilePage styleId={styleId} />;
