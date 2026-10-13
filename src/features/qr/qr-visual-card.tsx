@@ -17,17 +17,17 @@ export const qrCardTextStyleOptions: {
 
 const headingBoxClass: Record<QrCardTextStyle, string> = {
   band: "",
-  dark: "w-fit rounded-[1.6cqw] bg-[rgb(10_10_10/0.8)] px-[3cqw] pt-[1.6cqw] pb-[1.2cqw]",
+  dark: "w-fit rounded-[1.6cqw] bg-[rgb(10_10_10/0.8)] px-[3.2cqw] pt-[3cqw] pb-[1.9cqw]",
   light:
-    "w-fit rounded-[1.6cqw] bg-[rgb(255_255_255/0.93)] px-[3cqw] pt-[1.6cqw] pb-[1.2cqw] text-[#0a0a0a]",
+    "w-fit rounded-[1.6cqw] bg-[rgb(255_255_255/0.93)] px-[3.2cqw] pt-[3cqw] pb-[1.9cqw] text-[#0a0a0a]",
   shadow: "",
 };
 
 const detailPanelClass: Record<QrCardTextStyle, string> = {
   band: "",
-  dark: "rounded-[1.6cqw] bg-[rgb(10_10_10/0.8)] px-[2.6cqw] py-[2cqw]",
+  dark: "self-stretch justify-center rounded-[1.6cqw] bg-[rgb(10_10_10/0.8)] px-[3cqw] py-[2.4cqw]",
   light:
-    "rounded-[1.6cqw] bg-[rgb(255_255_255/0.93)] px-[2.6cqw] py-[2cqw] text-[#0a0a0a]",
+    "self-stretch justify-center rounded-[1.6cqw] bg-[rgb(255_255_255/0.93)] px-[3cqw] py-[2.4cqw] text-[#0a0a0a]",
   shadow: "",
 };
 
@@ -114,7 +114,7 @@ export function QrVisualCard({
         >
           <h3
             className={cn(
-              "max-w-full py-[1cqw] text-[9.5cqw] leading-[1.14] font-bold tracking-[-0.025em] break-words text-balance uppercase",
+              "max-w-full py-[1cqw] text-[9.5cqw] leading-[1.2] font-bold tracking-[-0.025em] break-words text-balance uppercase",
               shadowText && "[text-shadow:0_1px_3px_rgb(0_0_0/0.45)]",
               headingBoxClass[textStyle],
               headingClassName,
@@ -142,7 +142,7 @@ export function QrVisualCard({
           {descriptionLines.length || location ? (
             <div
               className={cn(
-                "flex min-w-0 flex-1 flex-col items-start gap-[1.4cqw] pb-[0.5cqw] text-left",
+                "flex min-w-0 flex-1 flex-col items-start gap-[1.2cqw] pb-[0.5cqw] text-left",
                 shadowText &&
                   "[text-shadow:0_0_1px_rgb(0_0_0/0.95),0_1px_1px_rgb(0_0_0/0.95)]",
                 detailPanelClass[textStyle],
@@ -151,15 +151,12 @@ export function QrVisualCard({
               {descriptionLines.length ? (
                 <p
                   className={cn(
-                    "grid gap-[0.6cqw] text-[4.2cqw] leading-[1.3] font-semibold",
+                    "grid text-[4.2cqw] leading-[1.42] font-semibold",
                     textStyle === "light" ? "text-[#0a0a0a]" : "text-white",
                   )}
                 >
                   {descriptionLines.map((line, index) => (
-                    <span
-                      className="line-clamp-2 pt-[0.15em] text-balance"
-                      key={index}
-                    >
+                    <span className="line-clamp-2" key={index}>
                       {line}
                     </span>
                   ))}
@@ -168,7 +165,7 @@ export function QrVisualCard({
               {location ? (
                 <p
                   className={cn(
-                    "flex min-w-0 items-center gap-[1cqw] pt-[0.15em] text-[3.55cqw] leading-[1.3] font-medium",
+                    "flex min-w-0 items-center gap-[1cqw] text-[3.55cqw] leading-[1.42] font-medium",
                     textStyle === "light"
                       ? "text-[#0a0a0a]/80"
                       : "text-white/90",
