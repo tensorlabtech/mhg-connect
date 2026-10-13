@@ -18,10 +18,12 @@ import { user } from "@/db/schema/auth";
 export const profileStatuses = ["draft", "published"] as const;
 export const profileTemplates = ["cover", "minimal"] as const;
 export const qrStatuses = ["available", "active", "locked"] as const;
+export const qrCardTextStyles = ["shadow", "band", "dark", "light"] as const;
 
 export type ProfileStatus = (typeof profileStatuses)[number];
 export type ProfileTemplate = (typeof profileTemplates)[number];
 export type QrStatus = (typeof qrStatuses)[number];
+export type QrCardTextStyle = (typeof qrCardTextStyles)[number];
 
 export type ProfileVisibility = {
   bio: boolean;
@@ -115,6 +117,10 @@ export const qrCodes = pgTable(
     }),
     activeProfileId: uuid("active_profile_id"),
     cardBackgroundUrl: text("card_background_url"),
+    cardTextStyle: text("card_text_style")
+      .$type<QrCardTextStyle>()
+      .default("shadow")
+      .notNull(),
     activatedAt: productTimestamp("activated_at"),
     version: integer("version").default(1).notNull(),
     createdAt: productTimestamp("created_at").defaultNow().notNull(),
@@ -145,6 +151,10 @@ export const qrCodes = pgTable(
       )`,
     ),
     check("qr_codes_version_check", sql`${table.version} > 0`),
+    check(
+      "qr_codes_card_text_style_check",
+      sql`${table.cardTextStyle} in ('shadow', 'band', 'dark', 'light')`,
+    ),
   ],
 );
 

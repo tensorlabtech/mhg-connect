@@ -5,12 +5,20 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
+const defaultLabels = {
+  call: "Gọi",
+  saveContact: "Lưu liên hệ",
+  share: "Chia sẻ",
+};
+
 export function PublicProfileActions({
   inert = false,
+  labels = defaultLabels,
   phone,
   token,
 }: {
   inert?: boolean;
+  labels?: { call: string; saveContact: string; share: string };
   phone: string | null;
   token: string;
 }) {
@@ -36,7 +44,7 @@ export function PublicProfileActions({
       <div aria-hidden="true" className="profile-actions" data-preview-actions>
         <Button asChild className="min-w-0 flex-nowrap px-3" size="lg">
           <span>
-            <Download /> Lưu liên hệ
+            <Download /> {labels.saveContact}
           </span>
         </Button>
         {phone ? (
@@ -47,7 +55,7 @@ export function PublicProfileActions({
             variant="secondary"
           >
             <span>
-              <Phone /> Gọi
+              <Phone /> {labels.call}
             </span>
           </Button>
         ) : null}
@@ -58,7 +66,7 @@ export function PublicProfileActions({
           variant="secondary"
         >
           <span>
-            <Share2 /> Chia sẻ
+            <Share2 /> {labels.share}
           </span>
         </Button>
       </div>
@@ -69,11 +77,11 @@ export function PublicProfileActions({
     <div className="profile-actions">
       <Button asChild className="min-w-0 flex-nowrap px-3" size="lg">
         <a
-          aria-label="Lưu liên hệ"
+          aria-label={labels.saveContact}
           download
           href={`/q/${encodeURIComponent(token)}/vcard`}
         >
-          <Download /> Lưu liên hệ
+          <Download /> {labels.saveContact}
         </a>
       </Button>
       {phone ? (
@@ -84,7 +92,7 @@ export function PublicProfileActions({
           variant="secondary"
         >
           <a href={`tel:${phone.replace(/\s/g, "")}`}>
-            <Phone /> Gọi
+            <Phone /> {labels.call}
           </a>
         </Button>
       ) : null}
@@ -94,7 +102,7 @@ export function PublicProfileActions({
         size="lg"
         variant="secondary"
       >
-        <Share2 /> Chia sẻ
+        <Share2 /> {labels.share}
       </Button>
     </div>
   );

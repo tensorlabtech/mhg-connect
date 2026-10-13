@@ -13,11 +13,16 @@ import {
   validateDocumentMedia,
   validatePublishDocument,
 } from "@/features/profile/profile-builder-server-validation";
+import {
+  collectArticleImageUrls,
+  pruneOrphanTranslations,
+} from "@/features/profile/profile-article";
 import { profileDocumentToFlat } from "@/features/profile/profile-document";
 import { getProfileBlock } from "@/features/profile/profile-document";
 import { parseProfileDocument } from "@/features/profile/profile-document-schema";
 import {
   deleteProfileMedia,
+  isManagedProfileMediaUrl,
   type ProfileMediaKind,
   uploadProfileMedia,
 } from "@/lib/profile-media-storage";
@@ -153,7 +158,7 @@ export async function saveProfileAction(
     };
   }
   const document = replaceDocumentMedia(
-    validation.document,
+    pruneOrphanTranslations(validation.document),
     uploadedAvatar?.url ??
       getProfileBlock(validation.document, "identity").data.avatarUrl,
     uploadedCover?.url,
@@ -268,6 +273,12 @@ export async function saveProfileAction(
       previousBackground && previousBackground !== savedBackground
         ? previousBackground
         : null,
+      ...(() => {
+        const kept = new Set(collectArticleImageUrls(document));
+        return collectArticleImageUrls(previousDocument).filter(
+          (url) => !kept.has(url) && isManagedProfileMediaUrl(url),
+        );
+      })(),
     ].filter((url): url is string => Boolean(url?.startsWith("https://")));
     await Promise.all(
       replacedUrls.map((url) =>

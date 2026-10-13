@@ -8,6 +8,11 @@ import { PublicProfileActions } from "@/features/profile/public-profile-actions"
 import { ProfileLivingSurface } from "@/features/profile/profile-living-surface";
 import { defaultCoverUrl } from "@/features/profile/profile-demo-media";
 import {
+  getArticleBlock,
+  hasArticleContent,
+  localizeProfileDocument,
+} from "@/features/profile/profile-article";
+import {
   createProfileDocument,
   getProfileBlock,
   profileDocumentToFlat,
@@ -17,8 +22,17 @@ import type {
   ProfileBlock,
   ProfileBlockType,
   ProfileDocument,
+  ProfileLocale,
   SocialProfileField,
 } from "@/features/profile/profile-document-types";
+import { profileHtmlLang, profileText } from "@/features/profile/profile-i18n";
+import {
+  ArticleBlockView,
+  ArticleFactsList,
+  ProfileLanguageSwitcher,
+  visibleArticleFacts,
+  visibleArticleReferences,
+} from "@/features/profile/public-profile-article";
 import {
   getSocialProfileHref,
   socialPlatforms,
@@ -26,6 +40,7 @@ import {
 import {
   ProfileWikipediaArticleNavigation,
   PublicProfileWikipediaAttribution,
+  WikipediaInfoboxSpacer,
 } from "@/features/profile/public-profile-wikipedia-chrome";
 import {
   normalizeExternalUrl,
@@ -50,6 +65,8 @@ type SelectionMode = {
 export function PublicProfile({
   document: persistedDocument,
   editor,
+  locale = "vi",
+  onLocaleChange,
   ownerToolbar,
   profile,
   preview = false,
@@ -58,6 +75,8 @@ export function PublicProfile({
 }: {
   document?: unknown;
   editor?: EditorMode;
+  locale?: ProfileLocale;
+  onLocaleChange?: (locale: ProfileLocale) => void;
   ownerToolbar?: React.ReactNode;
   profile: PublicProfileViewModel;
   preview?: boolean;
@@ -65,12 +84,19 @@ export function PublicProfile({
   showActions?: boolean;
 }) {
   const fallback = createProfileDocument({ ...profile, status: "published" });
-  const document = persistedDocument
+  const sourceDocument = persistedDocument
     ? resolveProfileDocument(persistedDocument, {
         ...profile,
         status: "published",
       })
     : fallback;
+  const document = localizeProfileDocument(sourceDocument, locale);
+  const availableLocales: ProfileLocale[] = [
+    "vi",
+    ...(sourceDocument.languages ?? []),
+  ];
+  const interactive = !(preview || Boolean(editor) || Boolean(selection));
+  const isWikipediaTheme = document.theme.themeId === "wikipedia";
   const flat = profileDocumentToFlat(document);
   const phone =
     flat.visibleFields.phone && flat.phone?.trim() ? flat.phone.trim() : null;
@@ -97,6 +123,11 @@ export function PublicProfile({
   const actions = showActions ? (
     <PublicProfileActions
       inert={preview || Boolean(editor) || Boolean(selection)}
+      labels={{
+        call: profileText(locale, "call"),
+        saveContact: profileText(locale, "saveContact"),
+        share: profileText(locale, "share"),
+      }}
       phone={phone}
       token={profile.publicToken}
     />
@@ -118,11 +149,19 @@ export function PublicProfile({
       data-preview={preview || undefined}
       data-style={document.theme.themeId}
       data-template={document.theme.headerLayout}
+      lang={profileHtmlLang(locale)}
       style={backgroundStyle}
     >
       {showLivingSurface ? <ProfileLivingSurface /> : null}
       <main className="profile-shell" id="profile">
         {ownerToolbar}
+        <ProfileLanguageSwitcher
+          inert={!interactive && !onLocaleChange}
+          languages={availableLocales}
+          locale={locale}
+          onChange={onLocaleChange}
+        />
+        {isWikipediaTheme && interactive ? <WikipediaInfoboxSpacer /> : null}
         <section className="profile-content" aria-label="Thông tin cá nhân">
           <BlockFrame
             editor={editor}
@@ -135,6 +174,7 @@ export function PublicProfile({
               document={document}
               editor={editor}
               inert={preview || Boolean(editor) || Boolean(selection)}
+              locale={locale}
               onNavigate={editor?.onSelect ?? selection?.onSelect}
               showWikipediaInfoboxDetails={!editor && !selection}
             />
@@ -143,11 +183,48 @@ export function PublicProfile({
             {identityActions ? null : actions}
             <div className="profile-blocks">
               {document.blocks.slice(1).map((block) =>
-                (document.theme.themeId === "wikipedia" &&
-                  block.type === "contact" &&
-                  !editor &&
-                  !selection) ||
-                (selection && !hasVisibleBlockContent(block)) ? null : (
+                block.type === "article" ? (
+                  !block.visible && !selection && !editor ? null : (
+                    <BlockFrame
+                      editor={editor}
+                      key={block.id}
+                      selection={selection}
+                      type="article"
+                    >
+                      {block.visible ? (
+                        <ArticleBlockView
+                          document={document}
+                          inert={!interactive}
+                          isWikipedia={isWikipediaTheme}
+                          locale={locale}
+                          placeholder={
+                            selection || editor ? (
+                              <EmptyBlockPlaceholder
+                                disabled={(editor ?? selection)?.disabled}
+                                label="Bài viết đang trống — bấm để thêm mục, ảnh, nguồn"
+                                onSelect={() =>
+                                  (editor ?? selection)?.onSelect("article")
+                                }
+                              />
+                            ) : null
+                          }
+                        />
+                      ) : (
+                        <HiddenBlockPlaceholder
+                          disabled={(editor ?? selection)?.disabled}
+                          label={blockLabel.article}
+                          onSelect={() =>
+                            (editor ?? selection)?.onSelect("article")
+                          }
+                        />
+                      )}
+                    </BlockFrame>
+                  )
+                ) : (document.theme.themeId === "wikipedia" &&
+                    block.type === "contact" &&
+                    !editor &&
+                    !selection) ||
+                  (selection && !hasVisibleBlockContent(block)) ? null : (
                   <BlockFrame
                     editor={editor}
                     key={block.id}
@@ -158,6 +235,7 @@ export function PublicProfile({
                       document={document}
                       editor={editor}
                       editing={Boolean(editor)}
+                      locale={locale}
                       preview={preview || Boolean(editor) || Boolean(selection)}
                       type={block.type}
                     />
@@ -176,6 +254,7 @@ export function PublicProfile({
 }
 
 const blockLabel: Record<ProfileBlockType, string> = {
+  article: "Bài viết",
   bio: "Giới thiệu",
   contact: "Thông tin liên hệ",
   identity: "Avatar & Cover",
@@ -233,6 +312,7 @@ function IdentityBlockView({
   document,
   editor,
   inert,
+  locale,
   onNavigate,
   showWikipediaInfoboxDetails,
 }: {
@@ -240,6 +320,7 @@ function IdentityBlockView({
   document: ProfileDocument;
   editor?: EditorMode;
   inert: boolean;
+  locale: ProfileLocale;
   onNavigate?: (type: ProfileBlockType) => void;
   showWikipediaInfoboxDetails: boolean;
 }) {
@@ -255,6 +336,9 @@ function IdentityBlockView({
   const isWikipedia = document.theme.themeId === "wikipedia";
   const contact = getProfileBlock(document, "contact");
   const social = getProfileBlock(document, "social");
+  const article = getArticleBlock(document);
+  const articleFacts = isWikipedia ? visibleArticleFacts(article) : [];
+  const referenceCount = visibleArticleReferences(article).length;
   return (
     <div
       className="profile-identity-block"
@@ -297,7 +381,7 @@ function IdentityBlockView({
           <dl className="profile-wikipedia-infobox-summary">
             {visibleFields.title && (shownTitle || editor) ? (
               <>
-                <dt>Chức danh</dt>
+                <dt>{profileText(locale, "title")}</dt>
                 <dd>
                   {editor ? (
                     <InlineInput
@@ -321,7 +405,7 @@ function IdentityBlockView({
             ) : null}
             {visibleFields.company && (shownCompany || editor) ? (
               <>
-                <dt>Đơn vị</dt>
+                <dt>{profileText(locale, "company")}</dt>
                 <dd>
                   {editor ? (
                     <InlineInput
@@ -345,7 +429,7 @@ function IdentityBlockView({
             ) : null}
             {visibleFields.location && (location || editor) ? (
               <>
-                <dt>Địa điểm</dt>
+                <dt>{profileText(locale, "location")}</dt>
                 <dd>
                   {editor ? (
                     <InlineInput
@@ -369,8 +453,18 @@ function IdentityBlockView({
             ) : null}
           </dl>
         ) : null}
+        <ArticleFactsList
+          className="profile-wikipedia-infobox-summary profile-wikipedia-infobox-facts"
+          facts={articleFacts}
+          inert={inert}
+          referenceCount={referenceCount}
+        />
         {isWikipedia && showWikipediaInfoboxDetails ? (
-          <WikipediaInfoboxContact block={contact} inert={inert} />
+          <WikipediaInfoboxContact
+            block={contact}
+            inert={inert}
+            locale={locale}
+          />
         ) : null}
         {isWikipedia && actions ? (
           <div className="profile-wikipedia-infobox-actions">{actions}</div>
@@ -487,6 +581,11 @@ function IdentityBlockView({
           <ProfileWikipediaArticleNavigation
             hasContact={hasVisibleBlockContent(contact)}
             hasSocial={hasVisibleBlockContent(social)}
+            labels={{
+              article: profileText(locale, "article"),
+              contact: profileText(locale, "contact"),
+              externalLinks: profileText(locale, "externalLinks"),
+            }}
             onNavigate={onNavigate}
           />
         ) : null}
@@ -498,19 +597,21 @@ function IdentityBlockView({
 function WikipediaInfoboxContact({
   block,
   inert,
+  locale,
 }: {
   block: ReturnType<typeof getProfileBlock<"contact">>;
   inert: boolean;
+  locale: ProfileLocale;
 }) {
   if (!block.visible) return null;
-  const items = buildContactItems(block);
+  const items = buildContactItems(block, false, locale);
   if (!items.length) return null;
   return (
     <DirectorySection
       items={items}
       preview={inert}
       section="contact"
-      title="Thông tin liên hệ"
+      title={profileText(locale, "contactDetails")}
     />
   );
 }
@@ -519,16 +620,18 @@ function OptionalBlockView({
   document,
   editor,
   editing,
+  locale,
   preview,
   type,
 }: {
   document: ProfileDocument;
   editor?: EditorMode;
   editing: boolean;
+  locale: ProfileLocale;
   preview: boolean;
   type: ProfileBlockType;
 }) {
-  if (type === "identity") return null;
+  if (type === "identity" || type === "article") return null;
   const block = getProfileBlock(document, type);
   if (!block.visible)
     return editing ? (
@@ -568,13 +671,13 @@ function OptionalBlockView({
         data-profile-section="bio"
         id="profile-bio"
       >
-        <h2>Giới thiệu</h2>
+        <h2>{profileText(locale, "about")}</h2>
         <p className="profile-bio profile-bio-block">{block.data.text}</p>
       </section>
     );
   }
   if (block.type === "contact") {
-    const items = buildContactItems(block, editing);
+    const items = buildContactItems(block, editing, locale);
     return items.length ? (
       <DirectorySection
         items={items}
@@ -591,7 +694,7 @@ function OptionalBlockView({
         }
         preview={preview}
         section="contact"
-        title="Thông tin liên hệ"
+        title={profileText(locale, "contactDetails")}
       />
     ) : editing ? (
       <EmptyBlockPlaceholder
@@ -619,8 +722,8 @@ function OptionalBlockView({
       section="social"
       title={
         document.theme.themeId === "wikipedia"
-          ? "Liên kết ngoài"
-          : "Mạng xã hội"
+          ? profileText(locale, "externalLinks")
+          : profileText(locale, "social")
       }
     />
   ) : editing ? (
@@ -697,6 +800,7 @@ type ContactField = "contactEmail" | "phone" | "website";
 
 function hasVisibleBlockContent(block: ProfileBlock) {
   if (block.type === "identity") return true;
+  if (block.type === "article") return hasArticleContent(block);
   if (!block.visible) return false;
   if (block.type === "bio") return Boolean(block.data.text);
   if (block.type === "contact") return buildContactItems(block).length > 0;
@@ -706,6 +810,7 @@ function hasVisibleBlockContent(block: ProfileBlock) {
 function buildContactItems(
   block: ReturnType<typeof getProfileBlock<"contact">>,
   editing = false,
+  locale: ProfileLocale = "vi",
 ) {
   const { contactEmail, phone, visibleFields, website } = block.data;
   return [
@@ -714,7 +819,7 @@ function buildContactItems(
           field: "phone",
           href: phone ? `tel:${phone.replace(/\s/g, "")}` : "",
           icon: Phone,
-          label: "Điện thoại",
+          label: profileText(locale, "phone"),
           maxLength: 40,
           placeholder: "Thêm số điện thoại",
           type: "tel" as const,
@@ -726,7 +831,7 @@ function buildContactItems(
           field: "contactEmail",
           href: contactEmail ? `mailto:${contactEmail}` : "",
           icon: Mail,
-          label: "Email",
+          label: profileText(locale, "email"),
           maxLength: 254,
           placeholder: "Thêm email",
           type: "email" as const,
@@ -738,7 +843,7 @@ function buildContactItems(
           field: "website",
           href: website ? normalizeExternalUrl(website) : "",
           icon: Globe2,
-          label: "Website",
+          label: profileText(locale, "website"),
           maxLength: 240,
           placeholder: "Thêm website",
           type: "url" as const,
@@ -749,7 +854,7 @@ function buildContactItems(
 }
 
 function buildSocialItems(
-  block: ReturnType<typeof getProfileBlock<"social">>,
+  block: Extract<ProfileBlock, { type: "social" }>,
   editing = false,
 ) {
   return socialPlatforms.flatMap((platform) => {

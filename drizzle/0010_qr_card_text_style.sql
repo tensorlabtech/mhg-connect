@@ -1,0 +1,2 @@
+ALTER TABLE "qr_codes" ADD COLUMN "card_text_style" text DEFAULT 'shadow' NOT NULL;--> statement-breakpoint
+ALTER TABLE "qr_codes" ADD CONSTRAINT "qr_codes_card_text_style_check" CHECK ("qr_codes"."card_text_style" in ('shadow', 'band', 'dark', 'light'));

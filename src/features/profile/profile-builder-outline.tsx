@@ -16,10 +16,14 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Eye, EyeOff, GripVertical } from "lucide-react";
+import { BookOpenText, Eye, EyeOff, GripVertical } from "lucide-react";
 import { useState } from "react";
 
 import { IconButton } from "@/components/ui/button";
+import {
+  addArticleBlock,
+  getArticleBlock,
+} from "@/features/profile/profile-article";
 import { moveProfileBlock } from "@/features/profile/profile-document";
 import type {
   ProfileBlock,
@@ -30,6 +34,7 @@ import type {
 export type BuilderSelection = ProfileBlockType | "document";
 
 const labels: Record<ProfileBlockType, string> = {
+  article: "Bài viết (kiểu Wikipedia)",
   bio: "Giới thiệu",
   contact: "Liên hệ",
   identity: "Avatar & Cover",
@@ -125,6 +130,28 @@ export function ProfileBuilderOutline({
           ))}
         </SortableContext>
       </DndContext>
+      {!getArticleBlock(document) ? (
+        <button
+          className="mt-1 grid min-h-14 grid-cols-[2.75rem_minmax(0,1fr)] items-center rounded-lg border border-dashed border-border text-left transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/60 disabled:opacity-50"
+          disabled={disabled}
+          onClick={() => {
+            onChange(addArticleBlock(document));
+            onSelect("article");
+          }}
+          type="button"
+        >
+          <BookOpenText
+            aria-hidden="true"
+            className="mx-auto size-4 text-muted-foreground"
+          />
+          <span className="grid gap-0.5 pr-3 py-2">
+            <span className="text-sm">Thêm bài viết kiểu Wikipedia</span>
+            <span className="text-xs text-muted-foreground">
+              Hộp thông tin, các mục có ảnh, liên kết, nguồn tham khảo
+            </span>
+          </span>
+        </button>
+      ) : null}
       <p aria-live="polite" className="sr-only">
         {announcement}
       </p>

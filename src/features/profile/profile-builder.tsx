@@ -38,7 +38,10 @@ import {
   normalizeProfileDocumentVisibility,
   profileDocumentToFlat,
 } from "@/features/profile/profile-document";
-import type { ProfileDocument } from "@/features/profile/profile-document-types";
+import type {
+  ProfileDocument,
+  ProfileLocale,
+} from "@/features/profile/profile-document-types";
 import { PublicProfile } from "@/features/profile/public-profile";
 import { useProfileBuilderHistory } from "@/features/profile/use-profile-builder-history";
 
@@ -94,6 +97,7 @@ function ProfileBuilderEditor({
   const [version, setVersion] = useState(initialVersion);
   const [exitDialogOpen, setExitDialogOpen] = useState(false);
   const [selection, setSelection] = useState<BuilderSelection>("identity");
+  const [editLocale, setEditLocale] = useState<ProfileLocale>("vi");
   const [sidebarMode, setSidebarMode] =
     useState<ProfileBuilderSidebarMode>("list");
   const history = useProfileBuilderHistory(savedInitialDocument);
@@ -258,11 +262,13 @@ function ProfileBuilderEditor({
       document={editorDocument}
       hasUnsavedChanges={hasUnsavedChanges}
       invalidField={saveErrorField}
+      locale={editLocale}
       mode={sidebarMode}
       onBack={requestExit}
       onBackToList={() => setSidebarMode("list")}
       onChange={changeDocument}
       onClose={desktopSidebar ? undefined : () => setMobileSidebarOpen(false)}
+      onLocaleChange={setEditLocale}
       onProfileLabelChange={(value) => {
         setProfileLabel(value);
         setSaveError(null);
@@ -366,6 +372,8 @@ function ProfileBuilderEditor({
             <section aria-label="Canvas hồ sơ" className="min-w-0">
               <PublicProfile
                 document={editorDocument}
+                locale={editLocale}
+                onLocaleChange={setEditLocale}
                 profile={previewProfile}
                 selection={{
                   disabled: saving,

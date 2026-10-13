@@ -7,6 +7,7 @@ import {
   PencilLine,
   Plus,
   QrCode,
+  Repeat2,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -26,6 +27,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import type { QrCardTextStyle } from "@/db/schema/product";
 import { QrProfileAssignment } from "@/features/qr/qr-profile-assignment";
 import { QrCardPreviewDialog } from "@/features/qr/qr-card-preview-dialog";
 
@@ -51,6 +53,7 @@ export function QrCardActions({
   scanCount,
   status,
   svg,
+  textStyle,
   version,
 }: {
   activatedAt: Date | null;
@@ -65,6 +68,7 @@ export function QrCardActions({
   scanCount: number;
   status: string;
   svg: string;
+  textStyle: QrCardTextStyle;
   version: number;
 }) {
   const [assignmentOpen, setAssignmentOpen] = useState(false);
@@ -117,32 +121,41 @@ export function QrCardActions({
           qrId={qrId}
           status={status}
           svg={svg}
+          textStyle={textStyle}
           version={version}
         />
+        {profiles.length ? (
+          <Button
+            className="w-full"
+            onClick={() => setAssignmentOpen(true)}
+            type="button"
+            variant="secondary"
+          >
+            <Repeat2 aria-hidden="true" />
+            {profileId ? "Đổi hồ sơ hiển thị" : "Gắn hồ sơ có sẵn"}
+          </Button>
+        ) : (
+          <Button asChild className="w-full" variant="secondary">
+            <Link href={`/profiles/new?qr=${encodeURIComponent(publicToken)}`}>
+              <Plus aria-hidden="true" /> Tạo hồ sơ để gắn
+            </Link>
+          </Button>
+        )}
+        <Button
+          className="w-full"
+          onClick={() => setCardOpen(true)}
+          type="button"
+          variant="secondary"
+        >
+          <QrCode aria-hidden="true" /> Thiết kế thẻ QR
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button className="w-full" variant="secondary">
-              Thao tác <MoreHorizontal />
+              Thêm <MoreHorizontal />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={() => setCardOpen(true)}>
-              <QrCode /> Xem mã QR
-            </DropdownMenuItem>
-            {profiles.length ? (
-              <DropdownMenuItem onSelect={() => setAssignmentOpen(true)}>
-                <PencilLine />
-                {profileId ? "Đổi hồ sơ" : "Gắn hồ sơ"}
-              </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem asChild>
-                <Link
-                  href={`/profiles/new?qr=${encodeURIComponent(publicToken)}`}
-                >
-                  <Plus /> Tạo hồ sơ để gắn
-                </Link>
-              </DropdownMenuItem>
-            )}
             <DropdownMenuItem onSelect={() => setStatisticsOpen(true)}>
               <BarChart3 /> Thống kê
             </DropdownMenuItem>

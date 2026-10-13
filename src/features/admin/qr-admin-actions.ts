@@ -75,6 +75,7 @@ export async function adminQrAction(formData: FormData) {
           activeProfileId: null,
           activatedAt: null,
           cardBackgroundUrl: null,
+          cardTextStyle: "shadow" as const,
           ownerId: null,
           status: "available" as const,
           updatedAt: new Date(),

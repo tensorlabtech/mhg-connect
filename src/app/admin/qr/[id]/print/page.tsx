@@ -40,6 +40,7 @@ export default async function AdminQrPrintPage({
           headingClassName={qr.profileName ? undefined : "text-nowrap"}
           location={qr.profileLocation}
           svg={svg}
+          textStyle={qr.cardTextStyle}
         />
       </main>
     </ProductPage>

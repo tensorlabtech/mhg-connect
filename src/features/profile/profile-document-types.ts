@@ -1,11 +1,26 @@
-export const profileBlockTypes = [
+export const requiredProfileBlockTypes = [
   "identity",
   "bio",
   "contact",
   "social",
 ] as const;
+export const profileBlockTypes = [
+  ...requiredProfileBlockTypes,
+  "article",
+] as const;
 
 export type ProfileBlockType = (typeof profileBlockTypes)[number];
+export type RequiredProfileBlockType =
+  (typeof requiredProfileBlockTypes)[number];
+
+export const profileLocales = ["vi", "en", "zh"] as const;
+export type ProfileLocale = (typeof profileLocales)[number];
+export const profileExtraLocales = ["en", "zh"] as const;
+export type ProfileExtraLocale = (typeof profileExtraLocales)[number];
+/** Bản dịch theo khóa ổn định, ví dụ `identity.title`, `section.<id>.body`. */
+export type ProfileTranslations = Partial<
+  Record<ProfileExtraLocale, Record<string, string>>
+>;
 export type ProfileHeaderLayout = "cover" | "minimal";
 export const profileStyleIds = [
   "signature-dark",
@@ -98,15 +113,52 @@ export type SocialBlock = {
   visible: boolean;
 };
 
+export type ArticleFact = { id: string; label: string; value: string };
+export const articleImageAligns = ["right", "left", "center"] as const;
+export type ArticleImageAlign = (typeof articleImageAligns)[number];
+export type ArticleImage = {
+  align: ArticleImageAlign;
+  caption: string | null;
+  id: string;
+  url: string;
+};
+export type ArticleSection = {
+  body: string;
+  heading: string;
+  id: string;
+  images: ArticleImage[];
+};
+export type ArticleReference = {
+  date: string | null;
+  id: string;
+  source: string | null;
+  title: string;
+  url: string | null;
+};
+
+export type ArticleBlock = {
+  data: {
+    facts: ArticleFact[];
+    references: ArticleReference[];
+    sections: ArticleSection[];
+  };
+  id: "article";
+  type: "article";
+  visible: boolean;
+};
+
 export type ProfileBlock =
-  IdentityBlock | BioBlock | ContactBlock | SocialBlock;
+  IdentityBlock | BioBlock | ContactBlock | SocialBlock | ArticleBlock;
 
 export type ProfileDocument = {
   blocks: ProfileBlock[];
+  /** Ngôn ngữ bổ sung hiển thị cho khách (tiếng Việt luôn có). */
+  languages?: ProfileExtraLocale[];
   schemaVersion: 1;
   theme: {
     background: ProfileBackground;
     headerLayout: ProfileHeaderLayout;
     themeId: ProfileStyleId;
   };
+  translations?: ProfileTranslations;
 };

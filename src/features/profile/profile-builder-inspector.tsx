@@ -16,9 +16,13 @@ import {
   IdentityInspector,
   InspectorHeading,
 } from "@/features/profile/profile-builder-inspector-fields";
+import { ArticleInspector } from "@/features/profile/profile-builder-article-inspector";
 import type { BuilderSelection } from "@/features/profile/profile-builder-outline";
 import { getProfileBlock } from "@/features/profile/profile-document";
-import type { ProfileDocument } from "@/features/profile/profile-document-types";
+import type {
+  ProfileDocument,
+  ProfileLocale,
+} from "@/features/profile/profile-document-types";
 import { socialPlatforms } from "@/features/profile/profile-social-platforms";
 
 type ChangeHandler = (document: ProfileDocument, coalesceKey?: string) => void;
@@ -26,6 +30,7 @@ type ChangeHandler = (document: ProfileDocument, coalesceKey?: string) => void;
 export function ProfileBuilderInspector({
   document,
   invalidField,
+  locale = "vi",
   onBackToList,
   onChange,
   onProfileLabelChange,
@@ -34,6 +39,7 @@ export function ProfileBuilderInspector({
 }: {
   document: ProfileDocument;
   invalidField?: string | null;
+  locale?: ProfileLocale;
   onBackToList?: () => void;
   onChange: ChangeHandler;
   onProfileLabelChange?: (value: string) => void;
@@ -55,6 +61,7 @@ export function ProfileBuilderInspector({
       <IdentityInspector
         document={document}
         invalidField={invalidField}
+        locale={locale}
         onBackToList={onBackToList}
         onChange={onChange}
       />
@@ -64,6 +71,17 @@ export function ProfileBuilderInspector({
     return (
       <BioInspector
         document={document}
+        locale={locale}
+        onBackToList={onBackToList}
+        onChange={onChange}
+      />
+    );
+  }
+  if (selection === "article") {
+    return (
+      <ArticleInspector
+        document={document}
+        locale={locale}
         onBackToList={onBackToList}
         onChange={onChange}
       />
@@ -73,6 +91,7 @@ export function ProfileBuilderInspector({
     <DirectoryInspector
       document={document}
       invalidField={invalidField}
+      locale={locale}
       onBackToList={onBackToList}
       onChange={onChange}
       type={selection}
@@ -83,18 +102,21 @@ export function ProfileBuilderInspector({
 function DirectoryInspector({
   document,
   invalidField,
+  locale,
   onBackToList,
   onChange,
   type,
 }: {
   document: ProfileDocument;
   invalidField?: string | null;
+  locale: ProfileLocale;
   onBackToList?: () => void;
   onChange: ChangeHandler;
   type: "contact" | "social";
 }) {
   const block = getProfileBlock(document, type);
   const title = type === "contact" ? "Thông tin liên hệ" : "Mạng xã hội";
+  const translating = locale !== "vi";
 
   function setVisible(visible: boolean) {
     update({ ...block, visible });
@@ -113,7 +135,13 @@ function DirectoryInspector({
           />
         }
       />
-      {type === "contact" && block.type === "contact" ? (
+      {translating ? (
+        <p className="rounded-lg bg-muted/50 p-3 text-xs leading-5 text-muted-foreground">
+          Số điện thoại, email và liên kết dùng chung cho mọi ngôn ngữ. Sửa ở
+          bản Tiếng Việt.
+        </p>
+      ) : null}
+      {translating ? null : type === "contact" && block.type === "contact" ? (
         <FieldGroup>
           <>
             <DirectoryField

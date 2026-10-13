@@ -16,7 +16,12 @@ import {
   ProfileBuilderOutline,
   type BuilderSelection,
 } from "@/features/profile/profile-builder-outline";
-import type { ProfileDocument } from "@/features/profile/profile-document-types";
+import {
+  profileLocales,
+  type ProfileDocument,
+  type ProfileLocale,
+} from "@/features/profile/profile-document-types";
+import { profileLocaleLabels } from "@/features/profile/profile-i18n";
 
 export type ProfileBuilderSidebarMode = "detail" | "list";
 type SaveStatus = "conflict" | "dirty" | "error" | "saved" | "saving";
@@ -27,11 +32,13 @@ type SidebarProps = {
   document: ProfileDocument;
   hasUnsavedChanges: boolean;
   invalidField: string | null;
+  locale: ProfileLocale;
   mode: ProfileBuilderSidebarMode;
   onBack: () => void;
   onBackToList: () => void;
   onChange: (document: ProfileDocument, coalesceKey?: string) => void;
   onClose?: () => void;
+  onLocaleChange: (locale: ProfileLocale) => void;
   onProfileLabelChange: (value: string) => void;
   onRedo: () => void;
   onRetry: () => void;
@@ -52,11 +59,13 @@ export function ProfileBuilderSidebar(props: SidebarProps) {
     document,
     hasUnsavedChanges,
     invalidField,
+    locale,
     mode,
     onBack,
     onBackToList,
     onChange,
     onClose,
+    onLocaleChange,
     onProfileLabelChange,
     onRedo,
     onRetry,
@@ -114,6 +123,12 @@ export function ProfileBuilderSidebar(props: SidebarProps) {
       </header>
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5">
         {saveError ? <SaveError error={saveError} /> : null}
+        <LocalePicker
+          document={document}
+          disabled={saving}
+          locale={locale}
+          onChange={onLocaleChange}
+        />
         {mode === "list" ? (
           <div className="grid gap-10">
             <section
@@ -137,7 +152,7 @@ export function ProfileBuilderSidebar(props: SidebarProps) {
               <h2 className="text-base font-medium" id="profile-settings-title">
                 Cài đặt hồ sơ
               </h2>
-              <fieldset disabled={saving}>
+              <fieldset className="min-w-0" disabled={saving}>
                 <ProfileBuilderInspector
                   document={document}
                   invalidField={invalidField}
@@ -150,10 +165,11 @@ export function ProfileBuilderSidebar(props: SidebarProps) {
             </section>
           </div>
         ) : (
-          <fieldset disabled={saving}>
+          <fieldset className="min-w-0" disabled={saving}>
             <ProfileBuilderInspector
               document={document}
               invalidField={invalidField}
+              locale={locale}
               onBackToList={onBackToList}
               onChange={onChange}
               selection={selection}
@@ -161,6 +177,60 @@ export function ProfileBuilderSidebar(props: SidebarProps) {
           </fieldset>
         )}
       </div>
+    </div>
+  );
+}
+
+function LocalePicker({
+  disabled,
+  document,
+  locale,
+  onChange,
+}: {
+  disabled: boolean;
+  document: ProfileDocument;
+  locale: ProfileLocale;
+  onChange: (locale: ProfileLocale) => void;
+}) {
+  const visitorReady =
+    locale === "vi" || (document.languages?.includes(locale) ?? false);
+  return (
+    <div className="mb-6 grid gap-2">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-xs text-muted-foreground" id="builder-locale">
+          Ngôn ngữ đang nhập
+        </span>
+        <div
+          aria-labelledby="builder-locale"
+          className="inline-flex rounded-control bg-muted p-0.5"
+          role="radiogroup"
+        >
+          {profileLocales.map((item) => (
+            <button
+              aria-checked={item === locale}
+              className={`h-control-xs rounded-[calc(var(--radius-control)-2px)] px-2.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring/60 disabled:opacity-50 ${
+                item === locale
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              disabled={disabled}
+              key={item}
+              onClick={() => onChange(item)}
+              role="radio"
+              title={profileLocaleLabels[item].long}
+              type="button"
+            >
+              {profileLocaleLabels[item].short}
+            </button>
+          ))}
+        </div>
+      </div>
+      {!visitorReady ? (
+        <p className="text-xs leading-5 text-muted-foreground">
+          Bản {profileLocaleLabels[locale].long} chưa bật cho khách xem. Bật ở
+          mục &quot;Ngôn ngữ cho khách xem&quot; trong Cài đặt hồ sơ.
+        </p>
+      ) : null}
     </div>
   );
 }

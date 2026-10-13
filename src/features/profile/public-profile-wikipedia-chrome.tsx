@@ -12,25 +12,74 @@ export function PublicProfileWikipediaAttribution() {
   );
 }
 
+export function WikipediaInfoboxSpacer() {
+  useEffect(() => {
+    const infobox = document.querySelector<HTMLElement>(
+      "#profile-identity .profile-avatar-wrap",
+    );
+    const content = infobox?.closest<HTMLElement>(".profile-content");
+    if (!infobox || !content) return;
+    const sync = () => {
+      if (getComputedStyle(infobox).position !== "absolute") {
+        content.style.removeProperty("--profile-wikipedia-infobox-end");
+        return;
+      }
+      const contentTop = content.getBoundingClientRect().top;
+      const infoboxBottom = infobox.getBoundingClientRect().bottom;
+      content.style.setProperty(
+        "--profile-wikipedia-infobox-end",
+        `${Math.ceil(infoboxBottom - contentTop + 32)}px`,
+      );
+    };
+    sync();
+    const observer = new ResizeObserver(sync);
+    observer.observe(infobox);
+    window.addEventListener("resize", sync);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", sync);
+    };
+  }, []);
+  return null;
+}
+
+const defaultNavigationLabels = {
+  article: "Bài viết",
+  contact: "Liên hệ",
+  externalLinks: "Liên kết ngoài",
+};
+
 export function ProfileWikipediaArticleNavigation({
   hasContact,
   hasSocial,
+  labels = defaultNavigationLabels,
   onNavigate,
 }: {
   hasContact: boolean;
   hasSocial: boolean;
+  labels?: { article: string; contact: string; externalLinks: string };
   onNavigate?: (type: ProfileBlockType) => void;
 }) {
   const sections = [
-    { id: "profile-identity", label: "Bài viết", type: "identity" as const },
+    {
+      id: "profile-identity",
+      label: labels.article,
+      type: "identity" as const,
+    },
     ...(hasContact
-      ? [{ id: "profile-contact", label: "Liên hệ", type: "contact" as const }]
+      ? [
+          {
+            id: "profile-contact",
+            label: labels.contact,
+            type: "contact" as const,
+          },
+        ]
       : []),
     ...(hasSocial
       ? [
           {
             id: "profile-social",
-            label: "Liên kết ngoài",
+            label: labels.externalLinks,
             type: "social" as const,
           },
         ]

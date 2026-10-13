@@ -10,10 +10,7 @@ import { del, put } from "@vercel/blob";
 import { runtimeEnv } from "@/lib/runtime-env";
 
 export type ProfileMediaKind =
-  | "avatar"
-  | "background"
-  | "card-background"
-  | "cover";
+  "article" | "avatar" | "background" | "card-background" | "cover";
 
 let b2Client: S3Client | null = null;
 

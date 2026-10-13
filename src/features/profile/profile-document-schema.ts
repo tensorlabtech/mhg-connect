@@ -1,15 +1,89 @@
 import { z } from "zod";
 
 import {
+  articleImageAligns,
   profileBackgroundEffectIds,
   profileBackgroundPresetIds,
   profileBlockTypes,
+  profileExtraLocales,
   profileStyleIds,
+  requiredProfileBlockTypes,
   type ProfileBlockType,
   type ProfileDocument,
 } from "@/features/profile/profile-document-types";
 
 const nullableText = (max: number) => z.string().trim().max(max).nullable();
+const itemId = z.string().regex(/^[a-z0-9-]{4,40}$/i, "Mã mục không hợp lệ.");
+const httpsUrl = z
+  .string()
+  .trim()
+  .max(600)
+  .refine((value) => /^https:\/\/[^\s]+$/i.test(value), "Cần đường dẫn https.");
+const linkUrl = z
+  .string()
+  .trim()
+  .max(600)
+  .refine(
+    (value) => /^(https?:\/\/|mailto:|tel:)[^\s]+$/i.test(value),
+    "Đường dẫn không hợp lệ.",
+  );
+
+export const articleLimits = {
+  bodyLength: 6000,
+  facts: 30,
+  imagesPerSection: 6,
+  references: 60,
+  sections: 24,
+  translationLength: 6000,
+  translationKeys: 600,
+} as const;
+
+const articleBlockSchema = z.object({
+  data: z.object({
+    facts: z
+      .array(
+        z.object({
+          id: itemId,
+          label: z.string().trim().max(60),
+          value: z.string().trim().max(400),
+        }),
+      )
+      .max(articleLimits.facts),
+    references: z
+      .array(
+        z.object({
+          date: nullableText(40),
+          id: itemId,
+          source: nullableText(120),
+          title: z.string().trim().max(300),
+          url: linkUrl.nullable(),
+        }),
+      )
+      .max(articleLimits.references),
+    sections: z
+      .array(
+        z.object({
+          body: z.string().max(articleLimits.bodyLength),
+          heading: z.string().trim().max(120),
+          id: itemId,
+          images: z
+            .array(
+              z.object({
+                align: z.enum(articleImageAligns),
+                caption: nullableText(300),
+                id: itemId,
+                url: httpsUrl,
+              }),
+            )
+            .max(articleLimits.imagesPerSection),
+        }),
+      )
+      .max(articleLimits.sections),
+  }),
+  id: z.literal("article"),
+  type: z.literal("article"),
+  visible: z.boolean(),
+});
 const identityBlockSchema = z.object({
   data: z.object({
     avatarUrl: nullableText(500),
@@ -80,10 +154,36 @@ const profileBlockSchema = z.discriminatedUnion("type", [
     type: z.literal("social"),
     visible: z.boolean(),
   }),
+  articleBlockSchema,
 ]);
 
+const translationsSchema = z
+  .partialRecord(
+    z.enum(profileExtraLocales),
+    z
+      .record(
+        z
+          .string()
+          .regex(/^[a-z]+(\.[a-z0-9-]+){1,3}$/i)
+          .max(80),
+        z.string().max(articleLimits.translationLength),
+      )
+      .refine(
+        (value) => Object.keys(value).length <= articleLimits.translationKeys,
+        "Quá nhiều bản dịch.",
+      ),
+  )
+  .optional();
+
 const profileDocumentSchemaBase = z.object({
-  blocks: z.array(profileBlockSchema).length(profileBlockTypes.length),
+  blocks: z
+    .array(profileBlockSchema)
+    .min(requiredProfileBlockTypes.length)
+    .max(profileBlockTypes.length),
+  languages: z
+    .array(z.enum(profileExtraLocales))
+    .max(profileExtraLocales.length)
+    .optional(),
   schemaVersion: z.literal(1),
   theme: z.object({
     background: z
@@ -107,12 +207,13 @@ const profileDocumentSchemaBase = z.object({
     headerLayout: z.enum(["cover", "minimal"]),
     themeId: z.enum(profileStyleIds),
   }),
+  translations: translationsSchema,
 });
 
 export const profileDocumentSchema = profileDocumentSchemaBase.superRefine(
   (document, context) => {
     const types = document.blocks.map((block) => block.type);
-    for (const type of profileBlockTypes) {
+    for (const type of requiredProfileBlockTypes) {
       if (types.filter((candidate) => candidate === type).length !== 1) {
         context.addIssue({
           code: "custom",
@@ -120,6 +221,13 @@ export const profileDocumentSchema = profileDocumentSchemaBase.superRefine(
           path: ["blocks"],
         });
       }
+    }
+    if (types.filter((candidate) => candidate === "article").length > 1) {
+      context.addIssue({
+        code: "custom",
+        message: "Hồ sơ chỉ có tối đa một block bài viết.",
+        path: ["blocks"],
+      });
     }
     if (types[0] !== "identity") {
       context.addIssue({

@@ -1,6 +1,7 @@
 import QRCode from "qrcode";
 
 import { StatusBadge } from "@/components/product/status-badge";
+import type { QrCardTextStyle } from "@/db/schema/product";
 import { QrCardActions } from "@/features/qr/qr-card-actions";
 import { QrVisualCard } from "@/features/qr/qr-visual-card";
 import { runtimeEnv } from "@/lib/runtime-env";
@@ -8,6 +9,7 @@ import { runtimeEnv } from "@/lib/runtime-env";
 type QrItem = {
   activatedAt: Date | null;
   cardBackgroundUrl: string | null;
+  cardTextStyle: QrCardTextStyle;
   id: string;
   profileCompany: string | null;
   profileId: string | null;
@@ -79,6 +81,7 @@ function QrOwnershipCard({
         heading={profileName}
         location={item.profileLocation}
         svg={item.svg}
+        textStyle={item.cardTextStyle}
       />
 
       <section className="flex min-h-80 flex-col p-6 sm:p-8">
@@ -124,6 +127,7 @@ function QrOwnershipCard({
           scanCount={item.scanCount}
           status={item.status}
           svg={item.svg}
+          textStyle={item.cardTextStyle}
           version={item.version}
         />
       </section>

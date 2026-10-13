@@ -12,14 +12,23 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  getTranslation,
+  setTranslation,
+} from "@/features/profile/profile-article";
+import { TranslationField } from "@/features/profile/profile-builder-translation-field";
 import { ProfileMediaPicker } from "@/features/profile/profile-media-picker";
 import { getProfileBlock } from "@/features/profile/profile-document";
 import { ProfileStyleSettings } from "@/features/profile/profile-style-settings";
-import type {
-  ProfileBlock,
-  ProfileBlockType,
-  ProfileDocument,
+import {
+  profileExtraLocales,
+  type ProfileBlock,
+  type ProfileBlockType,
+  type ProfileDocument,
+  type ProfileLocale,
 } from "@/features/profile/profile-document-types";
+import { profileLocaleLabels } from "@/features/profile/profile-i18n";
 
 type ChangeHandler = (document: ProfileDocument, coalesceKey?: string) => void;
 
@@ -65,6 +74,106 @@ export function DocumentInspector({
         </p>
       </Field>
       <ProfileStyleSettings document={document} onChange={onChange} />
+      <fieldset className="grid gap-3">
+        <legend className="mb-1 text-sm font-medium">
+          Ngôn ngữ cho khách xem
+        </legend>
+        <p className="text-xs leading-5 text-muted-foreground">
+          Tiếng Việt luôn hiển thị. Bật thêm ngôn ngữ để khách bấm chuyển; phần
+          chưa dịch sẽ hiện tiếng Việt. Nhập bản dịch bằng nút ngôn ngữ ở đầu
+          thanh chỉnh sửa.
+        </p>
+        {profileExtraLocales.map((locale) => {
+          const enabled = document.languages?.includes(locale) ?? false;
+          const id = `profile-language-${locale}`;
+          return (
+            <div
+              className="flex min-h-10 items-center justify-between gap-3"
+              key={locale}
+            >
+              <label className="text-sm" htmlFor={id}>
+                {profileLocaleLabels[locale].long}
+              </label>
+              <Switch
+                checked={enabled}
+                id={id}
+                onCheckedChange={(checked) => {
+                  const current = new Set(document.languages ?? []);
+                  if (checked) current.add(locale);
+                  else current.delete(locale);
+                  const languages = profileExtraLocales.filter((item) =>
+                    current.has(item),
+                  );
+                  onChange({
+                    ...document,
+                    languages: languages.length ? languages : undefined,
+                  });
+                }}
+              />
+            </div>
+          );
+        })}
+      </fieldset>
+    </div>
+  );
+}
+
+function IdentityTranslationInspector({
+  document,
+  locale,
+  onBackToList,
+  onChange,
+}: {
+  document: ProfileDocument;
+  locale: Exclude<ProfileLocale, "vi">;
+  onBackToList?: () => void;
+  onChange: ChangeHandler;
+}) {
+  const block = getProfileBlock(document, "identity");
+  const fields = [
+    { key: "identity.name", original: block.data.name, title: "Họ và tên" },
+    {
+      key: "identity.title",
+      original: block.data.title ?? "",
+      title: "Chức danh",
+    },
+    {
+      key: "identity.company",
+      original: block.data.company ?? "",
+      title: "Công ty",
+    },
+    {
+      key: "identity.location",
+      original: block.data.location ?? "",
+      title: "Địa điểm",
+    },
+  ];
+  return (
+    <div className="grid gap-7">
+      <InspectorHeading
+        onBack={onBackToList}
+        title={`Avatar & Cover · ${profileLocaleLabels[locale].short}`}
+      />
+      <p className="rounded-lg bg-muted/50 p-3 text-xs leading-5 text-muted-foreground">
+        Đang nhập bản {profileLocaleLabels[locale].long}. Ảnh dùng chung cho mọi
+        ngôn ngữ. Ô để trống sẽ hiện chữ tiếng Việt.
+      </p>
+      <FieldGroup>
+        {fields.map((field) => (
+          <TranslationField
+            key={field.key}
+            onChange={(value) =>
+              onChange(
+                setTranslation(document, locale, field.key, value),
+                field.key,
+              )
+            }
+            original={field.original}
+            title={field.title}
+            value={getTranslation(document, locale, field.key) ?? ""}
+          />
+        ))}
+      </FieldGroup>
     </div>
   );
 }
@@ -72,14 +181,25 @@ export function DocumentInspector({
 export function IdentityInspector({
   document,
   invalidField,
+  locale = "vi",
   onBackToList,
   onChange,
 }: {
   document: ProfileDocument;
   invalidField?: string | null;
+  locale?: ProfileLocale;
   onBackToList?: () => void;
   onChange: ChangeHandler;
 }) {
+  if (locale !== "vi")
+    return (
+      <IdentityTranslationInspector
+        document={document}
+        locale={locale}
+        onBackToList={onBackToList}
+        onChange={onChange}
+      />
+    );
   const block = getProfileBlock(document, "identity");
   const setData = (patch: Partial<typeof block.data>, key?: string) =>
     onChange(
@@ -148,14 +268,37 @@ export function IdentityInspector({
 
 export function BioInspector({
   document,
+  locale = "vi",
   onBackToList,
   onChange,
 }: {
   document: ProfileDocument;
+  locale?: ProfileLocale;
   onBackToList?: () => void;
   onChange: ChangeHandler;
 }) {
   const block = getProfileBlock(document, "bio");
+  if (locale !== "vi")
+    return (
+      <div className="grid gap-7">
+        <InspectorHeading
+          onBack={onBackToList}
+          title={`Giới thiệu · ${profileLocaleLabels[locale].short}`}
+        />
+        <TranslationField
+          multiline
+          onChange={(value) =>
+            onChange(
+              setTranslation(document, locale, "bio.text", value),
+              "bio.text",
+            )
+          }
+          original={block.data.text ?? ""}
+          title="Nội dung"
+          value={getTranslation(document, locale, "bio.text") ?? ""}
+        />
+      </div>
+    );
   return (
     <div className="grid gap-7">
       <InspectorHeading

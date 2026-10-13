@@ -15,6 +15,10 @@ import {
   recordScan,
 } from "@/features/qr/qr-data";
 import { PublicProfile } from "@/features/profile/public-profile";
+import {
+  localizeProfileDocument,
+  resolveProfileLocale,
+} from "@/features/profile/profile-article";
 import { profileDocumentToFlat } from "@/features/profile/profile-document";
 import { getPublishedProfileSnapshot } from "@/features/profile/published-profile-snapshot";
 import { getSession } from "@/lib/session";
@@ -24,12 +28,21 @@ const getQrPageData = cache(getQrByToken);
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const { token } = await params;
+  const query = await searchParams;
   const result = await getQrPageData(token);
-  const document = getPublishedProfileSnapshot(result?.profile);
+  const snapshot = getPublishedProfileSnapshot(result?.profile);
+  const document = snapshot
+    ? localizeProfileDocument(
+        snapshot,
+        resolveProfileLocale(snapshot, query.lang),
+      )
+    : null;
 
   if (!result || result.qr.status !== "active" || !document) {
     return {
@@ -188,6 +201,13 @@ export default async function QrPage({
     await recordScan(result.qr.id, userAgent).catch(() => undefined);
   });
   const profile = { ...result.profile, publicToken: token };
+  const locale = resolveProfileLocale(publishedDocument, query.lang);
 
-  return <PublicProfile document={publishedDocument} profile={profile} />;
+  return (
+    <PublicProfile
+      document={publishedDocument}
+      locale={locale}
+      profile={profile}
+    />
+  );
 }

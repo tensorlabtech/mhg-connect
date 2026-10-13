@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "cn";
 import { Download, LoaderCircle, RotateCcw, Upload } from "lucide-react";
 import {
   useActionState,
@@ -10,11 +11,16 @@ import {
 } from "react";
 
 import { Button } from "@/components/ui/button";
+import type { QrCardTextStyle } from "@/db/schema/product";
 import {
   saveQrCardBackgroundAction,
+  saveQrCardTextStyleAction,
   type SaveQrCardBackgroundResult,
 } from "@/features/qr/qr-card-background-actions";
-import { QrVisualCard } from "@/features/qr/qr-visual-card";
+import {
+  QrVisualCard,
+  qrCardTextStyleOptions,
+} from "@/features/qr/qr-visual-card";
 
 const acceptedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const maxFileSize = 5 * 1024 * 1024;
@@ -30,6 +36,7 @@ export function QrCardBackgroundEditor({
   onUnsavedChange,
   qrId,
   svg,
+  textStyle = "shadow",
   version,
 }: {
   backgroundUrl: string | null;
@@ -41,8 +48,18 @@ export function QrCardBackgroundEditor({
   onUnsavedChange?: (unsaved: boolean) => void;
   qrId: string;
   svg: string;
+  textStyle?: QrCardTextStyle;
   version: number;
 }) {
+  const [liveVersion, setLiveVersion] = useState(version);
+  const [savedTextStyle, setSavedTextStyle] =
+    useState<QrCardTextStyle>(textStyle);
+  const [selectedTextStyle, setSelectedTextStyle] =
+    useState<QrCardTextStyle>(textStyle);
+  const [textStyleStatus, setTextStyleStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+  const [textStyleError, setTextStyleError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -68,6 +85,7 @@ export function QrCardBackgroundEditor({
     onPendingChange?.(true);
     try {
       const result = await saveQrCardBackgroundAction(previous, formData);
+      if (result.version) setLiveVersion(result.version);
       if (result.success) {
         setFileName(null);
         setClientError(null);
@@ -165,9 +183,40 @@ export function QrCardBackgroundEditor({
     }
   }
 
+  async function chooseTextStyle(next: QrCardTextStyle) {
+    if (next === selectedTextStyle || textStyleStatus === "saving") return;
+    const previous = savedTextStyle;
+    setSelectedTextStyle(next);
+    setTextStyleStatus("saving");
+    setTextStyleError(null);
+    onPendingChange?.(true);
+    try {
+      const result = await saveQrCardTextStyleAction({
+        expectedVersion: liveVersion,
+        qrId,
+        textStyle: next,
+      });
+      if (result.success && result.textStyle && result.version) {
+        setSavedTextStyle(result.textStyle);
+        setLiveVersion(result.version);
+        setTextStyleStatus("saved");
+      } else {
+        setSelectedTextStyle(previous);
+        setTextStyleStatus("error");
+        setTextStyleError(result.error ?? "Chưa thể lưu nền chữ.");
+      }
+    } catch {
+      setSelectedTextStyle(previous);
+      setTextStyleStatus("error");
+      setTextStyleError("Chưa thể lưu nền chữ. Hãy thử lại.");
+    } finally {
+      onPendingChange?.(false);
+    }
+  }
+
   const persistedUrl = state.success ? (state.url ?? null) : backgroundUrl;
   const activeBackground = previewUrl ?? persistedUrl;
-  const currentVersion = state.version ?? version;
+  const currentVersion = liveVersion;
   const error = clientError ?? (!state.success ? state.error : undefined);
 
   return (
@@ -179,6 +228,7 @@ export function QrCardBackgroundEditor({
           heading={heading}
           location={location}
           svg={svg}
+          textStyle={selectedTextStyle}
         />
       </div>
 
@@ -198,7 +248,61 @@ export function QrCardBackgroundEditor({
           ref={inputRef}
           type="file"
         />
-        <div className="max-w-md">
+        <fieldset className="grid min-w-0 gap-3">
+          <legend className="text-sm font-medium">Nền chữ</legend>
+          <p className="-mt-1 max-w-md text-sm leading-6 text-muted-foreground">
+            Giúp tên và chức danh luôn dễ đọc khi ảnh nền nhiều chi tiết.
+          </p>
+          <div
+            aria-label="Nền chữ trên thẻ"
+            className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+            role="radiogroup"
+          >
+            {qrCardTextStyleOptions.map((option) => {
+              const selected = option.id === selectedTextStyle;
+              return (
+                <button
+                  aria-checked={selected}
+                  aria-label={option.label}
+                  className={cn(
+                    "grid cursor-pointer gap-2 rounded-overlay p-2 text-left transition-colors focus-visible:ring-2 focus-visible:ring-ring/60 disabled:cursor-wait",
+                    selected
+                      ? "bg-secondary ring-1 ring-gold/70"
+                      : "bg-secondary/55 hover:bg-secondary",
+                  )}
+                  disabled={textStyleStatus === "saving"}
+                  key={option.id}
+                  onClick={() => chooseTextStyle(option.id)}
+                  role="radio"
+                  title={option.description}
+                  type="button"
+                >
+                  <TextStyleSwatch style={option.id} />
+                  <span className="text-xs font-medium">{option.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          <p
+            className={cn(
+              "text-xs leading-5",
+              textStyleStatus === "error"
+                ? "text-destructive"
+                : "text-muted-foreground",
+            )}
+            role={textStyleStatus === "error" ? "alert" : "status"}
+          >
+            {textStyleStatus === "saving"
+              ? "Đang lưu nền chữ…"
+              : textStyleStatus === "saved"
+                ? "Đã lưu nền chữ."
+                : textStyleStatus === "error"
+                  ? textStyleError
+                  : "Chọn là lưu ngay."}
+          </p>
+        </fieldset>
+
+        <div className="max-w-md border-t border-border/60 pt-5">
           <h3 className="text-sm font-medium">Ảnh nền thẻ</h3>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
             Ảnh phủ toàn bộ thẻ. Ảnh ngang sẽ được cắt theo trung tâm để phù hợp
@@ -293,5 +397,32 @@ export function QrCardBackgroundEditor({
         ) : null}
       </form>
     </div>
+  );
+}
+
+function TextStyleSwatch({ style }: { style: QrCardTextStyle }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="relative flex h-10 items-center justify-center overflow-hidden rounded-[0.35rem] bg-[linear-gradient(135deg,#7aa6c9_0%,#e8d8b8_45%,#4b6b8a_100%)]"
+    >
+      {style === "band" ? (
+        <span className="absolute inset-x-0 h-4 bg-[rgb(10_10_10/0.62)]" />
+      ) : null}
+      <span
+        className={cn(
+          "relative text-[0.625rem] font-bold tracking-tight uppercase",
+          style === "shadow" &&
+            "text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.45)]",
+          style === "band" && "text-white",
+          style === "dark" &&
+            "rounded-[0.2rem] bg-[rgb(10_10_10/0.78)] px-1.5 py-0.5 text-white",
+          style === "light" &&
+            "rounded-[0.2rem] bg-[rgb(255_255_255/0.92)] px-1.5 py-0.5 text-[#0a0a0a]",
+        )}
+      >
+        Tên
+      </span>
+    </span>
   );
 }

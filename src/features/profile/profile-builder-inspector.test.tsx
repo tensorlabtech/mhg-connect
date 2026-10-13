@@ -7,6 +7,10 @@ import { ProfileBuilderInspector } from "@/features/profile/profile-builder-insp
 import { createProfileDocument } from "@/features/profile/profile-document";
 import { profileStylePacks } from "@/features/profile/profile-style-packs";
 
+vi.mock("@/features/profile/profile-article-actions", () => ({
+  uploadArticleImageAction: vi.fn(),
+}));
+
 const document = createProfileDocument({
   avatarUrl: null,
   bio: "Giới thiệu ngắn",

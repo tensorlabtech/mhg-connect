@@ -24,6 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import type { QrCardTextStyle } from "@/db/schema/product";
 import { QrCardBackgroundEditor } from "@/features/qr/qr-card-background-editor";
 
 export function QrCardPreviewDialog({
@@ -37,6 +38,7 @@ export function QrCardPreviewDialog({
   qrId,
   status,
   svg,
+  textStyle,
   version,
 }: {
   backgroundUrl: string | null;
@@ -49,6 +51,7 @@ export function QrCardPreviewDialog({
   qrId: string;
   status: string;
   svg: string;
+  textStyle: QrCardTextStyle;
   version: number;
 }) {
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
@@ -84,8 +87,8 @@ export function QrCardPreviewDialog({
               Mã QR {publicToken}
             </DialogTitle>
             <DialogDescription>
-              Xem, tải xuống hoặc đổi ảnh nền của thẻ trước khi gửi cho người
-              nhận quét.
+              Chọn nền chữ, đổi ảnh nền hoặc tải ảnh thẻ trước khi in và gửi cho
+              người nhận quét.
             </DialogDescription>
           </DialogHeader>
 
@@ -99,6 +102,7 @@ export function QrCardPreviewDialog({
             onUnsavedChange={setHasUnsavedChanges}
             qrId={qrId}
             svg={svg}
+            textStyle={textStyle}
             version={version}
           />
 

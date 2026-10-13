@@ -87,6 +87,7 @@ export default async function AdminQrDetailPage({
                     publicToken={qr.publicToken}
                     status={qr.status}
                     svg={svg}
+                    textStyle={qr.cardTextStyle}
                   />
                   <Button asChild className="w-full" variant="outline">
                     <Link href={`/admin/qr/${qr.id}/print`} target="_blank">

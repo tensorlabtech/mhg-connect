@@ -2,6 +2,35 @@ import { cn } from "cn";
 import { MapPin } from "lucide-react";
 import Image from "next/image";
 
+import type { QrCardTextStyle } from "@/db/schema/product";
+
+export const qrCardTextStyleOptions: {
+  description: string;
+  id: QrCardTextStyle;
+  label: string;
+}[] = [
+  { description: "Chữ trắng có bóng nhẹ", id: "shadow", label: "Bóng chữ" },
+  { description: "Dải tối ngang thẻ", id: "band", label: "Dải tối" },
+  { description: "Khung tối ôm chữ", id: "dark", label: "Khung tối" },
+  { description: "Khung sáng, chữ đen", id: "light", label: "Khung sáng" },
+];
+
+const headingTextClass: Record<QrCardTextStyle, string> = {
+  band: "",
+  dark: "rounded-[1.2cqw] bg-[rgb(10_10_10/0.78)] px-[2.2cqw] py-[0.6cqw] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]",
+  light:
+    "rounded-[1.2cqw] bg-[rgb(255_255_255/0.92)] px-[2.2cqw] py-[0.6cqw] text-[#0a0a0a] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]",
+  shadow: "",
+};
+
+const detailPanelClass: Record<QrCardTextStyle, string> = {
+  band: "",
+  dark: "rounded-[1.6cqw] bg-[rgb(10_10_10/0.78)] px-[2.4cqw] py-[1.8cqw]",
+  light:
+    "rounded-[1.6cqw] bg-[rgb(255_255_255/0.92)] px-[2.4cqw] py-[1.8cqw] text-[#0a0a0a]",
+  shadow: "",
+};
+
 export function QrVisualCard({
   backgroundUrl,
   className,
@@ -10,6 +39,7 @@ export function QrVisualCard({
   headingClassName,
   location,
   svg,
+  textStyle = "shadow",
 }: {
   backgroundUrl?: string | null;
   className?: string;
@@ -18,7 +48,9 @@ export function QrVisualCard({
   headingClassName?: string;
   location?: string | null;
   svg: string;
+  textStyle?: QrCardTextStyle;
 }) {
+  const shadowText = textStyle === "shadow" || textStyle === "band";
   return (
     <section
       aria-label={`Thẻ QR: ${heading}`}
@@ -61,16 +93,35 @@ export function QrVisualCard({
           width={3248}
         />
 
-        <div className="absolute inset-x-[3.5cqw] top-1/2 flex min-w-0 -translate-y-1/2 items-center justify-center text-center">
+        <div
+          className={cn(
+            "absolute top-1/2 flex min-w-0 -translate-y-1/2 items-center justify-center text-center",
+            textStyle === "band"
+              ? "inset-x-0 bg-[rgb(10_10_10/0.62)] px-[3.5cqw] py-[2.5cqw]"
+              : "inset-x-[3.5cqw]",
+          )}
+          data-card-text-style={textStyle}
+        >
           <h3
             className={cn(
-              "max-w-full py-[1cqw] text-[9.5cqw] leading-[1.08] font-bold tracking-[-0.025em] break-words text-balance uppercase [text-shadow:0_1px_3px_rgb(0_0_0/0.45)]",
+              "max-w-full py-[1cqw] text-[9.5cqw] leading-[1.08] font-bold tracking-[-0.025em] break-words text-balance uppercase",
+              shadowText && "[text-shadow:0_1px_3px_rgb(0_0_0/0.45)]",
+              textStyle === "dark" || textStyle === "light"
+                ? "leading-[1.32]"
+                : "",
               headingClassName,
             )}
           >
-            {heading}
+            <span className={headingTextClass[textStyle]}>{heading}</span>
           </h3>
         </div>
+
+        {textStyle === "band" ? (
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 h-[48cqw] bg-[rgb(10_10_10/0.62)]"
+          />
+        ) : null}
 
         <div className="absolute inset-x-[3.5cqw] bottom-[3.5cqw] flex items-end gap-[3cqw]">
           <div
@@ -81,14 +132,33 @@ export function QrVisualCard({
           />
 
           {description || location ? (
-            <div className="flex min-w-0 flex-1 flex-col items-start gap-[1.5cqw] pb-[0.5cqw] text-left [text-shadow:0_0_1px_rgb(0_0_0/0.95),0_1px_1px_rgb(0_0_0/0.95)]">
+            <div
+              className={cn(
+                "flex min-w-0 flex-1 flex-col items-start gap-[1.5cqw] pb-[0.5cqw] text-left",
+                shadowText &&
+                  "[text-shadow:0_0_1px_rgb(0_0_0/0.95),0_1px_1px_rgb(0_0_0/0.95)]",
+                detailPanelClass[textStyle],
+              )}
+            >
               {description ? (
-                <p className="line-clamp-3 text-[4.35cqw] leading-[1.16] font-semibold text-white">
+                <p
+                  className={cn(
+                    "line-clamp-3 text-[4.35cqw] leading-[1.16] font-semibold",
+                    textStyle === "light" ? "text-[#0a0a0a]" : "text-white",
+                  )}
+                >
                   {description}
                 </p>
               ) : null}
               {location ? (
-                <p className="flex min-w-0 items-center gap-[1cqw] text-[3.55cqw] leading-[1.22] font-medium text-white/90">
+                <p
+                  className={cn(
+                    "flex min-w-0 items-center gap-[1cqw] text-[3.55cqw] leading-[1.22] font-medium",
+                    textStyle === "light"
+                      ? "text-[#0a0a0a]/80"
+                      : "text-white/90",
+                  )}
+                >
                   <MapPin
                     aria-hidden="true"
                     className="size-[4.5cqw] shrink-0"

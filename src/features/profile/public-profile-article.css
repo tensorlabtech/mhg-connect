@@ -1,0 +1,392 @@
+/* Bài viết kiểu bách khoa: hộp thông tin, các mục, ảnh, nguồn và chuyển ngôn ngữ. */
+
+.profile-language-switch {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  margin-bottom: var(--profile-space-3, 0.75rem);
+  font-size: 0.8125rem;
+  line-height: 1;
+}
+
+.profile-language-switch > * {
+  display: inline-flex;
+  min-width: 2.5rem;
+  min-height: 2rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.625rem;
+  border-radius: 999px;
+  color: var(--muted-foreground);
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.profile-language-switch > a:hover,
+.profile-language-switch > button:hover {
+  background: color-mix(in oklch, currentColor 10%, transparent);
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.profile-language-switch > [aria-current],
+.profile-language-switch > [aria-pressed="true"] {
+  background: color-mix(in oklch, var(--foreground) 12%, transparent);
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+.profile-language-switch > a:focus-visible,
+.profile-language-switch > button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.profile-article {
+  display: grid;
+  gap: var(--profile-space-12, 3rem);
+  min-width: 0;
+}
+
+.profile-facts-card {
+  padding: var(--profile-space-6, 1.5rem);
+}
+
+.profile-facts-list {
+  display: grid;
+  grid-template-columns: minmax(6rem, 30%) minmax(0, 1fr);
+  gap: 0.75rem 1.25rem;
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.profile-facts-list dt {
+  color: var(--muted-foreground);
+  font-weight: 600;
+}
+
+.profile-facts-list dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.profile-article-toc {
+  display: inline-grid;
+  justify-self: start;
+  gap: 0.5rem;
+  min-width: min(100%, 16rem);
+  padding: 0.875rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--profile-radius, 0.75rem);
+  font-size: 0.875rem;
+}
+
+.profile-article-toc strong {
+  font-weight: 700;
+}
+
+.profile-article-toc ol {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.profile-article-toc a,
+.profile-article-toc li > span {
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+.profile-article-toc-number {
+  min-width: 1.25rem;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.profile-article-body {
+  display: flow-root;
+  min-width: 0;
+}
+
+.profile-rich-text {
+  display: grid;
+  gap: 0.875rem;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.profile-rich-text > * {
+  margin: 0;
+}
+
+.profile-rich-text h3 {
+  margin-top: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.profile-rich-text ul {
+  display: grid;
+  gap: 0.375rem;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.profile-rich-link {
+  color: var(--profile-accent, var(--gold, currentColor));
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.profile-citation {
+  margin-left: 0.05em;
+  font-size: 0.72em;
+  line-height: 0;
+  vertical-align: super;
+}
+
+.profile-citation a {
+  text-decoration: none;
+}
+
+.profile-article-figure {
+  display: grid;
+  gap: 0.375rem;
+  width: min(100%, 17rem);
+  margin: 0.25rem 0 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.profile-article-figure[data-align="right"] {
+  float: right;
+  clear: right;
+  margin-left: 1.5rem;
+}
+
+.profile-article-figure[data-align="left"] {
+  float: left;
+  clear: left;
+  margin-right: 1.5rem;
+}
+
+.profile-article-figure[data-align="center"] {
+  clear: both;
+  width: min(100%, 36rem);
+  margin: 1.25rem auto 0.5rem;
+  text-align: center;
+}
+
+.profile-article-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: calc(var(--profile-radius, 0.75rem) * 0.6);
+  background: var(--muted);
+  object-fit: cover;
+}
+
+.profile-article-figure figcaption {
+  color: var(--muted-foreground);
+}
+
+.profile-references {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding-left: 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  list-style: decimal;
+  overflow-wrap: anywhere;
+}
+
+.profile-references li {
+  scroll-margin-top: 2rem;
+}
+
+.profile-references li:target {
+  background: color-mix(in oklch, var(--gold, #e5c16b) 22%, transparent);
+}
+
+.profile-references a {
+  color: var(--profile-accent, var(--gold, currentColor));
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.profile-article-section {
+  scroll-margin-top: 2rem;
+}
+
+@container (max-width: 34rem) {
+  .profile-article-figure[data-align="left"],
+  .profile-article-figure[data-align="right"] {
+    float: none;
+    width: 100%;
+    margin: 0.5rem 0 1rem;
+  }
+
+  .profile-facts-list {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+  }
+
+  .profile-facts-list dd {
+    margin-bottom: 0.625rem;
+  }
+}
+
+/* Bách khoa: hộp thông tin và bài viết giống trang bách khoa. */
+
+/* Georgia thiếu nhiều chữ tiếng Việt có dấu kép (ầ, ế, ổ…) nên trình duyệt ghép dấu lệch.
+   Dùng Lora (đã nạp sẵn, đủ bộ tiếng Việt) cho tiêu đề. */
+.profile-page[data-style="wikipedia"] {
+  --profile-heading-font: "Lora Variable", "Times New Roman", serif;
+}
+.profile-page[data-style="wikipedia"] .profile-content {
+  min-height: max(44rem, var(--profile-wikipedia-infobox-end, 0px));
+}
+
+.profile-page[data-style="wikipedia"] .profile-language-switch {
+  gap: 0;
+  margin-bottom: var(--profile-space-2);
+  font-family: var(--profile-body-font);
+}
+
+.profile-page[data-style="wikipedia"] .profile-language-switch > * {
+  min-height: 1.75rem;
+  border-radius: 0;
+  color: var(--profile-accent);
+}
+
+.profile-page[data-style="wikipedia"] .profile-language-switch > [aria-current],
+.profile-page[data-style="wikipedia"]
+  .profile-language-switch
+  > [aria-pressed="true"] {
+  background: transparent;
+  color: var(--profile-foreground);
+  box-shadow: inset 0 -2px 0 var(--profile-foreground);
+}
+
+.profile-page[data-style="wikipedia"] .profile-wikipedia-infobox-summary {
+  grid-template-columns: 6.25rem minmax(0, 1fr);
+}
+
+.profile-page[data-style="wikipedia"] .profile-wikipedia-infobox-facts {
+  margin-top: 0;
+}
+
+.profile-page[data-style="wikipedia"]
+  .profile-wikipedia-infobox-summary
+  + .profile-wikipedia-infobox-facts {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.profile-page[data-style="wikipedia"] .profile-wikipedia-infobox-facts a {
+  color: var(--profile-accent);
+}
+
+.profile-page[data-style="wikipedia"] .profile-article {
+  gap: var(--profile-space-6);
+  margin-top: var(--profile-space-6);
+}
+
+.profile-page[data-style="wikipedia"] .profile-article-toc {
+  border-color: var(--profile-border-color);
+  border-radius: 0;
+  background: var(--profile-surface);
+  font-family: var(--profile-body-font);
+}
+
+.profile-page[data-style="wikipedia"] .profile-article-toc strong {
+  text-align: center;
+}
+
+.profile-page[data-style="wikipedia"] .profile-article-toc a {
+  color: var(--profile-accent);
+}
+
+.profile-page[data-style="wikipedia"] .profile-rich-text {
+  max-width: none;
+  color: var(--profile-foreground);
+  font-family: var(--profile-body-font);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.profile-page[data-style="wikipedia"] .profile-rich-text h3 {
+  font-family: var(--profile-body-font);
+  font-size: 1.0625rem;
+}
+
+.profile-page[data-style="wikipedia"] .profile-rich-link {
+  color: var(--profile-accent);
+  text-decoration: none;
+}
+
+.profile-page[data-style="wikipedia"] .profile-rich-link:hover {
+  text-decoration: underline;
+}
+
+.profile-page[data-style="wikipedia"] .profile-article-figure {
+  width: min(100%, 15rem);
+  padding: 0.1875rem;
+  border: 1px solid var(--profile-border-color);
+  background: var(--profile-surface);
+  font-family: var(--profile-body-font);
+  font-size: 0.75rem;
+}
+
+.profile-page[data-style="wikipedia"]
+  .profile-article-figure[data-align="center"] {
+  width: min(100%, 30rem);
+}
+
+.profile-page[data-style="wikipedia"] .profile-article-figure img {
+  border-radius: 0;
+}
+
+.profile-page[data-style="wikipedia"] .profile-article-figure figcaption {
+  padding: 0.125rem 0.25rem 0.25rem;
+  color: var(--profile-foreground);
+  text-align: left;
+}
+
+.profile-page[data-style="wikipedia"] .profile-references {
+  color: var(--profile-foreground);
+  font-family: var(--profile-body-font);
+  font-size: 0.8125rem;
+}
+
+.profile-page[data-style="wikipedia"] .profile-references a {
+  color: var(--profile-accent);
+  text-decoration: none;
+}
+
+.profile-page[data-style="wikipedia"] .profile-references a:hover {
+  text-decoration: underline;
+}
+
+.profile-page[data-style="wikipedia"] .profile-references li:target {
+  background: #eaf3ff;
+}
+
+.profile-page[data-style="wikipedia"]
+  .profile-blocks
+  > [data-profile-block="article"],
+.profile-page[data-style="wikipedia"] [data-profile-section="article"] {
+  width: 100%;
+}

@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { db } from "@/db";
 import { qrCodes } from "@/db/schema";
+import { qrCardTextStyles, type QrCardTextStyle } from "@/db/schema/product";
 import {
   deleteProfileMedia,
   uploadProfileMedia,
@@ -64,7 +65,10 @@ export async function saveQrCardBackgroundAction(
       return { error: "Hãy chọn một ảnh nền trước khi lưu.", success: false };
     }
     if (!acceptedTypes.has(file.type)) {
-      return { error: "Ảnh nền chỉ hỗ trợ JPG, PNG hoặc WebP.", success: false };
+      return {
+        error: "Ảnh nền chỉ hỗ trợ JPG, PNG hoặc WebP.",
+        success: false,
+      };
     }
     if (file.size > maxFileSize) {
       return { error: "Ảnh nền phải nhỏ hơn 5 MB.", success: false };
@@ -99,7 +103,8 @@ export async function saveQrCardBackgroundAction(
     });
 
   if (!updated) {
-    if (uploadedUrl) await deleteProfileMedia(uploadedUrl).catch(() => undefined);
+    if (uploadedUrl)
+      await deleteProfileMedia(uploadedUrl).catch(() => undefined);
     return {
       error: "Thiết kế thẻ đã được thay đổi ở nơi khác. Hãy tải lại trang.",
       success: false,
@@ -125,6 +130,69 @@ export async function saveQrCardBackgroundAction(
     url: uploadedUrl
       ? `/api/qr-card-background/${parsed.data.qrId}?v=${updated.version}`
       : null,
+    version: updated.version,
+  };
+}
+
+const textStyleSchema = z.object({
+  expectedVersion: z.coerce.number().int().positive(),
+  qrId: z.uuid(),
+  textStyle: z.enum(qrCardTextStyles),
+});
+
+export type SaveQrCardTextStyleResult = {
+  error?: string;
+  success: boolean;
+  textStyle?: QrCardTextStyle;
+  version?: number;
+};
+
+export async function saveQrCardTextStyleAction(input: {
+  expectedVersion: number;
+  qrId: string;
+  textStyle: QrCardTextStyle;
+}): Promise<SaveQrCardTextStyleResult> {
+  const parsed = textStyleSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: "Kiểu nền chữ không hợp lệ.", success: false };
+  }
+
+  const session = await requireSession("/dashboard");
+  const [updated] = await db
+    .update(qrCodes)
+    .set({
+      cardTextStyle: parsed.data.textStyle,
+      updatedAt: new Date(),
+      version: sql`${qrCodes.version} + 1`,
+    })
+    .where(
+      and(
+        eq(qrCodes.id, parsed.data.qrId),
+        eq(qrCodes.ownerId, session.user.id),
+        eq(qrCodes.version, parsed.data.expectedVersion),
+      ),
+    )
+    .returning({
+      publicToken: qrCodes.publicToken,
+      textStyle: qrCodes.cardTextStyle,
+      version: qrCodes.version,
+    });
+
+  if (!updated) {
+    return {
+      error: "Thiết kế thẻ đã được thay đổi ở nơi khác. Hãy tải lại trang.",
+      success: false,
+    };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/admin/qr/${parsed.data.qrId}`);
+  revalidatePath(`/admin/qr/${parsed.data.qrId}/print`);
+  revalidatePath(`/q/${updated.publicToken}`);
+
+  return {
+    success: true,
+    textStyle: updated.textStyle,
     version: updated.version,
   };
 }

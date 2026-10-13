@@ -71,6 +71,13 @@
       "when": 1789613624233,
       "tag": "0009_amused_jimmy_woo",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791894143837,
+      "tag": "0010_qr_card_text_style",
+      "breakpoints": true
     }
   ]
 }
