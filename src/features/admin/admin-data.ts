@@ -11,6 +11,8 @@ export async function getAdminQrList() {
       id: qrCodes.id,
       cardBackgroundUrl: qrCodes.cardBackgroundUrl,
       cardTextStyle: qrCodes.cardTextStyle,
+      cardOrientation: qrCodes.cardOrientation,
+      cardTagline: qrCodes.cardTagline,
       publicToken: qrCodes.publicToken,
       status: qrCodes.status,
       ownerEmail: user.email,

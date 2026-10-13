@@ -9,9 +9,19 @@ import { db } from "@/db";
 import { qrCardDesigns, qrCodes } from "@/db/schema";
 import { qrCardTextStyles, type QrCardTextStyle } from "@/db/schema/product";
 import {
+  QR_CARD_DEFAULT_TAGLINE,
+  QR_CARD_TAGLINE_MAX,
+  qrCardOrientations,
+  type QrCardOrientation,
+} from "@/features/qr/qr-card-layout";
+import {
   toClientQrCardDesign as toClientDesign,
   type QrCardDesign,
 } from "@/features/qr/qr-card-design";
+import {
+  presetBackgroundUrl,
+  qrCardPresetIds,
+} from "@/features/qr/qr-card-presets";
 import {
   deleteProfileMedia,
   uploadProfileMedia,
@@ -36,7 +46,13 @@ const optionalText = (max: number) =>
     .nullable();
 
 const createSchema = z.object({
-  copyFrom: z.object({ textStyle: z.enum(qrCardTextStyles) }).nullable(),
+  copyFrom: z
+    .object({
+      orientation: z.enum(qrCardOrientations).optional(),
+      tagline: z.string().trim().max(QR_CARD_TAGLINE_MAX).optional(),
+      textStyle: z.enum(qrCardTextStyles),
+    })
+    .nullable(),
   name: z.string().trim().min(1).max(60),
   qrId: z.uuid(),
 });
@@ -47,6 +63,8 @@ const updateSchema = z.object({
   heading: optionalText(80).optional(),
   location: optionalText(120).optional(),
   name: z.string().trim().min(1).max(60).optional(),
+  orientation: z.enum(qrCardOrientations).optional(),
+  tagline: z.string().trim().max(QR_CARD_TAGLINE_MAX).optional(),
   textStyle: z.enum(qrCardTextStyles).optional(),
 });
 
@@ -80,7 +98,11 @@ function revalidateCard(qrId: string) {
 }
 
 export async function createQrCardDesignAction(input: {
-  copyFrom: { textStyle: QrCardTextStyle } | null;
+  copyFrom: {
+    orientation?: QrCardOrientation;
+    tagline?: string;
+    textStyle: QrCardTextStyle;
+  } | null;
   name: string;
   qrId: string;
 }): Promise<QrCardDesignResult> {
@@ -108,6 +130,8 @@ export async function createQrCardDesignAction(input: {
     .values({
       name: parsed.data.name,
       qrCodeId: qr.id,
+      orientation: parsed.data.copyFrom?.orientation ?? "portrait",
+      tagline: parsed.data.copyFrom?.tagline ?? QR_CARD_DEFAULT_TAGLINE,
       textStyle: parsed.data.copyFrom?.textStyle ?? "shadow",
     })
     .returning();
@@ -139,7 +163,10 @@ export async function saveQrCardDesignBackgroundAction(
   formData: FormData,
 ): Promise<QrCardDesignResult> {
   const designId = z.uuid().safeParse(formData.get("designId"));
-  const intent = formData.get("intent") === "remove" ? "remove" : "save";
+  const rawIntent = formData.get("intent");
+  const intent =
+    rawIntent === "remove" || rawIntent === "preset" ? rawIntent : "save";
+  const presetId = z.enum(qrCardPresetIds).safeParse(formData.get("presetId"));
   if (!designId.success)
     return { error: "Mẫu thẻ không hợp lệ.", success: false };
   const session = await requireSession("/dashboard");
@@ -147,7 +174,11 @@ export async function saveQrCardDesignBackgroundAction(
   if (!owned) return { error: "Không tìm thấy mẫu thẻ.", success: false };
 
   let uploadedUrl: string | null = null;
-  if (intent === "save") {
+  if (intent === "preset") {
+    if (!presetId.success)
+      return { error: "Hãy chọn một nền có sẵn.", success: false };
+    uploadedUrl = presetBackgroundUrl(presetId.data);
+  } else if (intent === "save") {
     const file = formData.get("background");
     if (!(file instanceof File) || file.size === 0)
       return { error: "Hãy chọn một ảnh nền.", success: false };

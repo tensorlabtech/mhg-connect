@@ -9,6 +9,16 @@ import { db } from "@/db";
 import { qrCodes } from "@/db/schema";
 import { qrCardTextStyles, type QrCardTextStyle } from "@/db/schema/product";
 import {
+  QR_CARD_TAGLINE_MAX,
+  qrCardOrientations,
+  type QrCardOrientation,
+} from "@/features/qr/qr-card-layout";
+import {
+  isPresetCardBackground,
+  presetBackgroundUrl,
+  qrCardPresetIds,
+} from "@/features/qr/qr-card-presets";
+import {
   deleteProfileMedia,
   uploadProfileMedia,
 } from "@/lib/profile-media-storage";
@@ -23,7 +33,8 @@ export type SaveQrCardBackgroundResult = {
 
 const inputSchema = z.object({
   expectedVersion: z.coerce.number().int().positive(),
-  intent: z.enum(["save", "remove"]),
+  intent: z.enum(["save", "remove", "preset"]),
+  presetId: z.enum(qrCardPresetIds).optional(),
   qrId: z.uuid(),
 });
 
@@ -36,7 +47,10 @@ export async function saveQrCardBackgroundAction(
 ): Promise<SaveQrCardBackgroundResult> {
   const parsed = inputSchema.safeParse({
     expectedVersion: formData.get("expectedVersion"),
-    intent: formData.get("intent") ?? "save",
+    intent: formData.get("presetId")
+      ? "preset"
+      : (formData.get("intent") ?? "save"),
+    presetId: formData.get("presetId") || undefined,
     qrId: formData.get("qrId"),
   });
   if (!parsed.success) {
@@ -59,7 +73,12 @@ export async function saveQrCardBackgroundAction(
   }
 
   let uploadedUrl: string | null = null;
-  if (parsed.data.intent === "save") {
+  if (parsed.data.intent === "preset") {
+    if (!parsed.data.presetId) {
+      return { error: "Hãy chọn một nền có sẵn.", success: false };
+    }
+    uploadedUrl = presetBackgroundUrl(parsed.data.presetId);
+  } else if (parsed.data.intent === "save") {
     const file = formData.get("background");
     if (!(file instanceof File) || file.size === 0) {
       return { error: "Hãy chọn một ảnh nền trước khi lưu.", success: false };
@@ -103,7 +122,7 @@ export async function saveQrCardBackgroundAction(
     });
 
   if (!updated) {
-    if (uploadedUrl)
+    if (uploadedUrl && !isPresetCardBackground(uploadedUrl))
       await deleteProfileMedia(uploadedUrl).catch(() => undefined);
     return {
       error: "Thiết kế thẻ đã được thay đổi ở nơi khác. Hãy tải lại trang.",
@@ -128,7 +147,9 @@ export async function saveQrCardBackgroundAction(
   return {
     success: true,
     url: uploadedUrl
-      ? `/api/qr-card-background/${parsed.data.qrId}?v=${updated.version}`
+      ? isPresetCardBackground(uploadedUrl)
+        ? uploadedUrl
+        : `/api/qr-card-background/${parsed.data.qrId}?v=${updated.version}`
       : null,
     version: updated.version,
   };
@@ -193,6 +214,74 @@ export async function saveQrCardTextStyleAction(input: {
   return {
     success: true,
     textStyle: updated.textStyle,
+    version: updated.version,
+  };
+}
+
+const layoutSchema = z.object({
+  expectedVersion: z.coerce.number().int().positive(),
+  orientation: z.enum(qrCardOrientations).optional(),
+  qrId: z.uuid(),
+  tagline: z.string().trim().max(QR_CARD_TAGLINE_MAX).optional(),
+});
+
+export type SaveQrCardLayoutResult = {
+  error?: string;
+  orientation?: QrCardOrientation;
+  success: boolean;
+  tagline?: string;
+  version?: number;
+};
+
+/** Lưu hướng thẻ (dọc/ngang) và dòng chữ cạnh logo của thẻ chính. */
+export async function saveQrCardLayoutAction(input: {
+  expectedVersion: number;
+  orientation?: QrCardOrientation;
+  qrId: string;
+  tagline?: string;
+}): Promise<SaveQrCardLayoutResult> {
+  const parsed = layoutSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: "Thông tin thẻ chưa hợp lệ.", success: false };
+  }
+  const { expectedVersion, orientation, qrId, tagline } = parsed.data;
+  const session = await requireSession("/dashboard");
+  const [updated] = await db
+    .update(qrCodes)
+    .set({
+      ...(orientation ? { cardOrientation: orientation } : {}),
+      ...(tagline !== undefined ? { cardTagline: tagline } : {}),
+      updatedAt: new Date(),
+      version: sql`${qrCodes.version} + 1`,
+    })
+    .where(
+      and(
+        eq(qrCodes.id, qrId),
+        eq(qrCodes.ownerId, session.user.id),
+        eq(qrCodes.version, expectedVersion),
+      ),
+    )
+    .returning({
+      orientation: qrCodes.cardOrientation,
+      tagline: qrCodes.cardTagline,
+      version: qrCodes.version,
+    });
+
+  if (!updated) {
+    return {
+      error: "Thiết kế thẻ đã được thay đổi ở nơi khác. Hãy tải lại trang.",
+      success: false,
+    };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/admin/qr/${qrId}`);
+  revalidatePath(`/admin/qr/${qrId}/print`);
+
+  return {
+    orientation: updated.orientation,
+    success: true,
+    tagline: updated.tagline,
     version: updated.version,
   };
 }

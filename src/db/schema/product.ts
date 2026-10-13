@@ -14,6 +14,14 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { user } from "@/db/schema/auth";
+import {
+  QR_CARD_DEFAULT_TAGLINE,
+  type QrCardOrientation,
+  qrCardOrientations,
+} from "@/features/qr/qr-card-layout";
+
+export { QR_CARD_DEFAULT_TAGLINE, qrCardOrientations };
+export type { QrCardOrientation };
 
 export const profileStatuses = ["draft", "published"] as const;
 export const profileTemplates = ["cover", "minimal"] as const;
@@ -121,6 +129,13 @@ export const qrCodes = pgTable(
       .$type<QrCardTextStyle>()
       .default("shadow")
       .notNull(),
+    cardOrientation: text("card_orientation")
+      .$type<QrCardOrientation>()
+      .default("portrait")
+      .notNull(),
+    cardTagline: text("card_tagline")
+      .default(QR_CARD_DEFAULT_TAGLINE)
+      .notNull(),
     activatedAt: productTimestamp("activated_at"),
     version: integer("version").default(1).notNull(),
     createdAt: productTimestamp("created_at").defaultNow().notNull(),
@@ -155,6 +170,10 @@ export const qrCodes = pgTable(
       "qr_codes_card_text_style_check",
       sql`${table.cardTextStyle} in ('shadow', 'band', 'dark', 'light')`,
     ),
+    check(
+      "qr_codes_card_orientation_check",
+      sql`${table.cardOrientation} in ('portrait', 'landscape')`,
+    ),
   ],
 );
 
@@ -171,6 +190,11 @@ export const qrCardDesigns = pgTable(
       .$type<QrCardTextStyle>()
       .default("shadow")
       .notNull(),
+    orientation: text("orientation")
+      .$type<QrCardOrientation>()
+      .default("portrait")
+      .notNull(),
+    tagline: text("tagline").default(QR_CARD_DEFAULT_TAGLINE).notNull(),
     heading: text("heading"),
     description: text("description"),
     location: text("location"),
@@ -182,6 +206,10 @@ export const qrCardDesigns = pgTable(
     check(
       "qr_card_designs_text_style_check",
       sql`${table.textStyle} in ('shadow', 'band', 'dark', 'light')`,
+    ),
+    check(
+      "qr_card_designs_orientation_check",
+      sql`${table.orientation} in ('portrait', 'landscape')`,
     ),
   ],
 );

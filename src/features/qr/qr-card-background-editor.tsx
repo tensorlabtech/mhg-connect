@@ -14,9 +14,13 @@ import { Button } from "@/components/ui/button";
 import type { QrCardTextStyle } from "@/db/schema/product";
 import {
   saveQrCardBackgroundAction,
+  saveQrCardLayoutAction,
   saveQrCardTextStyleAction,
   type SaveQrCardBackgroundResult,
 } from "@/features/qr/qr-card-background-actions";
+import type { QrCardOrientation } from "@/features/qr/qr-card-layout";
+import { QrCardLayoutFields } from "@/features/qr/qr-card-layout-fields";
+import { QrCardPresetPicker } from "@/features/qr/qr-card-preset-picker";
 import {
   QrVisualCard,
   qrCardTextStyleOptions,
@@ -34,8 +38,10 @@ export function QrCardBackgroundEditor({
   location,
   onPendingChange,
   onUnsavedChange,
+  orientation: initialOrientation = "portrait",
   qrId,
   svg,
+  tagline: initialTagline,
   textStyle = "shadow",
   version,
 }: {
@@ -46,8 +52,10 @@ export function QrCardBackgroundEditor({
   location: string | null;
   onPendingChange?: (pending: boolean) => void;
   onUnsavedChange?: (unsaved: boolean) => void;
+  orientation?: QrCardOrientation;
   qrId: string;
   svg: string;
+  tagline: string;
   textStyle?: QrCardTextStyle;
   version: number;
 }) {
@@ -60,6 +68,14 @@ export function QrCardBackgroundEditor({
     "idle" | "saving" | "saved" | "error"
   >("idle");
   const [textStyleError, setTextStyleError] = useState<string | null>(null);
+  const [orientation, setOrientation] =
+    useState<QrCardOrientation>(initialOrientation);
+  const [tagline, setTagline] = useState(initialTagline);
+  const [taglinePreview, setTaglinePreview] = useState(initialTagline);
+  const [layoutStatus, setLayoutStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+  const [layoutError, setLayoutError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -172,7 +188,7 @@ export function QrCardBackgroundEditor({
       });
       const link = document.createElement("a");
       const safeName = downloadName.replace(/[^a-zA-Z0-9_-]+/g, "-");
-      link.download = `mhg-qr-card-${safeName}.png`;
+      link.download = `mhg-qr-card-${safeName}-${orientation === "landscape" ? "ngang" : "doc"}.png`;
       link.href = dataUrl;
       link.click();
     } catch (error) {
@@ -214,20 +230,66 @@ export function QrCardBackgroundEditor({
     }
   }
 
+  async function saveLayout(patch: {
+    orientation?: QrCardOrientation;
+    tagline?: string;
+  }) {
+    const previous = { orientation, tagline };
+    if (patch.orientation) setOrientation(patch.orientation);
+    if (patch.tagline !== undefined) setTagline(patch.tagline);
+    setLayoutStatus("saving");
+    setLayoutError(null);
+    onPendingChange?.(true);
+    try {
+      const result = await saveQrCardLayoutAction({
+        expectedVersion: liveVersion,
+        qrId,
+        ...patch,
+      });
+      if (result.success && result.version) {
+        setLiveVersion(result.version);
+        setLayoutStatus("saved");
+      } else {
+        setOrientation(previous.orientation);
+        setTagline(previous.tagline);
+        setTaglinePreview(previous.tagline);
+        setLayoutStatus("error");
+        setLayoutError(result.error ?? "Chưa thể lưu thẻ.");
+      }
+    } catch {
+      setOrientation(previous.orientation);
+      setTagline(previous.tagline);
+      setTaglinePreview(previous.tagline);
+      setLayoutStatus("error");
+      setLayoutError("Chưa thể lưu thẻ. Hãy thử lại.");
+    } finally {
+      onPendingChange?.(false);
+    }
+  }
+
   const persistedUrl = state.success ? (state.url ?? null) : backgroundUrl;
   const activeBackground = previewUrl ?? persistedUrl;
   const currentVersion = liveVersion;
   const error = clientError ?? (!state.success ? state.error : undefined);
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[18rem_minmax(15rem,1fr)] lg:items-start">
+    <div
+      className={cn(
+        "grid gap-8 lg:items-start",
+        orientation === "landscape"
+          ? "lg:grid-cols-[26rem_minmax(15rem,1fr)]"
+          : "lg:grid-cols-[18rem_minmax(15rem,1fr)]",
+      )}
+    >
       <div className="w-full" ref={cardRef}>
         <QrVisualCard
           backgroundUrl={activeBackground}
           description={description}
           heading={heading}
           location={location}
+          orientation={orientation}
           svg={svg}
+          tagline={taglinePreview}
           textStyle={selectedTextStyle}
         />
       </div>
@@ -248,6 +310,34 @@ export function QrCardBackgroundEditor({
           ref={inputRef}
           type="file"
         />
+        <QrCardLayoutFields
+          disabled={layoutStatus === "saving" || isSaving}
+          idPrefix={`qr-${qrId}`}
+          onOrientationChange={(next) => void saveLayout({ orientation: next })}
+          onTaglineCommit={(next) => void saveLayout({ tagline: next })}
+          onTaglinePreview={setTaglinePreview}
+          orientation={orientation}
+          tagline={tagline}
+        />
+        <p
+          className={cn(
+            "-mt-3 text-xs leading-5",
+            layoutStatus === "error"
+              ? "text-destructive"
+              : "text-muted-foreground",
+          )}
+          role={layoutStatus === "error" ? "alert" : "status"}
+        >
+          {layoutStatus === "saving"
+            ? "Đang lưu thẻ…"
+            : layoutStatus === "saved"
+              ? "Đã lưu hướng thẻ và dòng chữ."
+              : layoutStatus === "error"
+                ? layoutError
+                : null}
+        </p>
+
+        <div aria-hidden="true" className="border-t border-border/60" />
         <fieldset className="grid min-w-0 gap-3">
           <legend className="text-sm font-medium">Nền chữ</legend>
           <p className="-mt-1 max-w-md text-sm leading-6 text-muted-foreground">
@@ -309,6 +399,11 @@ export function QrCardBackgroundEditor({
             tỷ lệ badge.
           </p>
         </div>
+        <QrCardPresetPicker
+          buttonName="presetId"
+          disabled={isSaving}
+          selectedUrl={persistedUrl}
+        />
         <div className="grid min-w-0 gap-2 sm:grid-cols-2">
           <Button
             disabled={isSaving}

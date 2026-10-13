@@ -51,6 +51,11 @@
   min-width: 0;
 }
 
+/* Bài viết luôn trải hết chiều ngang, kể cả ở giao diện chia hai cột (Studio). */
+.profile-blocks > [data-profile-block="article"] {
+  grid-column: 1 / -1;
+}
+
 .profile-facts-card {
   padding: var(--profile-space-6, 1.5rem);
 }

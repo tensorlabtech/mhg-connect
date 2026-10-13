@@ -28,6 +28,9 @@ import { Textarea } from "@/components/ui/textarea";
 import type { QrCardTextStyle } from "@/db/schema/product";
 import { TextStyleSwatch } from "@/features/qr/qr-card-background-editor";
 import type { QrCardDesign } from "@/features/qr/qr-card-design";
+import type { QrCardOrientation } from "@/features/qr/qr-card-layout";
+import { QrCardLayoutFields } from "@/features/qr/qr-card-layout-fields";
+import { QrCardPresetPicker } from "@/features/qr/qr-card-preset-picker";
 import {
   deleteQrCardDesignAction,
   saveQrCardDesignBackgroundAction,
@@ -72,6 +75,11 @@ export function QrCardDesignEditor({
     name: design.name,
   });
   const [textStyle, setTextStyle] = useState<QrCardTextStyle>(design.textStyle);
+  const [orientation, setOrientation] = useState<QrCardOrientation>(
+    design.orientation,
+  );
+  const [tagline, setTagline] = useState(design.tagline);
+  const [taglinePreview, setTaglinePreview] = useState(design.tagline);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [status, setStatus] = useState<
     "idle" | "saving" | "saved" | "uploading" | "error"
@@ -151,6 +159,24 @@ export function QrCardDesignEditor({
     else setTextStyle(previous);
   }
 
+  async function saveLayout(patch: {
+    orientation?: QrCardOrientation;
+    tagline?: string;
+  }) {
+    const previous = { orientation, tagline };
+    if (patch.orientation) setOrientation(patch.orientation);
+    if (patch.tagline !== undefined) setTagline(patch.tagline);
+    const result = await run(() =>
+      updateQrCardDesignAction({ designId: design.id, ...patch }),
+    );
+    if (result && "design" in result) onChange(result.design);
+    else {
+      setOrientation(previous.orientation);
+      setTagline(previous.tagline);
+      setTaglinePreview(previous.tagline);
+    }
+  }
+
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -190,6 +216,18 @@ export function QrCardDesignEditor({
     }
   }
 
+  async function pickPreset(presetId: string) {
+    const formData = new FormData();
+    formData.set("designId", design.id);
+    formData.set("intent", "preset");
+    formData.set("presetId", presetId);
+    const result = await run(() => saveQrCardDesignBackgroundAction(formData));
+    if (result && "design" in result) {
+      setPreviewUrl(null);
+      onChange(result.design);
+    }
+  }
+
   async function removeDesign() {
     const result = await run(() =>
       deleteQrCardDesignAction({ designId: design.id }),
@@ -213,7 +251,7 @@ export function QrCardDesignEditor({
         .replace(/[̀-ͯ]/g, "")
         .replace(/đ/gi, "d")
         .replace(/[^a-zA-Z0-9_-]+/g, "-");
-      link.download = `mhg-qr-card-${safeName}.png`;
+      link.download = `mhg-qr-card-${safeName}-${orientation === "landscape" ? "ngang" : "doc"}.png`;
       link.href = dataUrl;
       link.click();
     } catch (exportError) {
@@ -229,7 +267,14 @@ export function QrCardDesignEditor({
   const background = previewUrl ?? design.backgroundUrl;
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[18rem_minmax(15rem,1fr)] lg:items-start">
+    <div
+      className={cn(
+        "grid gap-8 lg:items-start",
+        orientation === "landscape"
+          ? "lg:grid-cols-[26rem_minmax(15rem,1fr)]"
+          : "lg:grid-cols-[18rem_minmax(15rem,1fr)]",
+      )}
+    >
       <div className="w-full" ref={cardRef}>
         <QrVisualCard
           backgroundUrl={background}
@@ -238,7 +283,9 @@ export function QrCardDesignEditor({
           location={
             fields.location === null ? defaults.location : fields.location
           }
+          orientation={orientation}
           svg={svg}
+          tagline={taglinePreview}
           textStyle={textStyle}
         />
       </div>
@@ -260,6 +307,17 @@ export function QrCardDesignEditor({
           />
         </Field>
 
+        <QrCardLayoutFields
+          disabled={busy}
+          idPrefix={`design-${design.id}`}
+          onOrientationChange={(next) => void saveLayout({ orientation: next })}
+          onTaglineCommit={(next) => void saveLayout({ tagline: next })}
+          onTaglinePreview={setTaglinePreview}
+          orientation={orientation}
+          tagline={tagline}
+        />
+
+        <div aria-hidden="true" className="border-t border-border/60" />
         <fieldset className="grid min-w-0 gap-3">
           <legend className="text-sm font-medium">Nền chữ</legend>
           <div
@@ -370,6 +428,11 @@ export function QrCardDesignEditor({
             onChange={handleFile}
             ref={inputRef}
             type="file"
+          />
+          <QrCardPresetPicker
+            disabled={busy}
+            onPick={(presetId) => void pickPreset(presetId)}
+            selectedUrl={design.backgroundUrl}
           />
           <div className="grid min-w-0 gap-2 sm:grid-cols-2">
             <Button

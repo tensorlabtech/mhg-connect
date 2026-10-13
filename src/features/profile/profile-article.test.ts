@@ -342,3 +342,29 @@ describe("external links and videos", () => {
     expect(markup).toContain('id="profile-external-links"');
   });
 });
+
+describe("article image urls", () => {
+  test("accepts https and same-site paths but not protocol-relative or http", () => {
+    const withImage = (url: string) =>
+      parseProfileDocument(
+        updateArticleBlock(articleDocument(), (block) => ({
+          ...block,
+          data: {
+            ...block.data,
+            sections: [
+              {
+                body: "",
+                heading: "A",
+                id: "sec-img",
+                images: [{ align: "right", caption: null, id: "img-1", url }],
+              },
+            ],
+          },
+        })),
+      ) !== null;
+    expect(withImage("https://example.com/a.jpg")).toBe(true);
+    expect(withImage("/_demo/a.jpg")).toBe(true);
+    expect(withImage("//evil.example/a.jpg")).toBe(false);
+    expect(withImage("http://example.com/a.jpg")).toBe(false);
+  });
+});

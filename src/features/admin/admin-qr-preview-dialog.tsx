@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import type { QrCardTextStyle } from "@/db/schema/product";
+import type { QrCardOrientation } from "@/features/qr/qr-card-layout";
 import { QrVisualCard } from "@/features/qr/qr-visual-card";
 
 export function AdminQrPreviewDialog({
@@ -29,6 +30,8 @@ export function AdminQrPreviewDialog({
   publicToken,
   status,
   svg,
+  orientation,
+  tagline,
   textStyle,
 }: {
   backgroundUrl?: string | null;
@@ -41,6 +44,8 @@ export function AdminQrPreviewDialog({
   publicToken: string;
   status: string;
   svg: string;
+  orientation?: QrCardOrientation;
+  tagline?: string;
   textStyle?: QrCardTextStyle;
 }) {
   const pathname = usePathname();
@@ -81,6 +86,8 @@ export function AdminQrPreviewDialog({
             headingClassName={profileName ? undefined : "text-nowrap"}
             location={location}
             svg={svg}
+            orientation={orientation}
+            tagline={tagline}
             textStyle={textStyle}
           />
           <div className="flex min-w-0 flex-col">

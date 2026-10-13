@@ -28,6 +28,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import type { QrCardTextStyle } from "@/db/schema/product";
+import type { QrCardOrientation } from "@/features/qr/qr-card-layout";
 import type { QrCardDesign } from "@/features/qr/qr-card-design";
 import { QrProfileAssignment } from "@/features/qr/qr-profile-assignment";
 import { QrCardPreviewDialog } from "@/features/qr/qr-card-preview-dialog";
@@ -48,6 +49,7 @@ export function QrCardActions({
   designs,
   heading,
   location,
+  orientation,
   profileId,
   profiles,
   publicToken,
@@ -55,6 +57,7 @@ export function QrCardActions({
   scanCount,
   status,
   svg,
+  tagline,
   textStyle,
   version,
 }: {
@@ -64,6 +67,7 @@ export function QrCardActions({
   designs: QrCardDesign[];
   heading: string;
   location: string | null;
+  orientation: QrCardOrientation;
   profileId: string | null;
   profiles: AssignmentProfile[];
   publicToken: string;
@@ -71,6 +75,7 @@ export function QrCardActions({
   scanCount: number;
   status: string;
   svg: string;
+  tagline: string;
   textStyle: QrCardTextStyle;
   version: number;
 }) {
@@ -121,10 +126,12 @@ export function QrCardActions({
           location={location}
           onOpenChange={setCardOpen}
           open={cardOpen}
+          orientation={orientation}
           publicToken={publicToken}
           qrId={qrId}
           status={status}
           svg={svg}
+          tagline={tagline}
           textStyle={textStyle}
           version={version}
         />

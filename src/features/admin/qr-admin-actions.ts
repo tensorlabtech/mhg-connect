@@ -10,6 +10,7 @@ import { db } from "@/db";
 import { adminActions, qrCardDesigns, qrCodes } from "@/db/schema";
 import { deleteProfileMedia } from "@/lib/profile-media-storage";
 import { requireAdmin } from "@/lib/session";
+import { QR_CARD_DEFAULT_TAGLINE } from "@/features/qr/qr-card-layout";
 
 const createSchema = z.object({
   publicToken: z
@@ -76,6 +77,8 @@ export async function adminQrAction(formData: FormData) {
           activatedAt: null,
           cardBackgroundUrl: null,
           cardTextStyle: "shadow" as const,
+          cardOrientation: "portrait" as const,
+          cardTagline: QR_CARD_DEFAULT_TAGLINE,
           ownerId: null,
           status: "available" as const,
           updatedAt: new Date(),

@@ -27,6 +27,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { QrCardTextStyle } from "@/db/schema/product";
+import type { QrCardOrientation } from "@/features/qr/qr-card-layout";
 import { QrCardBackgroundEditor } from "@/features/qr/qr-card-background-editor";
 import type { QrCardDesign } from "@/features/qr/qr-card-design";
 import { createQrCardDesignAction } from "@/features/qr/qr-card-design-actions";
@@ -42,10 +43,12 @@ export function QrCardPreviewDialog({
   location,
   onOpenChange,
   open,
+  orientation,
   publicToken,
   qrId,
   status,
   svg,
+  tagline,
   textStyle,
   version,
 }: {
@@ -56,10 +59,12 @@ export function QrCardPreviewDialog({
   location: string | null;
   onOpenChange: (open: boolean) => void;
   open: boolean;
+  orientation: QrCardOrientation;
   publicToken: string;
   qrId: string;
   status: string;
   svg: string;
+  tagline: string;
   textStyle: QrCardTextStyle;
   version: number;
 }) {
@@ -94,8 +99,12 @@ export function QrCardPreviewDialog({
       const current = designs.find((design) => design.id === activeDesign);
       const result = await createQrCardDesignAction({
         copyFrom: current
-          ? { textStyle: current.textStyle }
-          : { textStyle: textStyle },
+          ? {
+              orientation: current.orientation,
+              tagline: current.tagline,
+              textStyle: current.textStyle,
+            }
+          : { orientation, tagline, textStyle },
         name: `Mẫu ${designs.length + 2}`,
         qrId,
       });
@@ -217,8 +226,10 @@ export function QrCardPreviewDialog({
               location={location}
               onPendingChange={setIsSaving}
               onUnsavedChange={setHasUnsavedChanges}
+              orientation={orientation}
               qrId={qrId}
               svg={svg}
+              tagline={tagline}
               textStyle={textStyle}
               version={version}
             />

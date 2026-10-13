@@ -88,7 +88,9 @@ export default async function AdminQrDetailPage({
                     profileName={qr.profileName}
                     publicToken={qr.publicToken}
                     status={qr.status}
+                    orientation={qr.cardOrientation}
                     svg={svg}
+                    tagline={qr.cardTagline}
                     textStyle={qr.cardTextStyle}
                   />
                   <Button asChild className="w-full" variant="outline">

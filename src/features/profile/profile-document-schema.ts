@@ -20,6 +20,16 @@ const httpsUrl = z
   .trim()
   .max(600)
   .refine((value) => /^https:\/\/[^\s]+$/i.test(value), "Cần đường dẫn https.");
+/** Ảnh trong bài: https hoặc đường dẫn cùng trang (bắt đầu bằng "/"), ví dụ ảnh có sẵn trong thư mục public. */
+const imageUrl = z
+  .string()
+  .trim()
+  .max(600)
+  .refine(
+    (value) =>
+      /^https:\/\/[^\s]+$/i.test(value) || /^\/(?!\/)[^\s]+$/.test(value),
+    "Cần đường dẫn ảnh https.",
+  );
 const linkUrl = z
   .string()
   .trim()
@@ -107,7 +117,7 @@ const articleBlockSchema = z.object({
                 align: z.enum(articleImageAligns),
                 caption: nullableText(300),
                 id: itemId,
-                url: httpsUrl,
+                url: imageUrl,
               }),
             )
             .max(articleLimits.imagesPerSection),

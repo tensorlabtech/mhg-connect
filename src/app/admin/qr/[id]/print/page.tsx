@@ -30,6 +30,7 @@ export default async function AdminQrPrintPage({
         )
       : undefined;
   if (typeof query.design === "string" && !design) notFound();
+  const orientation = design?.orientation ?? qr.cardOrientation;
   const description =
     design?.description ??
     [qr.profileTitle, qr.profileCompany].filter(Boolean).join(" · ");
@@ -42,17 +43,29 @@ export default async function AdminQrPrintPage({
         </Button>
         <AdminQrPrintButton />
       </div>
-      <main className="mx-auto max-w-[20rem] [print-color-adjust:exact]">
+      <main
+        className={
+          orientation === "landscape"
+            ? "mx-auto max-w-[32rem] [print-color-adjust:exact]"
+            : "mx-auto max-w-[20rem] [print-color-adjust:exact]"
+        }
+      >
         <QrVisualCard
           backgroundUrl={design ? design.backgroundUrl : qr.cardBackgroundUrl}
-          className="print:w-[53.98mm]"
+          className={
+            orientation === "landscape"
+              ? "print:w-[85.6mm]"
+              : "print:w-[53.98mm]"
+          }
           description={description || "Quét để mở hồ sơ"}
           heading={design?.heading || qr.profileName || qr.publicToken}
           headingClassName={
             design?.heading || qr.profileName ? undefined : "text-nowrap"
           }
           location={design?.location ?? qr.profileLocation}
+          orientation={orientation}
           svg={svg}
+          tagline={design ? design.tagline : qr.cardTagline}
           textStyle={design?.textStyle ?? qr.cardTextStyle}
         />
       </main>

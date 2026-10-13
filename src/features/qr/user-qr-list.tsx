@@ -1,16 +1,21 @@
+import { cn } from "cn";
 import QRCode from "qrcode";
 
 import { StatusBadge } from "@/components/product/status-badge";
 import type { QrCardTextStyle } from "@/db/schema/product";
+import type { QrCardOrientation } from "@/features/qr/qr-card-layout";
 import { QrCardActions } from "@/features/qr/qr-card-actions";
 import type { QrCardDesign } from "@/features/qr/qr-card-design";
 import { getQrCardDesigns } from "@/features/qr/qr-data";
+import { isPresetCardBackground } from "@/features/qr/qr-card-presets";
 import { QrVisualCard } from "@/features/qr/qr-visual-card";
 import { runtimeEnv } from "@/lib/runtime-env";
 
 type QrItem = {
   activatedAt: Date | null;
   cardBackgroundUrl: string | null;
+  cardOrientation: QrCardOrientation;
+  cardTagline: string;
   cardTextStyle: QrCardTextStyle;
   id: string;
   profileCompany: string | null;
@@ -78,13 +83,22 @@ function QrOwnershipCard({
     .join(" · ");
 
   return (
-    <article className="grid gap-4 rounded-surface bg-card p-4 lg:grid-cols-[17rem_minmax(0,1fr)]">
+    <article
+      className={cn(
+        "grid gap-4 rounded-surface bg-card p-4",
+        item.cardOrientation === "landscape"
+          ? "lg:grid-cols-[24rem_minmax(0,1fr)] lg:items-start"
+          : "lg:grid-cols-[17rem_minmax(0,1fr)]",
+      )}
+    >
       <QrVisualCard
         backgroundUrl={item.cardBackgroundUrl}
         description={role}
         heading={profileName}
         location={item.profileLocation}
+        orientation={item.cardOrientation}
         svg={item.svg}
+        tagline={item.cardTagline}
         textStyle={item.cardTextStyle}
       />
 
@@ -126,7 +140,9 @@ function QrOwnershipCard({
           activatedAt={item.activatedAt}
           backgroundUrl={
             item.cardBackgroundUrl
-              ? `/api/qr-card-background/${item.id}?v=${item.version}`
+              ? isPresetCardBackground(item.cardBackgroundUrl)
+                ? item.cardBackgroundUrl
+                : `/api/qr-card-background/${item.id}?v=${item.version}`
               : null
           }
           description={role || "Quét để mở hồ sơ"}
@@ -140,6 +156,8 @@ function QrOwnershipCard({
           scanCount={item.scanCount}
           status={item.status}
           svg={item.svg}
+          orientation={item.cardOrientation}
+          tagline={item.cardTagline}
           textStyle={item.cardTextStyle}
           version={item.version}
         />
