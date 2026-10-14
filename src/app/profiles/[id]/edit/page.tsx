@@ -27,12 +27,15 @@ export default async function EditProfilePage({
     fallback,
   );
 
-  const layout = editor === "cu" ? "classic" : "form";
+  const layout =
+    editor === "cu" ? "classic" : editor === "form" ? "form" : "inline";
 
   return (
     <ProfileBuilder
       initialDocument={
-        layout === "form" ? withFormTemplate(initialDocument) : initialDocument
+        layout === "classic"
+          ? initialDocument
+          : withFormTemplate(initialDocument)
       }
       initialProfileId={id}
       initialProfileLabel={

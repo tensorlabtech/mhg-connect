@@ -18,7 +18,12 @@ export default async function NewProfilePage({
     qrToken && (await findOwnedQrWithoutProfile(session.user.id, qrToken))
       ? qrToken
       : "";
-  const layout = query.editor === "cu" ? "classic" : "form";
+  const layout =
+    query.editor === "cu"
+      ? "classic"
+      : query.editor === "form"
+        ? "form"
+        : "inline";
   const baseDocument = createProfileDocument({
     avatarUrl: null,
     bio: null,
@@ -39,7 +44,7 @@ export default async function NewProfilePage({
   });
 
   const initialDocument =
-    layout === "form" ? withFormTemplate(baseDocument) : baseDocument;
+    layout === "classic" ? baseDocument : withFormTemplate(baseDocument);
 
   return (
     <ProfileBuilder

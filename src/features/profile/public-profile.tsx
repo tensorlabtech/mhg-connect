@@ -39,6 +39,18 @@ import {
   socialPlatforms,
 } from "@/features/profile/profile-social-platforms";
 import {
+  EditableText,
+  InlineEditProvider,
+  MediaEditButton,
+  type InlineEditApi,
+} from "@/features/profile/profile-inline-edit";
+import {
+  BlockVisibilityTools,
+  EditableArticleBlockView,
+  EditableFactsList,
+  HiddenBlockBarFor,
+} from "@/features/profile/public-profile-article-edit";
+import {
   ProfileWikipediaArticleNavigation,
   PublicProfileWikipediaAttribution,
   WikipediaInfoboxSpacer,
@@ -66,6 +78,7 @@ type SelectionMode = {
 export function PublicProfile({
   document: persistedDocument,
   editor,
+  inlineEdit,
   locale = "vi",
   onLocaleChange,
   ownerToolbar,
@@ -76,6 +89,8 @@ export function PublicProfile({
 }: {
   document?: unknown;
   editor?: EditorMode;
+  /** Sửa trực tiếp trên trang: bấm vào chữ, ảnh, mục nào là sửa ngay chỗ đó. */
+  inlineEdit?: InlineEditApi;
   locale?: ProfileLocale;
   onLocaleChange?: (locale: ProfileLocale) => void;
   ownerToolbar?: React.ReactNode;
@@ -96,7 +111,13 @@ export function PublicProfile({
     "vi",
     ...(sourceDocument.languages ?? []),
   ];
-  const interactive = !(preview || Boolean(editor) || Boolean(selection));
+  const inlineEditing = Boolean(inlineEdit);
+  const interactive = !(
+    preview ||
+    Boolean(editor) ||
+    Boolean(selection) ||
+    inlineEditing
+  );
   const isWikipediaTheme = document.theme.themeId === "wikipedia";
   const flat = profileDocumentToFlat(document);
   const phone =
@@ -123,7 +144,7 @@ export function PublicProfile({
     : undefined;
   const actions = showActions ? (
     <PublicProfileActions
-      inert={preview || Boolean(editor) || Boolean(selection)}
+      inert={!interactive}
       labels={{
         call: profileText(locale, "call"),
         saveContact: profileText(locale, "saveContact"),
@@ -142,11 +163,12 @@ export function PublicProfile({
   const showLivingSurface =
     document.theme.themeId === "studio-light" &&
     document.theme.background.type === "style";
-  return (
+  const page = (
     <div
       className={`profile-page ${preview ? "profile-page-preview" : "min-h-dvh"}`}
       data-background={backgroundKey}
       data-editing={Boolean(editor) || undefined}
+      data-inline-editing={inlineEditing || undefined}
       data-preview={preview || undefined}
       data-style={document.theme.themeId}
       data-template={document.theme.headerLayout}
@@ -162,7 +184,9 @@ export function PublicProfile({
           locale={locale}
           onChange={onLocaleChange}
         />
-        {isWikipediaTheme && interactive ? <WikipediaInfoboxSpacer /> : null}
+        {isWikipediaTheme && (interactive || inlineEditing) ? (
+          <WikipediaInfoboxSpacer />
+        ) : null}
         <section className="profile-content" aria-label="Thông tin cá nhân">
           <BlockFrame
             editor={editor}
@@ -174,17 +198,39 @@ export function PublicProfile({
               actions={identityActions}
               document={document}
               editor={editor}
-              inert={preview || Boolean(editor) || Boolean(selection)}
+              inert={!interactive}
+              inlineEditing={inlineEditing}
               locale={locale}
               onNavigate={editor?.onSelect ?? selection?.onSelect}
-              showWikipediaInfoboxDetails={!editor && !selection}
+              showWikipediaInfoboxDetails={
+                !editor && !selection && !inlineEditing
+              }
             />
           </BlockFrame>
           <div className="profile-inner">
             {identityActions ? null : actions}
             <div className="profile-blocks">
               {document.blocks.slice(1).map((block) =>
-                block.type === "article" ? (
+                inlineEditing ? (
+                  block.type === "article" ? (
+                    <EditableArticleBlockView
+                      document={document}
+                      isWikipedia={isWikipediaTheme}
+                      key={block.id}
+                      locale={locale}
+                    />
+                  ) : (
+                    <OptionalBlockView
+                      document={document}
+                      editing={false}
+                      inlineEditing
+                      key={block.id}
+                      locale={locale}
+                      preview
+                      type={block.type}
+                    />
+                  )
+                ) : block.type === "article" ? (
                   !block.visible && !selection && !editor ? null : (
                     <BlockFrame
                       editor={editor}
@@ -252,6 +298,11 @@ export function PublicProfile({
       </main>
     </div>
   );
+  return inlineEdit ? (
+    <InlineEditProvider value={inlineEdit}>{page}</InlineEditProvider>
+  ) : (
+    page
+  );
 }
 
 const blockLabel: Record<ProfileBlockType, string> = {
@@ -313,6 +364,7 @@ function IdentityBlockView({
   document,
   editor,
   inert,
+  inlineEditing = false,
   locale,
   onNavigate,
   showWikipediaInfoboxDetails,
@@ -321,6 +373,7 @@ function IdentityBlockView({
   document: ProfileDocument;
   editor?: EditorMode;
   inert: boolean;
+  inlineEditing?: boolean;
   locale: ProfileLocale;
   onNavigate?: (type: ProfileBlockType) => void;
   showWikipediaInfoboxDetails: boolean;
@@ -356,12 +409,23 @@ function IdentityBlockView({
             sizes="(max-width: 704px) calc(100vw - 2rem), 896px"
             src={coverUrl}
           />
+          {inlineEditing ? <MediaEditButton kind="cover" /> : null}
         </div>
       ) : null}
       <div className="profile-avatar-wrap">
         {isWikipedia ? (
           <div className="profile-wikipedia-infobox-heading">
-            <strong>{name || "Tên của bạn"}</strong>
+            {inlineEditing ? (
+              <EditableText
+                as="strong"
+                k="identity.name"
+                label="Họ và tên trong hộp thông tin"
+                maxLength={100}
+                placeholder="Họ và tên"
+              />
+            ) : (
+              <strong>{name || "Tên của bạn"}</strong>
+            )}
           </div>
         ) : null}
         <Avatar className="profile-avatar">
@@ -375,7 +439,36 @@ function IdentityBlockView({
             {(name || "MH").slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
+        {isWikipedia && inlineEditing ? (
+          <dl className="profile-wikipedia-infobox-summary">
+            <dt>{profileText(locale, "title")}</dt>
+            <EditableText
+              as="dd"
+              k="identity.title"
+              label="Chức danh"
+              maxLength={120}
+              placeholder="Thêm chức danh"
+            />
+            <dt>{profileText(locale, "company")}</dt>
+            <EditableText
+              as="dd"
+              k="identity.company"
+              label="Đơn vị"
+              maxLength={120}
+              placeholder="Thêm đơn vị"
+            />
+            <dt>{profileText(locale, "location")}</dt>
+            <EditableText
+              as="dd"
+              k="identity.location"
+              label="Địa điểm"
+              maxLength={120}
+              placeholder="Thêm địa điểm"
+            />
+          </dl>
+        ) : null}
         {isWikipedia &&
+        !inlineEditing &&
         ((visibleFields.title && (shownTitle || editor)) ||
           (visibleFields.company && (shownCompany || editor)) ||
           (visibleFields.location && (location || editor))) ? (
@@ -454,12 +547,19 @@ function IdentityBlockView({
             ) : null}
           </dl>
         ) : null}
-        <ArticleFactsList
-          className="profile-wikipedia-infobox-summary profile-wikipedia-infobox-facts"
-          facts={articleFacts}
-          inert={inert}
-          referenceCount={referenceCount}
-        />
+        {isWikipedia && inlineEditing ? (
+          <EditableFactsList
+            className="profile-wikipedia-infobox-summary profile-wikipedia-infobox-facts"
+            document={document}
+          />
+        ) : (
+          <ArticleFactsList
+            className="profile-wikipedia-infobox-summary profile-wikipedia-infobox-facts"
+            facts={articleFacts}
+            inert={inert}
+            referenceCount={referenceCount}
+          />
+        )}
         {isWikipedia && showWikipediaInfoboxDetails ? (
           <WikipediaInfoboxContact
             block={contact}
@@ -474,7 +574,14 @@ function IdentityBlockView({
       <div className="profile-inner profile-identity-copy">
         <div className="profile-heading">
           <h1>
-            {editor ? (
+            {inlineEditing ? (
+              <EditableText
+                k="identity.name"
+                label="Họ và tên"
+                maxLength={100}
+                placeholder="Họ và tên"
+              />
+            ) : editor ? (
               <InlineInput
                 ariaLabel="Họ và tên"
                 aria-describedby={
@@ -499,7 +606,25 @@ function IdentityBlockView({
               name || "Tên của bạn"
             )}
           </h1>
-          {!isWikipedia ? (
+          {!isWikipedia && inlineEditing ? (
+            <p className="profile-byline">
+              <EditableText
+                k="identity.title"
+                label="Chức danh"
+                maxLength={120}
+                placeholder="Thêm chức danh"
+              />
+              <span aria-hidden="true">·</span>
+              <EditableText
+                as="strong"
+                k="identity.company"
+                label="Đơn vị"
+                maxLength={120}
+                placeholder="Thêm đơn vị"
+              />
+            </p>
+          ) : null}
+          {!isWikipedia && !inlineEditing ? (
             <p className="profile-byline">
               {visibleFields.title ? (
                 editor ? (
@@ -551,7 +676,21 @@ function IdentityBlockView({
               ) : null}
             </p>
           ) : null}
-          {!isWikipedia && visibleFields.location && (location || editor) ? (
+          {!isWikipedia && inlineEditing ? (
+            <p className="profile-location">
+              <MapPin aria-hidden="true" />
+              <EditableText
+                k="identity.location"
+                label="Địa điểm"
+                maxLength={120}
+                placeholder="Thêm địa điểm"
+              />
+            </p>
+          ) : null}
+          {!isWikipedia &&
+          !inlineEditing &&
+          visibleFields.location &&
+          (location || editor) ? (
             <p className="profile-location">
               <MapPin aria-hidden="true" />
               {editor ? (
@@ -622,6 +761,7 @@ function OptionalBlockView({
   document,
   editor,
   editing,
+  inlineEditing = false,
   locale,
   preview,
   type,
@@ -629,12 +769,86 @@ function OptionalBlockView({
   document: ProfileDocument;
   editor?: EditorMode;
   editing: boolean;
+  inlineEditing?: boolean;
   locale: ProfileLocale;
   preview: boolean;
   type: ProfileBlockType;
 }) {
   if (type === "identity" || type === "article") return null;
   const block = getProfileBlock(document, type);
+  if (inlineEditing) {
+    if (!block.visible) return <HiddenBlockBarFor type={type} />;
+    if (block.type === "bio")
+      return (
+        <section
+          className="profile-section profile-edit-item"
+          data-profile-section="bio"
+          id="profile-bio"
+        >
+          <BlockVisibilityTools label="giới thiệu" type="bio" />
+          <h2>{profileText(locale, "about")}</h2>
+          <EditableText
+            as="p"
+            className="profile-bio profile-bio-block"
+            k="bio.text"
+            label="Giới thiệu"
+            maxLength={700}
+            multiline
+            placeholder="Hai, ba câu giới thiệu: bạn là ai, đang làm gì, điều muốn người quét mã nhớ về bạn."
+          />
+        </section>
+      );
+    // Đang sửa thì hiện đủ các ô (kể cả ô trống) để bấm vào là điền.
+    const items =
+      block.type === "contact"
+        ? buildContactItems(
+            {
+              ...block,
+              data: {
+                ...block.data,
+                visibleFields: { email: true, phone: true, website: true },
+              },
+            },
+            true,
+            locale,
+          )
+        : buildSocialItems(
+            {
+              ...block,
+              data: {
+                ...block.data,
+                visibleFields: Object.fromEntries(
+                  socialPlatforms.map((platform) => [platform.field, true]),
+                ) as typeof block.data.visibleFields,
+              },
+            },
+            true,
+          ).filter(
+            (item) =>
+              item.value ||
+              socialPlatforms.find((platform) => platform.field === item.field)
+                ?.group === "primary",
+          );
+    return (
+      <DirectorySection
+        editablePrefix={block.type}
+        items={items}
+        preview
+        section={block.type}
+        title={
+          block.type === "contact"
+            ? profileText(locale, "contactDetails")
+            : profileText(locale, "social")
+        }
+        tools={
+          <BlockVisibilityTools
+            label={block.type === "contact" ? "liên hệ" : "mạng xã hội"}
+            type={block.type}
+          />
+        }
+      />
+    );
+  }
   if (!block.visible)
     return editing ? (
       <HiddenBlockPlaceholder
@@ -881,14 +1095,19 @@ function buildSocialItems(
 
 function DirectorySection({
   disabled,
+  editablePrefix,
   invalidField,
   items,
   onValueChange,
   preview,
   section,
   title,
+  tools,
 }: {
   disabled?: boolean;
+  /** Sửa trực tiếp trên trang: giá trị mỗi dòng thành chữ bấm vào là sửa. */
+  editablePrefix?: "contact" | "social";
+  tools?: React.ReactNode;
   invalidField?: string | null;
   items: DirectoryItem[];
   onValueChange?: (field: string, value: string) => void;
@@ -898,10 +1117,11 @@ function DirectorySection({
 }) {
   return (
     <section
-      className="profile-section"
+      className={`profile-section${tools ? " profile-edit-item" : ""}`}
       data-profile-section={section}
       id={`profile-${section}`}
     >
+      {tools}
       <h2>{title}</h2>
       <Card className="profile-section-card profile-directory-card">
         <div className="profile-directory-list">
@@ -935,7 +1155,15 @@ function DirectorySection({
                     />
                   ) : null}
                   <span className="profile-directory-label">{label}</span>
-                  {onValueChange ? (
+                  {editablePrefix ? (
+                    <EditableText
+                      as="strong"
+                      k={`${editablePrefix}.${field}`}
+                      label={label}
+                      maxLength={maxLength}
+                      placeholder={placeholder}
+                    />
+                  ) : onValueChange ? (
                     <InlineInput
                       ariaLabel={label}
                       aria-describedby={
@@ -954,7 +1182,7 @@ function DirectorySection({
                   ) : (
                     <strong>{displayDirectoryValue(value)}</strong>
                   )}
-                  {!onValueChange ? (
+                  {!onValueChange && !editablePrefix ? (
                     <ArrowUpRight
                       aria-hidden="true"
                       className="profile-directory-arrow"

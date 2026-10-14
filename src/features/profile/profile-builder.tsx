@@ -43,13 +43,17 @@ import type {
   ProfileLocale,
 } from "@/features/profile/profile-document-types";
 import { ProfileFormEditor } from "@/features/profile/profile-form-editor";
+import { ProfileInlineEditor } from "@/features/profile/profile-inline-editor";
 import { PublicProfile } from "@/features/profile/public-profile";
 import { useProfileBuilderHistory } from "@/features/profile/use-profile-builder-history";
 
 type ProfileBuilderProps = {
   initialDocument: ProfileDocument;
-  /** "form": trình sửa dạng thẻ (mặc định); "classic": cột chỉnh sửa bên trái như cũ. */
-  layout?: "classic" | "form";
+  /**
+   * "inline": sửa trực tiếp trên trang (mặc định); "form": trình sửa dạng thẻ;
+   * "classic": cột chỉnh sửa bên trái như cũ.
+   */
+  layout?: "classic" | "form" | "inline";
   initialProfileId?: string;
   initialProfileLabel: string;
   initialVersion: number;
@@ -77,7 +81,7 @@ function ProfileBuilderEditor({
   initialProfileId,
   initialProfileLabel,
   initialVersion,
-  layout = "form",
+  layout = "inline",
   linkedQr,
   qrToken = "",
 }: ProfileBuilderProps) {
@@ -326,11 +330,13 @@ function ProfileBuilderEditor({
     </AlertDialog>
   );
 
-  if (layout === "form") {
+  if (layout === "inline" || layout === "form") {
+    const Editor =
+      layout === "inline" ? ProfileInlineEditor : ProfileFormEditor;
     return (
       <form className="min-h-dvh bg-background" ref={formRef}>
         {exitDialog}
-        <ProfileFormEditor
+        <Editor
           canRedo={history.canRedo}
           canUndo={history.canUndo}
           document={editorDocument}

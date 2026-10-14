@@ -8,6 +8,7 @@ import "@/app/globals.css";
 import "@/features/profile/public-profile-style-packs.css";
 import "@/features/profile/public-profile-wikipedia-style.css";
 import "@/features/profile/public-profile-article.css";
+import "@/features/profile/public-profile-inline-edit.css";
 
 export const metadata: Metadata = {
   applicationName: "MHG Connect",
