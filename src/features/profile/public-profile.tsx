@@ -952,7 +952,7 @@ function DirectorySection({
                       value={value}
                     />
                   ) : (
-                    <strong>{value}</strong>
+                    <strong>{displayDirectoryValue(value)}</strong>
                   )}
                   {!onValueChange ? (
                     <ArrowUpRight
@@ -983,6 +983,15 @@ function DirectorySection({
       </Card>
     </section>
   );
+}
+
+/** Rút gọn đường dẫn để đọc dễ trên điện thoại: bỏ https://, www. và dấu / cuối. */
+function displayDirectoryValue(value: string) {
+  if (!/^https?:\/\//i.test(value)) return value;
+  return value
+    .replace(/^https?:\/\//i, "")
+    .replace(/^www\./i, "")
+    .replace(/\/$/, "");
 }
 
 function InlineInput({

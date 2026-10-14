@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  boolean,
   check,
   foreignKey,
   index,
@@ -210,6 +211,48 @@ export const qrCardDesigns = pgTable(
     check(
       "qr_card_designs_orientation_check",
       sql`${table.orientation} in ('portrait', 'landscape')`,
+    ),
+  ],
+);
+
+/**
+ * Mẫu sticker/thẻ có sẵn (sticker sản phẩm MHG, chủ đề Đất nước…). Lưu trong database
+ * để thêm, sửa, ẩn mẫu mà không cần sửa code; ảnh nền nằm trong public/brand/card-backgrounds.
+ */
+export const qrCardPresets = pgTable(
+  "qr_card_presets",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    category: text("category").notNull(),
+    backgroundUrl: text("background_url").notNull(),
+    orientation: text("orientation")
+      .$type<QrCardOrientation>()
+      .default("portrait")
+      .notNull(),
+    textStyle: text("text_style")
+      .$type<QrCardTextStyle>()
+      .default("dark")
+      .notNull(),
+    tagline: text("tagline").default(QR_CARD_DEFAULT_TAGLINE).notNull(),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    active: boolean("active").default(true).notNull(),
+    createdAt: productTimestamp("created_at").defaultNow().notNull(),
+    updatedAt: productTimestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("qr_card_presets_active_sort_idx").on(table.active, table.sortOrder),
+    check(
+      "qr_card_presets_text_style_check",
+      sql`${table.textStyle} in ('shadow', 'band', 'dark', 'light')`,
+    ),
+    check(
+      "qr_card_presets_orientation_check",
+      sql`${table.orientation} in ('portrait', 'landscape')`,
+    ),
+    check(
+      "qr_card_presets_background_check",
+      sql`${table.backgroundUrl} like '/brand/card-backgrounds/%'`,
     ),
   ],
 );

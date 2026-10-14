@@ -13,10 +13,10 @@ import {
   qrCardOrientations,
   type QrCardOrientation,
 } from "@/features/qr/qr-card-layout";
+import { findActiveQrCardPreset } from "@/features/qr/qr-card-preset-data";
 import {
   isPresetCardBackground,
-  presetBackgroundUrl,
-  qrCardPresetIds,
+  type QrCardPreset,
 } from "@/features/qr/qr-card-presets";
 import {
   deleteProfileMedia,
@@ -26,6 +26,8 @@ import { requireSession } from "@/lib/session";
 
 export type SaveQrCardBackgroundResult = {
   error?: string;
+  /** Có khi vừa áp một mẫu sticker: mẫu đổi luôn hướng thẻ, nền chữ và dòng chữ cạnh logo. */
+  layout?: Pick<QrCardPreset, "orientation" | "tagline" | "textStyle">;
   success: boolean;
   url?: string | null;
   version?: number;
@@ -34,7 +36,7 @@ export type SaveQrCardBackgroundResult = {
 const inputSchema = z.object({
   expectedVersion: z.coerce.number().int().positive(),
   intent: z.enum(["save", "remove", "preset"]),
-  presetId: z.enum(qrCardPresetIds).optional(),
+  presetId: z.string().max(64).optional(),
   qrId: z.uuid(),
 });
 
@@ -73,11 +75,13 @@ export async function saveQrCardBackgroundAction(
   }
 
   let uploadedUrl: string | null = null;
+  let preset: QrCardPreset | null = null;
   if (parsed.data.intent === "preset") {
-    if (!parsed.data.presetId) {
-      return { error: "Hãy chọn một nền có sẵn.", success: false };
+    preset = await findActiveQrCardPreset(parsed.data.presetId);
+    if (!preset) {
+      return { error: "Mẫu sticker này không còn dùng được.", success: false };
     }
-    uploadedUrl = presetBackgroundUrl(parsed.data.presetId);
+    uploadedUrl = preset.backgroundUrl;
   } else if (parsed.data.intent === "save") {
     const file = formData.get("background");
     if (!(file instanceof File) || file.size === 0) {
@@ -106,6 +110,13 @@ export async function saveQrCardBackgroundAction(
     .update(qrCodes)
     .set({
       cardBackgroundUrl: uploadedUrl,
+      ...(preset
+        ? {
+            cardOrientation: preset.orientation,
+            cardTagline: preset.tagline,
+            cardTextStyle: preset.textStyle,
+          }
+        : {}),
       updatedAt: new Date(),
       version: sql`${qrCodes.version} + 1`,
     })
@@ -145,6 +156,15 @@ export async function saveQrCardBackgroundAction(
   }
 
   return {
+    ...(preset
+      ? {
+          layout: {
+            orientation: preset.orientation,
+            tagline: preset.tagline,
+            textStyle: preset.textStyle,
+          },
+        }
+      : {}),
     success: true,
     url: uploadedUrl
       ? isPresetCardBackground(uploadedUrl)

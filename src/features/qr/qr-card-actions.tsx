@@ -32,6 +32,7 @@ import type { QrCardOrientation } from "@/features/qr/qr-card-layout";
 import type { QrCardDesign } from "@/features/qr/qr-card-design";
 import { QrProfileAssignment } from "@/features/qr/qr-profile-assignment";
 import { QrCardPreviewDialog } from "@/features/qr/qr-card-preview-dialog";
+import type { QrCardPreset } from "@/features/qr/qr-card-presets";
 
 type AssignmentProfile = {
   company: string | null;
@@ -50,6 +51,7 @@ export function QrCardActions({
   heading,
   location,
   orientation,
+  presets,
   profileId,
   profiles,
   publicToken,
@@ -68,6 +70,7 @@ export function QrCardActions({
   heading: string;
   location: string | null;
   orientation: QrCardOrientation;
+  presets: readonly QrCardPreset[];
   profileId: string | null;
   profiles: AssignmentProfile[];
   publicToken: string;
@@ -127,6 +130,7 @@ export function QrCardActions({
           onOpenChange={setCardOpen}
           open={cardOpen}
           orientation={orientation}
+          presets={presets}
           publicToken={publicToken}
           qrId={qrId}
           status={status}

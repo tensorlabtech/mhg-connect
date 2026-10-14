@@ -92,6 +92,13 @@
       "when": 1791904601515,
       "tag": "0012_qr_card_layout",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791968900760,
+      "tag": "0013_qr_card_presets",
+      "breakpoints": true
     }
   ]
 }

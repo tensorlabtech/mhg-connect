@@ -107,6 +107,7 @@ export function QrCardLayoutFields({
           <Switch
             aria-label="Hiện dòng chữ cạnh logo"
             checked={shown}
+            className="relative after:absolute after:-inset-3 after:content-['']"
             disabled={disabled}
             onCheckedChange={(checked) =>
               commit(checked ? lastShown || QR_CARD_DEFAULT_TAGLINE : "")

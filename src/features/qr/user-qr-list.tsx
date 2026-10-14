@@ -7,7 +7,11 @@ import type { QrCardOrientation } from "@/features/qr/qr-card-layout";
 import { QrCardActions } from "@/features/qr/qr-card-actions";
 import type { QrCardDesign } from "@/features/qr/qr-card-design";
 import { getQrCardDesigns } from "@/features/qr/qr-data";
-import { isPresetCardBackground } from "@/features/qr/qr-card-presets";
+import { getQrCardPresets } from "@/features/qr/qr-card-preset-data";
+import {
+  isPresetCardBackground,
+  type QrCardPreset,
+} from "@/features/qr/qr-card-presets";
 import { QrVisualCard } from "@/features/qr/qr-visual-card";
 import { runtimeEnv } from "@/lib/runtime-env";
 
@@ -47,7 +51,10 @@ export async function UserQrList({
   items: QrItem[];
   profiles: AssignmentProfile[];
 }) {
-  const designs = await getQrCardDesigns(items.map((item) => item.id));
+  const [designs, presets] = await Promise.all([
+    getQrCardDesigns(items.map((item) => item.id)),
+    getQrCardPresets(),
+  ]);
   const cards = await Promise.all(
     items.map(async (item) => ({
       ...item,
@@ -64,7 +71,12 @@ export async function UserQrList({
   return (
     <div className="grid gap-4">
       {cards.map((qr) => (
-        <QrOwnershipCard item={qr} key={qr.id} profiles={profiles} />
+        <QrOwnershipCard
+          item={qr}
+          key={qr.id}
+          presets={presets}
+          profiles={profiles}
+        />
       ))}
     </div>
   );
@@ -72,9 +84,11 @@ export async function UserQrList({
 
 function QrOwnershipCard({
   item,
+  presets,
   profiles,
 }: {
   item: QrCardItem;
+  presets: QrCardPreset[];
   profiles: AssignmentProfile[];
 }) {
   const profileName = item.profileName ?? "Chưa gắn hồ sơ";
@@ -103,9 +117,9 @@ function QrOwnershipCard({
       />
 
       <section className="flex min-h-80 flex-col p-6 sm:p-8">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xl font-semibold tracking-[-0.02em] text-gold">
+        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+          <div className="min-w-0">
+            <p className="text-xl font-semibold tracking-[-0.02em] break-keep whitespace-nowrap text-gold">
               {item.publicToken}
             </p>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -149,6 +163,7 @@ function QrOwnershipCard({
           designs={item.designs}
           heading={profileName}
           location={item.profileLocation}
+          presets={presets}
           profileId={item.profileId}
           profiles={profiles}
           publicToken={item.publicToken}

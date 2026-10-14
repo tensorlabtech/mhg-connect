@@ -18,10 +18,8 @@ import {
   toClientQrCardDesign as toClientDesign,
   type QrCardDesign,
 } from "@/features/qr/qr-card-design";
-import {
-  presetBackgroundUrl,
-  qrCardPresetIds,
-} from "@/features/qr/qr-card-presets";
+import { findActiveQrCardPreset } from "@/features/qr/qr-card-preset-data";
+import type { QrCardPreset } from "@/features/qr/qr-card-presets";
 import {
   deleteProfileMedia,
   uploadProfileMedia,
@@ -166,7 +164,6 @@ export async function saveQrCardDesignBackgroundAction(
   const rawIntent = formData.get("intent");
   const intent =
     rawIntent === "remove" || rawIntent === "preset" ? rawIntent : "save";
-  const presetId = z.enum(qrCardPresetIds).safeParse(formData.get("presetId"));
   if (!designId.success)
     return { error: "Mẫu thẻ không hợp lệ.", success: false };
   const session = await requireSession("/dashboard");
@@ -174,10 +171,12 @@ export async function saveQrCardDesignBackgroundAction(
   if (!owned) return { error: "Không tìm thấy mẫu thẻ.", success: false };
 
   let uploadedUrl: string | null = null;
+  let preset: QrCardPreset | null = null;
   if (intent === "preset") {
-    if (!presetId.success)
-      return { error: "Hãy chọn một nền có sẵn.", success: false };
-    uploadedUrl = presetBackgroundUrl(presetId.data);
+    preset = await findActiveQrCardPreset(formData.get("presetId"));
+    if (!preset)
+      return { error: "Mẫu sticker này không còn dùng được.", success: false };
+    uploadedUrl = preset.backgroundUrl;
   } else if (intent === "save") {
     const file = formData.get("background");
     if (!(file instanceof File) || file.size === 0)
@@ -201,7 +200,17 @@ export async function saveQrCardDesignBackgroundAction(
 
   const [updated] = await db
     .update(qrCardDesigns)
-    .set({ backgroundUrl: uploadedUrl, updatedAt: new Date() })
+    .set({
+      backgroundUrl: uploadedUrl,
+      ...(preset
+        ? {
+            orientation: preset.orientation,
+            tagline: preset.tagline,
+            textStyle: preset.textStyle,
+          }
+        : {}),
+      updatedAt: new Date(),
+    })
     .where(eq(qrCardDesigns.id, owned.design.id))
     .returning();
   const replaced = owned.design.backgroundUrl;

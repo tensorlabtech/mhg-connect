@@ -32,6 +32,7 @@ import { QrCardBackgroundEditor } from "@/features/qr/qr-card-background-editor"
 import type { QrCardDesign } from "@/features/qr/qr-card-design";
 import { createQrCardDesignAction } from "@/features/qr/qr-card-design-actions";
 import { QrCardDesignEditor } from "@/features/qr/qr-card-design-editor";
+import type { QrCardPreset } from "@/features/qr/qr-card-presets";
 
 const maxDesigns = 12;
 
@@ -44,6 +45,7 @@ export function QrCardPreviewDialog({
   onOpenChange,
   open,
   orientation,
+  presets = [],
   publicToken,
   qrId,
   status,
@@ -60,6 +62,7 @@ export function QrCardPreviewDialog({
   onOpenChange: (open: boolean) => void;
   open: boolean;
   orientation: QrCardOrientation;
+  presets?: readonly QrCardPreset[];
   publicToken: string;
   qrId: string;
   status: string;
@@ -154,7 +157,7 @@ export function QrCardPreviewDialog({
                 <button
                   aria-selected={activeDesign === item.id}
                   className={cn(
-                    "h-control-sm max-w-48 truncate rounded-full px-3.5 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-ring/60 disabled:opacity-50",
+                    "h-control-sm max-w-full truncate rounded-full px-3.5 text-sm transition-colors sm:max-w-72 focus-visible:ring-2 focus-visible:ring-ring/60 disabled:opacity-50",
                     activeDesign === item.id
                       ? "bg-secondary text-foreground ring-1 ring-gold/70"
                       : "bg-secondary/55 text-muted-foreground hover:bg-secondary hover:text-foreground",
@@ -163,6 +166,7 @@ export function QrCardPreviewDialog({
                   key={item.id}
                   onClick={() => setActiveDesign(item.id)}
                   role="tab"
+                  title={item.name}
                   type="button"
                 >
                   {item.name}
@@ -213,6 +217,7 @@ export function QrCardPreviewDialog({
                 setActiveDesign("main");
               }}
               onPendingChange={setIsSaving}
+              presets={presets}
               svg={svg}
             />
           ) : null}
@@ -227,6 +232,7 @@ export function QrCardPreviewDialog({
               onPendingChange={setIsSaving}
               onUnsavedChange={setHasUnsavedChanges}
               orientation={orientation}
+              presets={presets}
               qrId={qrId}
               svg={svg}
               tagline={tagline}

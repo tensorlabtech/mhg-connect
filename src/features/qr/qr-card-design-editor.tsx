@@ -31,6 +31,7 @@ import type { QrCardDesign } from "@/features/qr/qr-card-design";
 import type { QrCardOrientation } from "@/features/qr/qr-card-layout";
 import { QrCardLayoutFields } from "@/features/qr/qr-card-layout-fields";
 import { QrCardPresetPicker } from "@/features/qr/qr-card-preset-picker";
+import type { QrCardPreset } from "@/features/qr/qr-card-presets";
 import {
   deleteQrCardDesignAction,
   saveQrCardDesignBackgroundAction,
@@ -56,6 +57,7 @@ export function QrCardDesignEditor({
   onChange,
   onDeleted,
   onPendingChange,
+  presets,
   svg,
 }: {
   defaults: { description: string; heading: string; location: string | null };
@@ -64,6 +66,7 @@ export function QrCardDesignEditor({
   onChange: (design: QrCardDesign) => void;
   onDeleted: () => void;
   onPendingChange?: (pending: boolean) => void;
+  presets: readonly QrCardPreset[];
   svg: string;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -224,6 +227,10 @@ export function QrCardDesignEditor({
     const result = await run(() => saveQrCardDesignBackgroundAction(formData));
     if (result && "design" in result) {
       setPreviewUrl(null);
+      setOrientation(result.design.orientation);
+      setTextStyle(result.design.textStyle);
+      setTagline(result.design.tagline);
+      setTaglinePreview(result.design.tagline);
       onChange(result.design);
     }
   }
@@ -432,6 +439,7 @@ export function QrCardDesignEditor({
           <QrCardPresetPicker
             disabled={busy}
             onPick={(presetId) => void pickPreset(presetId)}
+            presets={presets}
             selectedUrl={design.backgroundUrl}
           />
           <div className="grid min-w-0 gap-2 sm:grid-cols-2">

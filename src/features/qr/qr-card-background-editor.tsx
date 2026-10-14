@@ -21,6 +21,7 @@ import {
 import type { QrCardOrientation } from "@/features/qr/qr-card-layout";
 import { QrCardLayoutFields } from "@/features/qr/qr-card-layout-fields";
 import { QrCardPresetPicker } from "@/features/qr/qr-card-preset-picker";
+import type { QrCardPreset } from "@/features/qr/qr-card-presets";
 import {
   QrVisualCard,
   qrCardTextStyleOptions,
@@ -39,6 +40,7 @@ export function QrCardBackgroundEditor({
   onPendingChange,
   onUnsavedChange,
   orientation: initialOrientation = "portrait",
+  presets,
   qrId,
   svg,
   tagline: initialTagline,
@@ -53,6 +55,7 @@ export function QrCardBackgroundEditor({
   onPendingChange?: (pending: boolean) => void;
   onUnsavedChange?: (unsaved: boolean) => void;
   orientation?: QrCardOrientation;
+  presets: readonly QrCardPreset[];
   qrId: string;
   svg: string;
   tagline: string;
@@ -102,6 +105,13 @@ export function QrCardBackgroundEditor({
     try {
       const result = await saveQrCardBackgroundAction(previous, formData);
       if (result.version) setLiveVersion(result.version);
+      if (result.success && result.layout) {
+        setOrientation(result.layout.orientation);
+        setTagline(result.layout.tagline);
+        setTaglinePreview(result.layout.tagline);
+        setSavedTextStyle(result.layout.textStyle);
+        setSelectedTextStyle(result.layout.textStyle);
+      }
       if (result.success) {
         setFileName(null);
         setClientError(null);
@@ -395,13 +405,14 @@ export function QrCardBackgroundEditor({
         <div className="max-w-md border-t border-border/60 pt-5">
           <h3 className="text-sm font-medium">Ảnh nền thẻ</h3>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Ảnh phủ toàn bộ thẻ. Ảnh ngang sẽ được cắt theo trung tâm để phù hợp
-            tỷ lệ badge.
+            Chọn một mẫu sticker có sẵn hoặc tải ảnh của bạn. Ảnh phủ toàn bộ
+            thẻ và tự cắt giữa theo khổ dọc hay ngang.
           </p>
         </div>
         <QrCardPresetPicker
           buttonName="presetId"
           disabled={isSaving}
+          presets={presets}
           selectedUrl={persistedUrl}
         />
         <div className="grid min-w-0 gap-2 sm:grid-cols-2">
