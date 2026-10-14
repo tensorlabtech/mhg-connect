@@ -24,7 +24,7 @@ import {
 import { profileLocaleLabels } from "@/features/profile/profile-i18n";
 
 export type ProfileBuilderSidebarMode = "detail" | "list";
-type SaveStatus = "conflict" | "dirty" | "error" | "saved" | "saving";
+export type SaveStatus = "conflict" | "dirty" | "error" | "saved" | "saving";
 
 type SidebarProps = {
   canRedo: boolean;
@@ -235,7 +235,7 @@ function LocalePicker({
   );
 }
 
-function SaveError({ error }: { error: string }) {
+export function SaveError({ error }: { error: string }) {
   return (
     <Alert className="mb-5" variant="destructive">
       <AlertCircle aria-hidden="true" />
@@ -244,7 +244,7 @@ function SaveError({ error }: { error: string }) {
   );
 }
 
-function SaveButton({
+export function SaveButton({
   hasUnsavedChanges,
   onRetry,
   onSave,

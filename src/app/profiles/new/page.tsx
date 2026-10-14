@@ -1,6 +1,7 @@
 import { defaultProfileVisibility } from "@/db/schema";
 import { ProfileBuilder } from "@/features/profile/profile-builder";
 import { createProfileDocument } from "@/features/profile/profile-document";
+import { withFormTemplate } from "@/features/profile/profile-form-hints";
 import { createDefaultProfileLabel } from "@/features/profile/profile-label";
 import { findOwnedQrWithoutProfile } from "@/features/qr/qr-data";
 import { requireSession } from "@/lib/session";
@@ -17,7 +18,8 @@ export default async function NewProfilePage({
     qrToken && (await findOwnedQrWithoutProfile(session.user.id, qrToken))
       ? qrToken
       : "";
-  const initialDocument = createProfileDocument({
+  const layout = query.editor === "cu" ? "classic" : "form";
+  const baseDocument = createProfileDocument({
     avatarUrl: null,
     bio: null,
     company: null,
@@ -36,11 +38,15 @@ export default async function NewProfilePage({
     zalo: null,
   });
 
+  const initialDocument =
+    layout === "form" ? withFormTemplate(baseDocument) : baseDocument;
+
   return (
     <ProfileBuilder
       initialDocument={initialDocument}
       initialProfileLabel={createDefaultProfileLabel()}
       initialVersion={0}
+      layout={layout}
       linkedQr={[]}
       qrToken={validQrToken}
     />

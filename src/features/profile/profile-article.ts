@@ -304,14 +304,16 @@ export function collectArticleImageUrls(document: ProfileDocument | null) {
   );
 }
 
+/** Mục chỉ hiện cho khách khi đã có nội dung hoặc ảnh; tiêu đề gợi ý còn trống thì ẩn. */
+export function isFilledArticleSection(section: ArticleSection) {
+  return Boolean(section.body.trim() || section.images.length);
+}
+
 export function hasArticleContent(block: ArticleBlock | null) {
   if (!block || !block.visible) return false;
   return (
     block.data.facts.some((fact) => fact.label.trim() && fact.value.trim()) ||
-    block.data.sections.some(
-      (section) =>
-        section.heading.trim() || section.body.trim() || section.images.length,
-    ) ||
+    block.data.sections.some(isFilledArticleSection) ||
     block.data.references.some((reference) => reference.title.trim()) ||
     (block.data.links ?? []).some((link) => link.url.trim())
   );
@@ -319,10 +321,7 @@ export function hasArticleContent(block: ArticleBlock | null) {
 
 export function visibleArticleSections(block: ArticleBlock | null) {
   if (!block || !block.visible) return [] as ArticleSection[];
-  return block.data.sections.filter(
-    (section) =>
-      section.heading.trim() || section.body.trim() || section.images.length,
-  );
+  return block.data.sections.filter(isFilledArticleSection);
 }
 
 export function moveItem<T>(items: T[], index: number, offset: -1 | 1) {

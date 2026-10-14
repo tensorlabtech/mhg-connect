@@ -13,7 +13,13 @@ import {
   Quote,
   Trash2,
 } from "lucide-react";
-import { useId, useRef, useState, type ChangeEvent } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from "react";
 import { cn } from "cn";
 
 import {
@@ -225,7 +231,7 @@ function RowTools({
   );
 }
 
-type Updater = (
+export type Updater = (
   mutate: (data: ArticleBlock["data"]) => ArticleBlock["data"],
   key?: string,
 ) => void;
@@ -516,15 +522,21 @@ function SectionCard({
   );
 }
 
-function RichBodyEditor({
+export function RichBodyEditor({
   id,
+  label = "Nội dung",
   onChange,
+  placeholder = "Viết nội dung mục. Dòng trống để sang đoạn mới.",
   referenceCount,
+  showSyntaxHelp = true,
   value,
 }: {
   id: string;
+  label?: string;
   onChange: (value: string) => void;
+  placeholder?: string;
   referenceCount: number;
+  showSyntaxHelp?: boolean;
   value: string;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -600,7 +612,7 @@ function RichBodyEditor({
 
   return (
     <Field>
-      <FieldLabel htmlFor={id}>Nội dung</FieldLabel>
+      <FieldLabel htmlFor={id}>{label}</FieldLabel>
       <div className="flex flex-wrap items-center gap-1">
         <Popover onOpenChange={setLinkOpen} open={linkOpen}>
           <PopoverTrigger asChild>
@@ -714,12 +726,15 @@ function RichBodyEditor({
         onChange={(event) => onChange(event.target.value)}
         onKeyUp={rememberSelection}
         onMouseUp={rememberSelection}
-        placeholder="Viết nội dung mục. Dòng trống để sang đoạn mới."
+        placeholder={placeholder}
         ref={textareaRef}
         rows={9}
         value={value}
       />
-      <p className="text-xs leading-5 text-muted-foreground">
+      <p
+        className="text-xs leading-5 text-muted-foreground"
+        hidden={!showSyntaxHelp}
+      >
         Liên kết: [chữ](https://...) · Đậm: **chữ** · Nghiêng:
         &apos;&apos;chữ&apos;&apos; · Trích nguồn: [1] · Tiêu đề phụ: ### · Danh
         sách: -
@@ -728,10 +743,13 @@ function RichBodyEditor({
   );
 }
 
-function SectionImagesEditor({
+export function SectionImagesEditor({
+  openPickerSignal = 0,
   section,
   setSection,
 }: {
+  /** Tăng số này để mở hộp chọn ảnh từ bên ngoài (thanh công cụ nổi). */
+  openPickerSignal?: number;
   section: ArticleSection;
   setSection: (
     mutate: (section: ArticleSection) => ArticleSection,
@@ -744,6 +762,12 @@ function SectionImagesEditor({
   const [pasteOpen, setPasteOpen] = useState(false);
   const [pastedUrl, setPastedUrl] = useState("");
   const full = section.images.length >= articleLimits.imagesPerSection;
+  const lastSignal = useRef(openPickerSignal);
+  useEffect(() => {
+    if (openPickerSignal === lastSignal.current) return;
+    lastSignal.current = openPickerSignal;
+    inputRef.current?.click();
+  }, [openPickerSignal]);
 
   function addImage(url: string) {
     setSection((current) => ({
@@ -941,7 +965,7 @@ function SectionImagesEditor({
   );
 }
 
-function ReferencesEditor({
+export function ReferencesEditor({
   block,
   update,
 }: {
@@ -1102,7 +1126,7 @@ function ReferencesEditor({
   );
 }
 
-function ExternalLinksEditor({
+export function ExternalLinksEditor({
   block,
   update,
 }: {

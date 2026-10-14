@@ -42,11 +42,14 @@ import type {
   ProfileDocument,
   ProfileLocale,
 } from "@/features/profile/profile-document-types";
+import { ProfileFormEditor } from "@/features/profile/profile-form-editor";
 import { PublicProfile } from "@/features/profile/public-profile";
 import { useProfileBuilderHistory } from "@/features/profile/use-profile-builder-history";
 
 type ProfileBuilderProps = {
   initialDocument: ProfileDocument;
+  /** "form": trình sửa dạng thẻ (mặc định); "classic": cột chỉnh sửa bên trái như cũ. */
+  layout?: "classic" | "form";
   initialProfileId?: string;
   initialProfileLabel: string;
   initialVersion: number;
@@ -74,6 +77,7 @@ function ProfileBuilderEditor({
   initialProfileId,
   initialProfileLabel,
   initialVersion,
+  layout = "form",
   linkedQr,
   qrToken = "",
 }: ProfileBuilderProps) {
@@ -84,8 +88,10 @@ function ProfileBuilderEditor({
     () => false,
   );
   const formRef = useRef<HTMLFormElement>(null);
-  const savedInitialDocument =
+  const normalizedInitialDocument =
     normalizeProfileDocumentVisibility(initialDocument);
+  // Trang server đã thêm sẵn bài viết mẫu cho dạng form (để mã mục giống nhau giữa server và trình duyệt).
+  const [savedInitialDocument] = useState(normalizedInitialDocument);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -286,6 +292,72 @@ function ProfileBuilderEditor({
       selection={selection}
     />
   );
+
+  const exitDialog = (
+    <AlertDialog onOpenChange={setExitDialogOpen} open={exitDialogOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Rời khi chưa lưu?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Các thay đổi chưa lưu sẽ không xuất hiện trên hồ sơ.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Ở lại</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => router.push("/dashboard")}
+            type="button"
+            variant="destructive"
+          >
+            Rời không lưu
+          </AlertDialogAction>
+          <Button
+            disabled={saving}
+            onClick={() => void saveAndExit()}
+            type="button"
+          >
+            {saving ? (
+              <LoaderCircle aria-hidden="true" className="animate-spin" />
+            ) : null}
+            {saving ? "Đang lưu…" : "Lưu và rời"}
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
+  if (layout === "form") {
+    return (
+      <form className="min-h-dvh bg-background" ref={formRef}>
+        {exitDialog}
+        <ProfileFormEditor
+          canRedo={history.canRedo}
+          canUndo={history.canUndo}
+          document={editorDocument}
+          hasUnsavedChanges={hasUnsavedChanges}
+          invalidField={saveErrorField}
+          locale={editLocale}
+          onBack={requestExit}
+          onChange={changeDocument}
+          onLocaleChange={setEditLocale}
+          onProfileLabelChange={(value) => {
+            setProfileLabel(value);
+            setSaveError(null);
+            setSaveErrorField(null);
+          }}
+          onRedo={history.redo}
+          onRetry={() => void handleSave()}
+          onSave={() => void handleSave()}
+          onUndo={history.undo}
+          previewProfile={previewProfile}
+          profileLabel={profileLabel}
+          saveError={saveError}
+          saving={saving}
+          saveStatus={saveStatus}
+        />
+      </form>
+    );
+  }
 
   return (
     <form className="min-h-dvh bg-background" ref={formRef}>
