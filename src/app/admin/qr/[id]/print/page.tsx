@@ -65,7 +65,9 @@ export default async function AdminQrPrintPage({
           location={design?.location ?? qr.profileLocation}
           orientation={orientation}
           svg={svg}
+          font={design ? design.font : qr.cardFont}
           tagline={design ? design.tagline : qr.cardTagline}
+          textColor={design ? design.textColor : qr.cardTextColor}
           textStyle={design?.textStyle ?? qr.cardTextStyle}
         />
       </main>

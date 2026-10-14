@@ -90,7 +90,9 @@ export default async function AdminQrDetailPage({
                     status={qr.status}
                     orientation={qr.cardOrientation}
                     svg={svg}
+                    font={qr.cardFont}
                     tagline={qr.cardTagline}
+                    textColor={qr.cardTextColor}
                     textStyle={qr.cardTextStyle}
                   />
                   <Button asChild className="w-full" variant="outline">

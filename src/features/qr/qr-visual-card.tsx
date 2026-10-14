@@ -5,6 +5,9 @@ import Image from "next/image";
 import type { QrCardTextStyle } from "@/db/schema/product";
 import {
   QR_CARD_DEFAULT_TAGLINE,
+  getQrCardFontOption,
+  normalizeQrCardTextColor,
+  type QrCardFont,
   type QrCardOrientation,
 } from "@/features/qr/qr-card-layout";
 
@@ -51,6 +54,13 @@ const landscapeDetailClass: Record<QrCardTextStyle, string> = {
   shadow: "",
 };
 
+/** Màu tối (độ sáng thấp) cần bóng chữ sáng thay vì bóng đen. */
+export function isDarkCardTextColor(color: string) {
+  const value = Number.parseInt(color.slice(1), 16);
+  const [r, g, b] = [(value >> 16) & 255, (value >> 8) & 255, value & 255];
+  return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 < 0.45;
+}
+
 /** Tách "Chức danh · Công ty" thành từng dòng để tên đơn vị không bị ngắt giữa chừng. */
 export function splitCardDescription(description?: string) {
   return (description ?? "")
@@ -64,17 +74,21 @@ export function QrVisualCard({
   backgroundUrl,
   className,
   description,
+  font,
   heading,
   headingClassName,
   location,
   orientation = "portrait",
   svg,
   tagline = QR_CARD_DEFAULT_TAGLINE,
+  textColor,
   textStyle = "shadow",
 }: {
   backgroundUrl?: string | null;
   className?: string;
   description?: string;
+  /** Phông chữ in trên thẻ; mặc định Be Vietnam Pro. */
+  font?: QrCardFont | null;
   heading: string;
   headingClassName?: string;
   location?: string | null;
@@ -82,10 +96,16 @@ export function QrVisualCard({
   svg: string;
   /** Dòng chữ cạnh logo; chuỗi rỗng là ẩn. */
   tagline?: string | null;
+  /** Màu chữ tên, chức danh, địa điểm (#rrggbb); null là tự động theo nền chữ. */
+  textColor?: string | null;
   textStyle?: QrCardTextStyle;
 }) {
   const landscape = orientation === "landscape";
+  const fontOption = getQrCardFontOption(font);
+  const color = normalizeQrCardTextColor(textColor);
+  const darkCustomColor = color ? isDarkCardTextColor(color) : false;
   const shadowText = textStyle === "shadow" || textStyle === "band";
+  const colorStyle = color ? { color } : undefined;
   const descriptionLines = splitCardDescription(description);
   const taglineText = (tagline ?? "").trim();
   const hasDetails = descriptionLines.length > 0 || Boolean(location);
@@ -148,6 +168,8 @@ export function QrVisualCard({
               : "bg-[rgb(10_10_10/0.62)] text-white",
           )}
           data-card-tagline
+          // Dòng cam kết sản phẩm luôn in phông mặc định cho dễ đọc, kể cả khi tên dùng chữ viết tay.
+          style={{ fontFamily: '"Be Vietnam Pro", system-ui, sans-serif' }}
         >
           <ShieldCheck
             aria-hidden="true"
@@ -183,7 +205,9 @@ export function QrVisualCard({
         "flex min-w-0 flex-col items-start text-left",
         landscape ? "gap-[0.8cqw]" : "flex-1 gap-[1.2cqw] pb-[0.5cqw]",
         shadowText &&
-          "[text-shadow:0_0_1px_rgb(0_0_0/0.95),0_1px_1px_rgb(0_0_0/0.95)]",
+          (darkCustomColor
+            ? "[text-shadow:0_0_2px_rgb(255_255_255/0.9),0_1px_2px_rgb(255_255_255/0.75)]"
+            : "[text-shadow:0_0_1px_rgb(0_0_0/0.95),0_1px_1px_rgb(0_0_0/0.95)]"),
         landscape
           ? landscapeDetailClass[textStyle]
           : detailPanelClass[textStyle],
@@ -196,6 +220,7 @@ export function QrVisualCard({
             landscape ? "text-[2.7cqw]" : "text-[4.2cqw]",
             textStyle === "light" ? "text-[#0a0a0a]" : "text-white",
           )}
+          style={colorStyle}
         >
           {descriptionLines.map((line, index) => (
             <span className="line-clamp-2" key={index}>
@@ -213,6 +238,7 @@ export function QrVisualCard({
               : "gap-[1cqw] text-[3.55cqw]",
             textStyle === "light" ? "text-[#0a0a0a]/80" : "text-white/90",
           )}
+          style={color ? { color, opacity: 0.9 } : undefined}
         >
           <MapPin
             aria-hidden="true"
@@ -230,16 +256,24 @@ export function QrVisualCard({
   const headingNode = (
     <h3
       className={cn(
-        "max-w-full font-bold tracking-[-0.025em] break-words uppercase",
+        "max-w-full font-bold break-words",
+        fontOption.uppercase ? "uppercase" : "normal-case",
+        font === "manrope" || !font || font === "be-vietnam"
+          ? "tracking-[-0.025em]"
+          : "tracking-normal",
         landscape
           ? "text-[6.2cqw] leading-[1.2]"
           : "py-[1cqw] text-[9.5cqw] leading-[1.2] text-balance",
-        shadowText && "[text-shadow:0_1px_3px_rgb(0_0_0/0.45)]",
+        shadowText &&
+          (darkCustomColor
+            ? "[text-shadow:0_0_3px_rgb(255_255_255/0.85)]"
+            : "[text-shadow:0_1px_3px_rgb(0_0_0/0.45)]"),
         landscape
           ? landscapeHeadingBoxClass[textStyle]
           : headingBoxClass[textStyle],
         headingClassName,
       )}
+      style={colorStyle}
     >
       {heading}
     </h3>
@@ -253,7 +287,9 @@ export function QrVisualCard({
         landscape ? "aspect-[85.6/53.98]" : "aspect-[53.98/85.6]",
         className,
       )}
+      data-card-font={fontOption.id}
       data-card-orientation={orientation}
+      style={{ fontFamily: fontOption.family }}
     >
       <div
         className={cn(

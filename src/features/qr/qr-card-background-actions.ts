@@ -10,9 +10,12 @@ import { qrCodes } from "@/db/schema";
 import { qrCardTextStyles, type QrCardTextStyle } from "@/db/schema/product";
 import {
   QR_CARD_TAGLINE_MAX,
+  qrCardFonts,
   qrCardOrientations,
+  type QrCardFont,
   type QrCardOrientation,
 } from "@/features/qr/qr-card-layout";
+import { qrCardTextColorInput } from "@/features/qr/qr-card-text-color-input";
 import { findActiveQrCardPreset } from "@/features/qr/qr-card-preset-data";
 import {
   isPresetCardBackground,
@@ -27,7 +30,9 @@ import { requireSession } from "@/lib/session";
 export type SaveQrCardBackgroundResult = {
   error?: string;
   /** Có khi vừa áp một mẫu sticker: mẫu đổi luôn hướng thẻ, nền chữ và dòng chữ cạnh logo. */
-  layout?: Pick<QrCardPreset, "orientation" | "tagline" | "textStyle">;
+  layout?: Pick<QrCardPreset, "orientation" | "tagline" | "textStyle"> & {
+    textColor: null;
+  };
   success: boolean;
   url?: string | null;
   version?: number;
@@ -115,6 +120,8 @@ export async function saveQrCardBackgroundAction(
             cardOrientation: preset.orientation,
             cardTagline: preset.tagline,
             cardTextStyle: preset.textStyle,
+            // Mẫu sticker có nền chữ riêng: trả màu chữ về tự động để chữ luôn đọc được.
+            cardTextColor: null,
           }
         : {}),
       updatedAt: new Date(),
@@ -162,6 +169,7 @@ export async function saveQrCardBackgroundAction(
             orientation: preset.orientation,
             tagline: preset.tagline,
             textStyle: preset.textStyle,
+            textColor: null,
           },
         }
       : {}),
@@ -240,37 +248,46 @@ export async function saveQrCardTextStyleAction(input: {
 
 const layoutSchema = z.object({
   expectedVersion: z.coerce.number().int().positive(),
+  font: z.enum(qrCardFonts).optional(),
   orientation: z.enum(qrCardOrientations).optional(),
   qrId: z.uuid(),
   tagline: z.string().trim().max(QR_CARD_TAGLINE_MAX).optional(),
+  textColor: qrCardTextColorInput,
 });
 
 export type SaveQrCardLayoutResult = {
   error?: string;
+  font?: QrCardFont;
   orientation?: QrCardOrientation;
   success: boolean;
   tagline?: string;
+  textColor?: string | null;
   version?: number;
 };
 
-/** Lưu hướng thẻ (dọc/ngang) và dòng chữ cạnh logo của thẻ chính. */
+/** Lưu hướng thẻ (dọc/ngang), dòng chữ cạnh logo, phông chữ và màu chữ của thẻ chính. */
 export async function saveQrCardLayoutAction(input: {
   expectedVersion: number;
+  font?: QrCardFont;
   orientation?: QrCardOrientation;
   qrId: string;
   tagline?: string;
+  textColor?: string | null;
 }): Promise<SaveQrCardLayoutResult> {
   const parsed = layoutSchema.safeParse(input);
   if (!parsed.success) {
     return { error: "Thông tin thẻ chưa hợp lệ.", success: false };
   }
-  const { expectedVersion, orientation, qrId, tagline } = parsed.data;
+  const { expectedVersion, font, orientation, qrId, tagline, textColor } =
+    parsed.data;
   const session = await requireSession("/dashboard");
   const [updated] = await db
     .update(qrCodes)
     .set({
       ...(orientation ? { cardOrientation: orientation } : {}),
       ...(tagline !== undefined ? { cardTagline: tagline } : {}),
+      ...(font ? { cardFont: font } : {}),
+      ...(textColor !== undefined ? { cardTextColor: textColor } : {}),
       updatedAt: new Date(),
       version: sql`${qrCodes.version} + 1`,
     })
@@ -282,8 +299,10 @@ export async function saveQrCardLayoutAction(input: {
       ),
     )
     .returning({
+      font: qrCodes.cardFont,
       orientation: qrCodes.cardOrientation,
       tagline: qrCodes.cardTagline,
+      textColor: qrCodes.cardTextColor,
       version: qrCodes.version,
     });
 
@@ -299,9 +318,11 @@ export async function saveQrCardLayoutAction(input: {
   revalidatePath(`/admin/qr/${qrId}/print`);
 
   return {
+    font: updated.font,
     orientation: updated.orientation,
     success: true,
     tagline: updated.tagline,
+    textColor: updated.textColor,
     version: updated.version,
   };
 }

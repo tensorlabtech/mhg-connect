@@ -27,7 +27,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { QrCardTextStyle } from "@/db/schema/product";
-import type { QrCardOrientation } from "@/features/qr/qr-card-layout";
+import type {
+  QrCardFont,
+  QrCardOrientation,
+} from "@/features/qr/qr-card-layout";
 import { QrCardBackgroundEditor } from "@/features/qr/qr-card-background-editor";
 import type { QrCardDesign } from "@/features/qr/qr-card-design";
 import { createQrCardDesignAction } from "@/features/qr/qr-card-design-actions";
@@ -40,6 +43,7 @@ export function QrCardPreviewDialog({
   backgroundUrl,
   description,
   designs: initialDesigns = [],
+  font,
   heading,
   location,
   onOpenChange,
@@ -51,12 +55,14 @@ export function QrCardPreviewDialog({
   status,
   svg,
   tagline,
+  textColor,
   textStyle,
   version,
 }: {
   backgroundUrl: string | null;
   description: string;
   designs?: QrCardDesign[];
+  font: QrCardFont;
   heading: string;
   location: string | null;
   onOpenChange: (open: boolean) => void;
@@ -68,6 +74,7 @@ export function QrCardPreviewDialog({
   status: string;
   svg: string;
   tagline: string;
+  textColor: string | null;
   textStyle: QrCardTextStyle;
   version: number;
 }) {
@@ -103,11 +110,13 @@ export function QrCardPreviewDialog({
       const result = await createQrCardDesignAction({
         copyFrom: current
           ? {
+              font: current.font,
               orientation: current.orientation,
               tagline: current.tagline,
+              textColor: current.textColor,
               textStyle: current.textStyle,
             }
-          : { orientation, tagline, textStyle },
+          : { font, orientation, tagline, textColor, textStyle },
         name: `Mẫu ${designs.length + 2}`,
         qrId,
       });
@@ -227,6 +236,7 @@ export function QrCardPreviewDialog({
               backgroundUrl={backgroundUrl}
               description={description}
               downloadName={publicToken}
+              font={font}
               heading={heading}
               location={location}
               onPendingChange={setIsSaving}
@@ -236,6 +246,7 @@ export function QrCardPreviewDialog({
               qrId={qrId}
               svg={svg}
               tagline={tagline}
+              textColor={textColor}
               textStyle={textStyle}
               version={version}
             />

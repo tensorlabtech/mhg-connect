@@ -11,6 +11,8 @@
 @import "@fontsource-variable/lora/wght.css";
 @import "@fontsource-variable/manrope/wght.css";
 @import "@fontsource-variable/sora/wght.css";
+@import "@fontsource-variable/oswald/wght.css";
+@import "@fontsource-variable/dancing-script/wght.css";
 @import "../features/profile/public-profile.css";
 @import "../features/dev/outsource-quotation/outsource-quotation-page.css";
 @import "../features/dev/outsource-quotation/outsource-quotation-print.css";

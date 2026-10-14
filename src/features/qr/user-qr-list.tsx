@@ -3,7 +3,10 @@ import QRCode from "qrcode";
 
 import { StatusBadge } from "@/components/product/status-badge";
 import type { QrCardTextStyle } from "@/db/schema/product";
-import type { QrCardOrientation } from "@/features/qr/qr-card-layout";
+import type {
+  QrCardFont,
+  QrCardOrientation,
+} from "@/features/qr/qr-card-layout";
 import { QrCardActions } from "@/features/qr/qr-card-actions";
 import type { QrCardDesign } from "@/features/qr/qr-card-design";
 import { getQrCardDesigns } from "@/features/qr/qr-data";
@@ -18,8 +21,10 @@ import { runtimeEnv } from "@/lib/runtime-env";
 type QrItem = {
   activatedAt: Date | null;
   cardBackgroundUrl: string | null;
+  cardFont: QrCardFont;
   cardOrientation: QrCardOrientation;
   cardTagline: string;
+  cardTextColor: string | null;
   cardTextStyle: QrCardTextStyle;
   id: string;
   profileCompany: string | null;
@@ -108,11 +113,13 @@ function QrOwnershipCard({
       <QrVisualCard
         backgroundUrl={item.cardBackgroundUrl}
         description={role}
+        font={item.cardFont}
         heading={profileName}
         location={item.profileLocation}
         orientation={item.cardOrientation}
         svg={item.svg}
         tagline={item.cardTagline}
+        textColor={item.cardTextColor}
         textStyle={item.cardTextStyle}
       />
 
@@ -161,6 +168,7 @@ function QrOwnershipCard({
           }
           description={role || "Quét để mở hồ sơ"}
           designs={item.designs}
+          font={item.cardFont}
           heading={profileName}
           location={item.profileLocation}
           presets={presets}
@@ -173,6 +181,7 @@ function QrOwnershipCard({
           svg={item.svg}
           orientation={item.cardOrientation}
           tagline={item.cardTagline}
+          textColor={item.cardTextColor}
           textStyle={item.cardTextStyle}
           version={item.version}
         />

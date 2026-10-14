@@ -28,8 +28,12 @@ import { Textarea } from "@/components/ui/textarea";
 import type { QrCardTextStyle } from "@/db/schema/product";
 import { TextStyleSwatch } from "@/features/qr/qr-card-background-editor";
 import type { QrCardDesign } from "@/features/qr/qr-card-design";
-import type { QrCardOrientation } from "@/features/qr/qr-card-layout";
+import type {
+  QrCardFont,
+  QrCardOrientation,
+} from "@/features/qr/qr-card-layout";
 import { QrCardLayoutFields } from "@/features/qr/qr-card-layout-fields";
+import { QrCardTypographyFields } from "@/features/qr/qr-card-typography-fields";
 import { QrCardPresetPicker } from "@/features/qr/qr-card-preset-picker";
 import type { QrCardPreset } from "@/features/qr/qr-card-presets";
 import {
@@ -83,6 +87,9 @@ export function QrCardDesignEditor({
   );
   const [tagline, setTagline] = useState(design.tagline);
   const [taglinePreview, setTaglinePreview] = useState(design.tagline);
+  const [font, setFont] = useState<QrCardFont>(design.font);
+  const [textColor, setTextColor] = useState<string | null>(design.textColor);
+  const [colorPreview, setColorPreview] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [status, setStatus] = useState<
     "idle" | "saving" | "saved" | "uploading" | "error"
@@ -163,12 +170,16 @@ export function QrCardDesignEditor({
   }
 
   async function saveLayout(patch: {
+    font?: QrCardFont;
     orientation?: QrCardOrientation;
     tagline?: string;
+    textColor?: string | null;
   }) {
-    const previous = { orientation, tagline };
+    const previous = { font, orientation, tagline, textColor };
     if (patch.orientation) setOrientation(patch.orientation);
     if (patch.tagline !== undefined) setTagline(patch.tagline);
+    if (patch.font) setFont(patch.font);
+    if (patch.textColor !== undefined) setTextColor(patch.textColor);
     const result = await run(() =>
       updateQrCardDesignAction({ designId: design.id, ...patch }),
     );
@@ -177,6 +188,8 @@ export function QrCardDesignEditor({
       setOrientation(previous.orientation);
       setTagline(previous.tagline);
       setTaglinePreview(previous.tagline);
+      setFont(previous.font);
+      setTextColor(previous.textColor);
     }
   }
 
@@ -229,6 +242,7 @@ export function QrCardDesignEditor({
       setPreviewUrl(null);
       setOrientation(result.design.orientation);
       setTextStyle(result.design.textStyle);
+      setTextColor(result.design.textColor);
       setTagline(result.design.tagline);
       setTaglinePreview(result.design.tagline);
       onChange(result.design);
@@ -286,6 +300,7 @@ export function QrCardDesignEditor({
         <QrVisualCard
           backgroundUrl={background}
           description={fields.description ?? defaults.description}
+          font={font}
           heading={fields.heading || defaults.heading}
           location={
             fields.location === null ? defaults.location : fields.location
@@ -293,6 +308,7 @@ export function QrCardDesignEditor({
           orientation={orientation}
           svg={svg}
           tagline={taglinePreview}
+          textColor={colorPreview ?? textColor}
           textStyle={textStyle}
         />
       </div>
@@ -322,6 +338,15 @@ export function QrCardDesignEditor({
           onTaglinePreview={setTaglinePreview}
           orientation={orientation}
           tagline={tagline}
+        />
+        <QrCardTypographyFields
+          disabled={busy}
+          font={font}
+          idPrefix={`design-${design.id}`}
+          onColorPreview={setColorPreview}
+          onFontChange={(next) => void saveLayout({ font: next })}
+          onTextColorChange={(next) => void saveLayout({ textColor: next })}
+          textColor={textColor}
         />
 
         <div aria-hidden="true" className="border-t border-border/60" />

@@ -9,11 +9,15 @@ import { db } from "@/db";
 import { qrCardDesigns, qrCodes } from "@/db/schema";
 import { qrCardTextStyles, type QrCardTextStyle } from "@/db/schema/product";
 import {
+  QR_CARD_DEFAULT_FONT,
   QR_CARD_DEFAULT_TAGLINE,
   QR_CARD_TAGLINE_MAX,
+  qrCardFonts,
   qrCardOrientations,
+  type QrCardFont,
   type QrCardOrientation,
 } from "@/features/qr/qr-card-layout";
+import { qrCardTextColorInput } from "@/features/qr/qr-card-text-color-input";
 import {
   toClientQrCardDesign as toClientDesign,
   type QrCardDesign,
@@ -46,8 +50,10 @@ const optionalText = (max: number) =>
 const createSchema = z.object({
   copyFrom: z
     .object({
+      font: z.enum(qrCardFonts).optional(),
       orientation: z.enum(qrCardOrientations).optional(),
       tagline: z.string().trim().max(QR_CARD_TAGLINE_MAX).optional(),
+      textColor: qrCardTextColorInput,
       textStyle: z.enum(qrCardTextStyles),
     })
     .nullable(),
@@ -58,11 +64,13 @@ const createSchema = z.object({
 const updateSchema = z.object({
   description: optionalText(160).optional(),
   designId: z.uuid(),
+  font: z.enum(qrCardFonts).optional(),
   heading: optionalText(80).optional(),
   location: optionalText(120).optional(),
   name: z.string().trim().min(1).max(60).optional(),
   orientation: z.enum(qrCardOrientations).optional(),
   tagline: z.string().trim().max(QR_CARD_TAGLINE_MAX).optional(),
+  textColor: qrCardTextColorInput,
   textStyle: z.enum(qrCardTextStyles).optional(),
 });
 
@@ -97,8 +105,10 @@ function revalidateCard(qrId: string) {
 
 export async function createQrCardDesignAction(input: {
   copyFrom: {
+    font?: QrCardFont;
     orientation?: QrCardOrientation;
     tagline?: string;
+    textColor?: string | null;
     textStyle: QrCardTextStyle;
   } | null;
   name: string;
@@ -131,6 +141,8 @@ export async function createQrCardDesignAction(input: {
       orientation: parsed.data.copyFrom?.orientation ?? "portrait",
       tagline: parsed.data.copyFrom?.tagline ?? QR_CARD_DEFAULT_TAGLINE,
       textStyle: parsed.data.copyFrom?.textStyle ?? "shadow",
+      font: parsed.data.copyFrom?.font ?? QR_CARD_DEFAULT_FONT,
+      textColor: parsed.data.copyFrom?.textColor ?? null,
     })
     .returning();
   revalidateCard(qr.id);
@@ -207,6 +219,7 @@ export async function saveQrCardDesignBackgroundAction(
             orientation: preset.orientation,
             tagline: preset.tagline,
             textStyle: preset.textStyle,
+            textColor: null,
           }
         : {}),
       updatedAt: new Date(),

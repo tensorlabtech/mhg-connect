@@ -16,7 +16,9 @@ import {
 
 import { user } from "@/db/schema/auth";
 import {
+  QR_CARD_DEFAULT_FONT,
   QR_CARD_DEFAULT_TAGLINE,
+  type QrCardFont,
   type QrCardOrientation,
   qrCardOrientations,
 } from "@/features/qr/qr-card-layout";
@@ -137,6 +139,11 @@ export const qrCodes = pgTable(
     cardTagline: text("card_tagline")
       .default(QR_CARD_DEFAULT_TAGLINE)
       .notNull(),
+    cardFont: text("card_font")
+      .$type<QrCardFont>()
+      .default(QR_CARD_DEFAULT_FONT)
+      .notNull(),
+    cardTextColor: text("card_text_color"),
     activatedAt: productTimestamp("activated_at"),
     version: integer("version").default(1).notNull(),
     createdAt: productTimestamp("created_at").defaultNow().notNull(),
@@ -175,6 +182,14 @@ export const qrCodes = pgTable(
       "qr_codes_card_orientation_check",
       sql`${table.cardOrientation} in ('portrait', 'landscape')`,
     ),
+    check(
+      "qr_codes_card_font_check",
+      sql`${table.cardFont} in ('be-vietnam', 'manrope', 'oswald', 'playfair', 'lora', 'dancing')`,
+    ),
+    check(
+      "qr_codes_card_text_color_check",
+      sql`${table.cardTextColor} is null or ${table.cardTextColor} ~ '^#[0-9a-f]{6}$'`,
+    ),
   ],
 );
 
@@ -196,6 +211,11 @@ export const qrCardDesigns = pgTable(
       .default("portrait")
       .notNull(),
     tagline: text("tagline").default(QR_CARD_DEFAULT_TAGLINE).notNull(),
+    font: text("font")
+      .$type<QrCardFont>()
+      .default(QR_CARD_DEFAULT_FONT)
+      .notNull(),
+    textColor: text("text_color"),
     heading: text("heading"),
     description: text("description"),
     location: text("location"),
@@ -211,6 +231,14 @@ export const qrCardDesigns = pgTable(
     check(
       "qr_card_designs_orientation_check",
       sql`${table.orientation} in ('portrait', 'landscape')`,
+    ),
+    check(
+      "qr_card_designs_font_check",
+      sql`${table.font} in ('be-vietnam', 'manrope', 'oswald', 'playfair', 'lora', 'dancing')`,
+    ),
+    check(
+      "qr_card_designs_text_color_check",
+      sql`${table.textColor} is null or ${table.textColor} ~ '^#[0-9a-f]{6}$'`,
     ),
   ],
 );

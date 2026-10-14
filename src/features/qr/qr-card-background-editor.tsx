@@ -18,8 +18,13 @@ import {
   saveQrCardTextStyleAction,
   type SaveQrCardBackgroundResult,
 } from "@/features/qr/qr-card-background-actions";
-import type { QrCardOrientation } from "@/features/qr/qr-card-layout";
+import {
+  QR_CARD_DEFAULT_FONT,
+  type QrCardFont,
+  type QrCardOrientation,
+} from "@/features/qr/qr-card-layout";
 import { QrCardLayoutFields } from "@/features/qr/qr-card-layout-fields";
+import { QrCardTypographyFields } from "@/features/qr/qr-card-typography-fields";
 import { QrCardPresetPicker } from "@/features/qr/qr-card-preset-picker";
 import type { QrCardPreset } from "@/features/qr/qr-card-presets";
 import {
@@ -35,6 +40,7 @@ export function QrCardBackgroundEditor({
   backgroundUrl,
   description,
   downloadName,
+  font: initialFont = QR_CARD_DEFAULT_FONT,
   heading,
   location,
   onPendingChange,
@@ -44,12 +50,14 @@ export function QrCardBackgroundEditor({
   qrId,
   svg,
   tagline: initialTagline,
+  textColor: initialTextColor = null,
   textStyle = "shadow",
   version,
 }: {
   backgroundUrl: string | null;
   description?: string;
   downloadName: string;
+  font?: QrCardFont;
   heading: string;
   location: string | null;
   onPendingChange?: (pending: boolean) => void;
@@ -59,6 +67,7 @@ export function QrCardBackgroundEditor({
   qrId: string;
   svg: string;
   tagline: string;
+  textColor?: string | null;
   textStyle?: QrCardTextStyle;
   version: number;
 }) {
@@ -75,6 +84,9 @@ export function QrCardBackgroundEditor({
     useState<QrCardOrientation>(initialOrientation);
   const [tagline, setTagline] = useState(initialTagline);
   const [taglinePreview, setTaglinePreview] = useState(initialTagline);
+  const [font, setFont] = useState<QrCardFont>(initialFont);
+  const [textColor, setTextColor] = useState<string | null>(initialTextColor);
+  const [colorPreview, setColorPreview] = useState<string | null>(null);
   const [layoutStatus, setLayoutStatus] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
@@ -111,6 +123,7 @@ export function QrCardBackgroundEditor({
         setTaglinePreview(result.layout.tagline);
         setSavedTextStyle(result.layout.textStyle);
         setSelectedTextStyle(result.layout.textStyle);
+        setTextColor(result.layout.textColor);
       }
       if (result.success) {
         setFileName(null);
@@ -240,13 +253,30 @@ export function QrCardBackgroundEditor({
     }
   }
 
+  function restoreLayout(previous: {
+    font: QrCardFont;
+    orientation: QrCardOrientation;
+    tagline: string;
+    textColor: string | null;
+  }) {
+    setOrientation(previous.orientation);
+    setTagline(previous.tagline);
+    setTaglinePreview(previous.tagline);
+    setFont(previous.font);
+    setTextColor(previous.textColor);
+  }
+
   async function saveLayout(patch: {
+    font?: QrCardFont;
     orientation?: QrCardOrientation;
     tagline?: string;
+    textColor?: string | null;
   }) {
-    const previous = { orientation, tagline };
+    const previous = { font, orientation, tagline, textColor };
     if (patch.orientation) setOrientation(patch.orientation);
     if (patch.tagline !== undefined) setTagline(patch.tagline);
+    if (patch.font) setFont(patch.font);
+    if (patch.textColor !== undefined) setTextColor(patch.textColor);
     setLayoutStatus("saving");
     setLayoutError(null);
     onPendingChange?.(true);
@@ -260,16 +290,12 @@ export function QrCardBackgroundEditor({
         setLiveVersion(result.version);
         setLayoutStatus("saved");
       } else {
-        setOrientation(previous.orientation);
-        setTagline(previous.tagline);
-        setTaglinePreview(previous.tagline);
+        restoreLayout(previous);
         setLayoutStatus("error");
         setLayoutError(result.error ?? "Chưa thể lưu thẻ.");
       }
     } catch {
-      setOrientation(previous.orientation);
-      setTagline(previous.tagline);
-      setTaglinePreview(previous.tagline);
+      restoreLayout(previous);
       setLayoutStatus("error");
       setLayoutError("Chưa thể lưu thẻ. Hãy thử lại.");
     } finally {
@@ -295,11 +321,13 @@ export function QrCardBackgroundEditor({
         <QrVisualCard
           backgroundUrl={activeBackground}
           description={description}
+          font={font}
           heading={heading}
           location={location}
           orientation={orientation}
           svg={svg}
           tagline={taglinePreview}
+          textColor={colorPreview ?? textColor}
           textStyle={selectedTextStyle}
         />
       </div>
@@ -329,6 +357,15 @@ export function QrCardBackgroundEditor({
           orientation={orientation}
           tagline={tagline}
         />
+        <QrCardTypographyFields
+          disabled={layoutStatus === "saving" || isSaving}
+          font={font}
+          idPrefix={`qr-${qrId}`}
+          onColorPreview={setColorPreview}
+          onFontChange={(next) => void saveLayout({ font: next })}
+          onTextColorChange={(next) => void saveLayout({ textColor: next })}
+          textColor={textColor}
+        />
         <p
           className={cn(
             "-mt-3 text-xs leading-5",
@@ -341,7 +378,7 @@ export function QrCardBackgroundEditor({
           {layoutStatus === "saving"
             ? "Đang lưu thẻ…"
             : layoutStatus === "saved"
-              ? "Đã lưu hướng thẻ và dòng chữ."
+              ? "Đã lưu thẻ."
               : layoutStatus === "error"
                 ? layoutError
                 : null}

@@ -1,28 +1,35 @@
 import type { QrCardTextStyle } from "@/db/schema/product";
-import type { QrCardOrientation } from "@/features/qr/qr-card-layout";
+import type {
+  QrCardFont,
+  QrCardOrientation,
+} from "@/features/qr/qr-card-layout";
 import { isPresetCardBackground } from "@/features/qr/qr-card-presets";
 
 export type QrCardDesign = {
   backgroundUrl: string | null;
   description: string | null;
+  font: QrCardFont;
   heading: string | null;
   id: string;
   location: string | null;
   name: string;
   orientation: QrCardOrientation;
   tagline: string;
+  textColor: string | null;
   textStyle: QrCardTextStyle;
 };
 
 type QrCardDesignRow = {
   backgroundUrl: string | null;
   description: string | null;
+  font: QrCardFont;
   heading: string | null;
   id: string;
   location: string | null;
   name: string;
   orientation: QrCardOrientation;
   tagline: string;
+  textColor: string | null;
   textStyle: QrCardTextStyle;
   updatedAt: Date;
 };
@@ -39,12 +46,14 @@ export function toClientQrCardDesign(
         : `/api/qr-card-background/${qrId}?design=${row.id}&v=${row.updatedAt.getTime()}`
       : null,
     description: row.description,
+    font: row.font,
     heading: row.heading,
     id: row.id,
     location: row.location,
     name: row.name,
     orientation: row.orientation,
     tagline: row.tagline,
+    textColor: row.textColor,
     textStyle: row.textStyle,
   };
 }

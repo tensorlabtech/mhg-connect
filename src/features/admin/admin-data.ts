@@ -13,6 +13,8 @@ export async function getAdminQrList() {
       cardTextStyle: qrCodes.cardTextStyle,
       cardOrientation: qrCodes.cardOrientation,
       cardTagline: qrCodes.cardTagline,
+      cardFont: qrCodes.cardFont,
+      cardTextColor: qrCodes.cardTextColor,
       publicToken: qrCodes.publicToken,
       status: qrCodes.status,
       ownerEmail: user.email,

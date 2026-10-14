@@ -28,7 +28,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import type { QrCardTextStyle } from "@/db/schema/product";
-import type { QrCardOrientation } from "@/features/qr/qr-card-layout";
+import type {
+  QrCardFont,
+  QrCardOrientation,
+} from "@/features/qr/qr-card-layout";
 import type { QrCardDesign } from "@/features/qr/qr-card-design";
 import { QrProfileAssignment } from "@/features/qr/qr-profile-assignment";
 import { QrCardPreviewDialog } from "@/features/qr/qr-card-preview-dialog";
@@ -48,6 +51,7 @@ export function QrCardActions({
   backgroundUrl,
   description,
   designs,
+  font,
   heading,
   location,
   orientation,
@@ -60,6 +64,7 @@ export function QrCardActions({
   status,
   svg,
   tagline,
+  textColor,
   textStyle,
   version,
 }: {
@@ -67,6 +72,7 @@ export function QrCardActions({
   backgroundUrl: string | null;
   description: string;
   designs: QrCardDesign[];
+  font: QrCardFont;
   heading: string;
   location: string | null;
   orientation: QrCardOrientation;
@@ -79,6 +85,7 @@ export function QrCardActions({
   status: string;
   svg: string;
   tagline: string;
+  textColor: string | null;
   textStyle: QrCardTextStyle;
   version: number;
 }) {
@@ -125,6 +132,7 @@ export function QrCardActions({
           backgroundUrl={backgroundUrl}
           description={description}
           designs={designs}
+          font={font}
           heading={heading}
           location={location}
           onOpenChange={setCardOpen}
@@ -136,6 +144,7 @@ export function QrCardActions({
           status={status}
           svg={svg}
           tagline={tagline}
+          textColor={textColor}
           textStyle={textStyle}
           version={version}
         />
