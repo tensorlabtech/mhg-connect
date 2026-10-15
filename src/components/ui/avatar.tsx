@@ -13,6 +13,8 @@ function Avatar({
 }) {
   return (
     <AvatarPrimitive.Root
+      // Tiện ích trình duyệt (rtrvr…) gắn thuộc tính lên ảnh đại diện trước khi React chạy.
+      suppressHydrationWarning
       data-slot="avatar"
       data-size={size}
       className={cn(

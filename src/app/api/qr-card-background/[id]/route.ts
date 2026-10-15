@@ -42,7 +42,11 @@ export async function GET(
     return new Response("Unsupported media source", { status: 400 });
   }
 
-  const source = await fetch(qr.backgroundUrl, { cache: "no-store" });
+  // Ảnh lưu trên máy khi chạy thử là đường dẫn tương đối (/_uploads/...).
+  const sourceUrl = qr.backgroundUrl.startsWith("/")
+    ? new URL(qr.backgroundUrl, request.url)
+    : qr.backgroundUrl;
+  const source = await fetch(sourceUrl, { cache: "no-store" });
   const contentType = source.headers.get("content-type") ?? "";
   if (!source.ok || !source.body || !contentType.startsWith("image/")) {
     return new Response("Image unavailable", { status: 502 });

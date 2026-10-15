@@ -76,7 +76,8 @@
   position: relative;
   display: flex;
   justify-content: center;
-  margin-top: -4.5rem;
+  /* Ảnh đại diện đứng dưới ảnh bìa, không đè lên ảnh bìa. */
+  margin-top: var(--profile-space-6, 1.5rem);
 }
 
 .profile-avatar {
@@ -471,7 +472,7 @@
   }
 
   .profile-avatar-wrap {
-    margin-top: -3.5rem;
+    margin-top: var(--profile-space-5, 1.25rem);
   }
 
   .profile-avatar {
@@ -593,7 +594,7 @@
   }
 
   .profile-page-preview .profile-avatar-wrap {
-    margin-top: -3rem;
+    margin-top: 1rem;
   }
 
   .profile-page-preview .profile-avatar {

@@ -64,8 +64,15 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <html className="dark" data-scroll-behavior="smooth" lang="vi">
-      <body>
+    // Tiện ích trình duyệt (Night Eye, rtrvr…) chèn thuộc tính vào <html>, <body>
+    // trước khi React chạy; bỏ qua cảnh báo lệch thuộc tính ở hai thẻ này.
+    <html
+      className="dark"
+      data-scroll-behavior="smooth"
+      lang="vi"
+      suppressHydrationWarning
+    >
+      <body suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>

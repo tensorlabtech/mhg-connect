@@ -18,6 +18,8 @@ export const runtimeEnv = {
   b2PublicUrlBase: runtime["B2_PUBLIC_URL_BASE"],
   b2Region: runtime["B2_REGION"],
   b2S3Endpoint: runtime["B2_S3_ENDPOINT"],
+  /** "local": khi chạy thử trên máy, lưu ảnh vào public/_uploads thay vì kho ảnh B2. */
+  mediaStorage: runtime["MEDIA_STORAGE"],
   adminEmail: runtime["ADMIN_EMAIL"],
   adminPassword: runtime["ADMIN_PASSWORD"],
   adminName: runtime["ADMIN_NAME"],

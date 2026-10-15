@@ -6,6 +6,8 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import { del, put } from "@vercel/blob";
+import { mkdir, unlink, writeFile } from "node:fs/promises";
+import path from "node:path";
 
 import { runtimeEnv } from "@/lib/runtime-env";
 
@@ -13,6 +15,21 @@ export type ProfileMediaKind =
   "article" | "avatar" | "background" | "card-background" | "cover";
 
 let b2Client: S3Client | null = null;
+
+const localUploadPrefix = "/_uploads/";
+
+/** Chỉ dùng khi chạy thử trên máy (MEDIA_STORAGE=local), không bao giờ ở bản chạy thật. */
+function usesLocalMediaStorage() {
+  return (
+    runtimeEnv.nodeEnv !== "production" && runtimeEnv.mediaStorage === "local"
+  );
+}
+
+function localUploadPath(url: string) {
+  const relative = url.slice(localUploadPrefix.length);
+  if (!/^[a-z-]+\/[0-9a-f-]+\.(jpg|png|webp)$/.test(relative)) return null;
+  return path.join(process.cwd(), "public", "_uploads", relative);
+}
 
 function getB2Config() {
   const values = {
@@ -57,6 +74,9 @@ function publicB2BaseUrl(bucket: string, endpoint: string) {
 }
 
 export function isManagedProfileMediaUrl(value: string) {
+  if (usesLocalMediaStorage() && value.startsWith(localUploadPrefix)) {
+    return localUploadPath(value) !== null;
+  }
   let url: URL;
   try {
     url = new URL(value);
@@ -78,6 +98,13 @@ export function isManagedProfileMediaUrl(value: string) {
 export async function uploadProfileMedia(file: File, kind: ProfileMediaKind) {
   const b2 = getB2Client();
   const key = `${kind}s/${crypto.randomUUID()}.${extensionFor(file.type)}`;
+  if (usesLocalMediaStorage()) {
+    const url = `${localUploadPrefix}${key}`;
+    const target = localUploadPath(url)!;
+    await mkdir(path.dirname(target), { recursive: true });
+    await writeFile(target, Buffer.from(await file.arrayBuffer()));
+    return { url };
+  }
   if (b2) {
     await b2.client.send(
       new PutObjectCommand({
@@ -103,6 +130,11 @@ export async function uploadProfileMedia(file: File, kind: ProfileMediaKind) {
 }
 
 export async function deleteProfileMedia(url: string) {
+  if (usesLocalMediaStorage() && url.startsWith(localUploadPrefix)) {
+    const target = localUploadPath(url);
+    if (target) await unlink(target).catch(() => undefined);
+    return;
+  }
   const b2 = getB2Client();
   if (b2) {
     const base = publicB2BaseUrl(b2.config.bucket!, b2.config.endpoint!);

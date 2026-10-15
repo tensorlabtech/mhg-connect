@@ -12,3 +12,5 @@ dist/
 *.tsbuildinfo
 site/
 .vercel
+# Ảnh tải lên khi chạy thử trên máy (MEDIA_STORAGE=local)
+public/_uploads/
