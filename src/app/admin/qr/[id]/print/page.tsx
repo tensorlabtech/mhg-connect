@@ -8,6 +8,7 @@ import { getAdminQrDetail } from "@/features/admin/admin-data";
 import { createPublicQrSvg } from "@/features/qr/create-public-qr-svg";
 import { getQrCardDesigns } from "@/features/qr/qr-data";
 import { QrVisualCard } from "@/features/qr/qr-visual-card";
+import { getEnterpriseBrand } from "@/features/enterprise/enterprise-data";
 import { requireAdmin } from "@/lib/session";
 
 export default async function AdminQrPrintPage({
@@ -22,6 +23,7 @@ export default async function AdminQrPrintPage({
   const query = await searchParams;
   const qr = await getAdminQrDetail(id);
   if (!qr) notFound();
+  const brand = await getEnterpriseBrand(qr.ownerId);
   const svg = await createPublicQrSvg(qr.publicToken);
   const design =
     typeof query.design === "string"
@@ -64,6 +66,11 @@ export default async function AdminQrPrintPage({
           }
           location={design?.location ?? qr.profileLocation}
           orientation={orientation}
+          position={design?.position ?? qr.cardPosition}
+          logoUrl={brand.url}
+          logoName={brand.name}
+          appearance={design?.appearance ?? qr.cardAppearance}
+          identity={{ avatarUrl: qr.profileAvatarUrl, phone: qr.profileVisibleFields?.phone === false ? null : qr.profilePhone, website: qr.profileVisibleFields?.website === false ? null : qr.profileWebsite, title: qr.profileVisibleFields?.title === false ? null : qr.profileTitle, company: qr.profileVisibleFields?.company === false ? null : qr.profileCompany }}
           svg={svg}
           font={design ? design.font : qr.cardFont}
           tagline={design ? design.tagline : qr.cardTagline}

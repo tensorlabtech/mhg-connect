@@ -1,0 +1,172 @@
+/* Physical card coordinates use container width, shared by preview/export/print. */
+.qr-card-emblem {
+  display: block;
+  width: 12cqw;
+  height: 12cqw;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.qr-card-emblem img {
+  height: 100%;
+  width: auto;
+  max-width: none;
+}
+[data-card-orientation="landscape"] .qr-card-emblem {
+  width: 8.5cqw;
+  height: 8.5cqw;
+}
+[data-qr-card] .qr-card-brand {
+  position: absolute;
+  inset: 3cqw 3.5cqw auto;
+  height: 14cqw;
+  gap: 2cqw;
+}
+[data-qr-card] .qr-card-logo {
+  width: 25cqw;
+  height: 12cqw;
+  padding: 0.6cqw;
+}
+[data-qr-card] [data-card-tagline] {
+  flex: 1;
+  font-size: 3.2cqw;
+  max-height: 14cqw;
+}
+[data-qr-card] .qr-card-composition {
+  position: absolute;
+  inset: 20cqw 3.5cqw 3.5cqw;
+  display: flex;
+  gap: 4cqw;
+  align-items: center;
+  justify-content: center;
+}
+[data-qr-card] .qr-card-qr-region {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+[data-qr-card] .qr-card-code {
+  width: 35cqw;
+  height: 35cqw;
+}
+[data-qr-card] .qr-card-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2cqw;
+  max-width: 100%;
+  padding: 1.2cqw;
+}
+[data-qr-card] .qr-card-heading {
+  font-size: 7cqw;
+  line-height: 1.2;
+  padding-block: 0.7cqw;
+}
+[data-qr-card] .qr-card-details {
+  flex: 0 1 auto;
+  width: 100%;
+  gap: 1.2cqw;
+}
+[data-qr-card] .qr-card-description {
+  font-size: 3.7cqw;
+  line-height: 1.35;
+}
+[data-qr-card] .qr-card-location {
+  font-size: 3.2cqw;
+  line-height: 1.35;
+}
+[data-qr-card][data-card-position="left"] .qr-card-copy,
+[data-qr-card][data-card-position="right"] .qr-card-copy {
+  flex: 1;
+}
+[data-qr-card][data-card-position="left"] .qr-card-heading,
+[data-qr-card][data-card-position="right"] .qr-card-heading {
+  font-size: 5.8cqw;
+}
+[data-qr-card][data-card-position="right"] .qr-card-composition {
+  flex-direction: row-reverse;
+}
+[data-qr-card][data-card-position="top"] .qr-card-composition {
+  flex-direction: column;
+}
+[data-qr-card][data-card-position="bottom"] .qr-card-composition {
+  flex-direction: column-reverse;
+}
+[data-qr-card][data-card-position="top"] .qr-card-copy,
+[data-qr-card][data-card-position="bottom"] .qr-card-copy {
+  width: 100%;
+}
+[data-qr-card][data-card-orientation="landscape"] .qr-card-brand {
+  height: 9cqw;
+  inset: 2cqw 3cqw auto;
+}
+[data-qr-card][data-card-orientation="landscape"] .qr-card-logo {
+  width: 18cqw;
+  height: 8.5cqw;
+}
+[data-qr-card][data-card-orientation="landscape"] [data-card-tagline] {
+  font-size: 2.3cqw;
+  max-height: 9cqw;
+}
+[data-qr-card][data-card-orientation="landscape"] .qr-card-composition {
+  inset: 13cqw 3cqw 3cqw;
+  gap: 3cqw;
+}
+[data-qr-card][data-card-orientation="landscape"] .qr-card-code {
+  width: 25cqw;
+  height: 25cqw;
+}
+[data-qr-card][data-card-orientation="landscape"] .qr-card-copy {
+  gap: 0.8cqw;
+  padding: 0.6cqw;
+}
+[data-qr-card][data-card-orientation="landscape"] .qr-card-heading {
+  font-size: 4.1cqw;
+}
+[data-qr-card][data-card-orientation="landscape"] .qr-card-description {
+  font-size: 2.4cqw;
+  line-height: 1.3;
+}
+[data-qr-card][data-card-orientation="landscape"] .qr-card-location {
+  font-size: 2.1cqw;
+  line-height: 1.3;
+}
+[data-qr-card][data-card-orientation="landscape"] .qr-card-details {
+  gap: 0.5cqw;
+  padding-block: 0.6cqw;
+}
+
+[data-qr-card][data-card-orientation="landscape"][data-card-position="top"]
+  .qr-card-code,
+[data-qr-card][data-card-orientation="landscape"][data-card-position="bottom"]
+  .qr-card-code {
+  width: 22cqw;
+  height: 22cqw;
+}
+[data-qr-card][data-card-orientation="landscape"][data-card-position="top"]
+  .qr-card-composition,
+[data-qr-card][data-card-orientation="landscape"][data-card-position="bottom"]
+  .qr-card-composition {
+  gap: 1cqw;
+}
+[data-qr-card][data-card-orientation="landscape"][data-card-position="top"]
+  .qr-card-heading,
+[data-qr-card][data-card-orientation="landscape"][data-card-position="bottom"]
+  .qr-card-heading {
+  font-size: 3.2cqw;
+  padding-block: 0;
+}
+[data-qr-card][data-card-orientation="landscape"][data-card-position="top"]
+  .qr-card-description,
+[data-qr-card][data-card-orientation="landscape"][data-card-position="bottom"]
+  .qr-card-description {
+  font-size: 2cqw;
+  line-height: 1.2;
+}
+[data-qr-card][data-card-orientation="landscape"][data-card-position="top"]
+  .qr-card-location,
+[data-qr-card][data-card-orientation="landscape"][data-card-position="bottom"]
+  .qr-card-location {
+  font-size: 1.8cqw;
+  line-height: 1.2;
+}

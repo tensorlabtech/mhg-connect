@@ -9,13 +9,14 @@ import { db } from "@/db";
 import { qrCardDesigns, qrCodes } from "@/db/schema";
 import { qrCardTextStyles, type QrCardTextStyle } from "@/db/schema/product";
 import {
-  QR_CARD_DEFAULT_FONT,
-  QR_CARD_DEFAULT_TAGLINE,
   QR_CARD_TAGLINE_MAX,
+  QR_CARD_DEFAULT_TAGLINE,
   qrCardFonts,
   qrCardOrientations,
+  qrCardPositions,
   type QrCardFont,
   type QrCardOrientation,
+  type QrCardPosition,
 } from "@/features/qr/qr-card-layout";
 import { qrCardTextColorInput } from "@/features/qr/qr-card-text-color-input";
 import {
@@ -51,7 +52,9 @@ const createSchema = z.object({
   copyFrom: z
     .object({
       font: z.enum(qrCardFonts).optional(),
+      sourceDesignId: z.uuid().optional(),
       orientation: z.enum(qrCardOrientations).optional(),
+      position: z.enum(qrCardPositions).optional(),
       tagline: z.string().trim().max(QR_CARD_TAGLINE_MAX).optional(),
       textColor: qrCardTextColorInput,
       textStyle: z.enum(qrCardTextStyles),
@@ -69,6 +72,7 @@ const updateSchema = z.object({
   location: optionalText(120).optional(),
   name: z.string().trim().min(1).max(60).optional(),
   orientation: z.enum(qrCardOrientations).optional(),
+  position: z.enum(qrCardPositions).optional(),
   tagline: z.string().trim().max(QR_CARD_TAGLINE_MAX).optional(),
   textColor: qrCardTextColorInput,
   textStyle: z.enum(qrCardTextStyles).optional(),
@@ -78,8 +82,15 @@ async function findOwnedQr(qrId: string, ownerId: string) {
   const [qr] = await db
     .select({
       backgroundUrl: qrCodes.cardBackgroundUrl,
+      appearance: qrCodes.cardAppearance,
       id: qrCodes.id,
       publicToken: qrCodes.publicToken,
+      orientation: qrCodes.cardOrientation,
+      position: qrCodes.cardPosition,
+      font: qrCodes.cardFont,
+      tagline: qrCodes.cardTagline,
+      textColor: qrCodes.cardTextColor,
+      textStyle: qrCodes.cardTextStyle,
     })
     .from(qrCodes)
     .where(and(eq(qrCodes.id, qrId), eq(qrCodes.ownerId, ownerId)))
@@ -106,7 +117,9 @@ function revalidateCard(qrId: string) {
 export async function createQrCardDesignAction(input: {
   copyFrom: {
     font?: QrCardFont;
+    sourceDesignId?: string;
     orientation?: QrCardOrientation;
+    position?: QrCardPosition;
     tagline?: string;
     textColor?: string | null;
     textStyle: QrCardTextStyle;
@@ -120,6 +133,16 @@ export async function createQrCardDesignAction(input: {
   const session = await requireSession("/dashboard");
   const qr = await findOwnedQr(parsed.data.qrId, session.user.id);
   if (!qr) return { error: "Không tìm thấy mã QR.", success: false };
+  let appearance = qr.appearance;
+  if (parsed.data.copyFrom?.sourceDesignId) {
+    const source = await findOwnedDesign(
+      parsed.data.copyFrom.sourceDesignId,
+      session.user.id,
+    );
+    if (!source || source.design.qrCodeId !== qr.id)
+      return { error: "Mẫu nguồn không thuộc mã QR này.", success: false };
+    appearance = source.design.appearance;
+  }
 
   const [{ total }] = await db
     .select({ total: count() })
@@ -137,12 +160,16 @@ export async function createQrCardDesignAction(input: {
     .insert(qrCardDesigns)
     .values({
       name: parsed.data.name,
+      appearance,
       qrCodeId: qr.id,
-      orientation: parsed.data.copyFrom?.orientation ?? "portrait",
-      tagline: parsed.data.copyFrom?.tagline ?? QR_CARD_DEFAULT_TAGLINE,
-      textStyle: parsed.data.copyFrom?.textStyle ?? "shadow",
-      font: parsed.data.copyFrom?.font ?? QR_CARD_DEFAULT_FONT,
-      textColor: parsed.data.copyFrom?.textColor ?? null,
+      orientation: parsed.data.copyFrom?.orientation ?? qr.orientation,
+      position: parsed.data.copyFrom?.position ?? qr.position,
+      tagline: QR_CARD_DEFAULT_TAGLINE,
+      textStyle: parsed.data.copyFrom?.textStyle ?? qr.textStyle,
+      font: parsed.data.copyFrom?.font ?? qr.font,
+      textColor: parsed.data.copyFrom
+        ? (parsed.data.copyFrom.textColor ?? null)
+        : qr.textColor,
     })
     .returning();
   revalidateCard(qr.id);
@@ -162,7 +189,7 @@ export async function updateQrCardDesignAction(
   const { designId, ...patch } = parsed.data;
   const [updated] = await db
     .update(qrCardDesigns)
-    .set({ ...patch, updatedAt: new Date() })
+    .set({ ...patch, tagline: QR_CARD_DEFAULT_TAGLINE, updatedAt: new Date() })
     .where(eq(qrCardDesigns.id, designId))
     .returning();
   revalidateCard(updated.qrCodeId);
@@ -214,10 +241,10 @@ export async function saveQrCardDesignBackgroundAction(
     .update(qrCardDesigns)
     .set({
       backgroundUrl: uploadedUrl,
+      tagline: QR_CARD_DEFAULT_TAGLINE,
       ...(preset
         ? {
             orientation: preset.orientation,
-            tagline: preset.tagline,
             textStyle: preset.textStyle,
             textColor: null,
           }

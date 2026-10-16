@@ -1,0 +1,84 @@
+.qr-interactive-surface {
+  --card-rotate-x: 0deg;
+  --card-rotate-y: 0deg;
+  --card-glare-x: 50%;
+  --card-glare-y: 50%;
+  min-width: 0;
+  width: 100%;
+  perspective: 1100px;
+  container-type: inline-size;
+}
+.qr-interactive-plane {
+  position: relative;
+  min-width: 0;
+  border-radius: var(--radius-surface, 1.5rem);
+  transform: none;
+  transform-style: flat;
+  transition:
+    transform 180ms ease-out,
+    box-shadow 180ms ease-out;
+}
+.qr-card-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at var(--card-glare-x) var(--card-glare-y),
+      rgb(255 255 255 / 0.28),
+      transparent 46%
+    ),
+    linear-gradient(
+      115deg,
+      transparent 26%,
+      rgb(255 255 255 / 0.12) 44%,
+      transparent 64%
+    );
+  opacity: 0.12;
+  transition: opacity 180ms ease-out;
+}
+[data-tilt-active="true"] .qr-card-sheen {
+  opacity: 1;
+}
+[data-tilt-active="true"] > .qr-interactive-plane {
+  transform: rotateX(var(--card-rotate-x)) rotateY(var(--card-rotate-y));
+  transform-style: preserve-3d;
+  box-shadow: 0 20px 44px rgb(0 0 0 / 0.24);
+}
+[data-card-capture="true"] > .qr-interactive-plane {
+  transform: none !important;
+  transition: none !important;
+  box-shadow: none !important;
+}
+[data-card-capture="true"] .qr-card-sheen {
+  display: none !important;
+}
+[data-qr-card] .qr-card-composition,
+[data-qr-card] .qr-card-brand {
+  z-index: 1;
+}
+@media (prefers-reduced-motion: reduce), (pointer: coarse) {
+  .qr-interactive-plane {
+    transform: none !important;
+    transition: none;
+    box-shadow: none !important;
+  }
+  .qr-card-sheen {
+    opacity: 0.08 !important;
+    transition: none;
+  }
+}
+@media print {
+  .qr-interactive-surface {
+    perspective: none;
+  }
+  .qr-interactive-plane {
+    transform: none !important;
+    transition: none;
+    box-shadow: none !important;
+  }
+  .qr-card-sheen {
+    display: none !important;
+  }
+}

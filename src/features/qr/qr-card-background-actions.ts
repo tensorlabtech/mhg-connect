@@ -10,10 +10,13 @@ import { qrCodes } from "@/db/schema";
 import { qrCardTextStyles, type QrCardTextStyle } from "@/db/schema/product";
 import {
   QR_CARD_TAGLINE_MAX,
+  QR_CARD_DEFAULT_TAGLINE,
   qrCardFonts,
   qrCardOrientations,
+  qrCardPositions,
   type QrCardFont,
   type QrCardOrientation,
+  type QrCardPosition,
 } from "@/features/qr/qr-card-layout";
 import { qrCardTextColorInput } from "@/features/qr/qr-card-text-color-input";
 import { findActiveQrCardPreset } from "@/features/qr/qr-card-preset-data";
@@ -115,10 +118,10 @@ export async function saveQrCardBackgroundAction(
     .update(qrCodes)
     .set({
       cardBackgroundUrl: uploadedUrl,
+      cardTagline: QR_CARD_DEFAULT_TAGLINE,
       ...(preset
         ? {
             cardOrientation: preset.orientation,
-            cardTagline: preset.tagline,
             cardTextStyle: preset.textStyle,
             // Mẫu sticker có nền chữ riêng: trả màu chữ về tự động để chữ luôn đọc được.
             cardTextColor: null,
@@ -167,7 +170,7 @@ export async function saveQrCardBackgroundAction(
       ? {
           layout: {
             orientation: preset.orientation,
-            tagline: preset.tagline,
+            tagline: QR_CARD_DEFAULT_TAGLINE,
             textStyle: preset.textStyle,
             textColor: null,
           },
@@ -250,6 +253,7 @@ const layoutSchema = z.object({
   expectedVersion: z.coerce.number().int().positive(),
   font: z.enum(qrCardFonts).optional(),
   orientation: z.enum(qrCardOrientations).optional(),
+  position: z.enum(qrCardPositions).optional(),
   qrId: z.uuid(),
   tagline: z.string().trim().max(QR_CARD_TAGLINE_MAX).optional(),
   textColor: qrCardTextColorInput,
@@ -259,6 +263,7 @@ export type SaveQrCardLayoutResult = {
   error?: string;
   font?: QrCardFont;
   orientation?: QrCardOrientation;
+  position?: QrCardPosition;
   success: boolean;
   tagline?: string;
   textColor?: string | null;
@@ -270,6 +275,7 @@ export async function saveQrCardLayoutAction(input: {
   expectedVersion: number;
   font?: QrCardFont;
   orientation?: QrCardOrientation;
+  position?: QrCardPosition;
   qrId: string;
   tagline?: string;
   textColor?: string | null;
@@ -278,14 +284,15 @@ export async function saveQrCardLayoutAction(input: {
   if (!parsed.success) {
     return { error: "Thông tin thẻ chưa hợp lệ.", success: false };
   }
-  const { expectedVersion, font, orientation, qrId, tagline, textColor } =
+  const { expectedVersion, font, orientation, position, qrId, textColor } =
     parsed.data;
   const session = await requireSession("/dashboard");
   const [updated] = await db
     .update(qrCodes)
     .set({
       ...(orientation ? { cardOrientation: orientation } : {}),
-      ...(tagline !== undefined ? { cardTagline: tagline } : {}),
+      ...(position ? { cardPosition: position } : {}),
+      cardTagline: QR_CARD_DEFAULT_TAGLINE,
       ...(font ? { cardFont: font } : {}),
       ...(textColor !== undefined ? { cardTextColor: textColor } : {}),
       updatedAt: new Date(),
@@ -301,6 +308,7 @@ export async function saveQrCardLayoutAction(input: {
     .returning({
       font: qrCodes.cardFont,
       orientation: qrCodes.cardOrientation,
+      position: qrCodes.cardPosition,
       tagline: qrCodes.cardTagline,
       textColor: qrCodes.cardTextColor,
       version: qrCodes.version,
@@ -320,6 +328,7 @@ export async function saveQrCardLayoutAction(input: {
   return {
     font: updated.font,
     orientation: updated.orientation,
+    position: updated.position,
     success: true,
     tagline: updated.tagline,
     textColor: updated.textColor,

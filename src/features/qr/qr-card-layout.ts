@@ -2,7 +2,22 @@
 export const qrCardOrientations = ["portrait", "landscape"] as const;
 export type QrCardOrientation = (typeof qrCardOrientations)[number];
 
-/** Dòng chữ mặc định in cạnh logo MHG trên thẻ/sticker; để trống là ẩn. */
+export const qrCardPositions = ["left", "right", "top", "bottom"] as const;
+export type QrCardPosition = (typeof qrCardPositions)[number];
+export const qrCardPositionOptions: { id: QrCardPosition; label: string }[] = [
+  { id: "left", label: "QR bên trái" },
+  { id: "right", label: "QR bên phải" },
+  { id: "top", label: "QR phía trên" },
+  { id: "bottom", label: "QR phía dưới" },
+];
+
+export function normalizeQrCardPosition(value: unknown): QrCardPosition {
+  return qrCardPositions.includes(value as QrCardPosition)
+    ? (value as QrCardPosition)
+    : "bottom";
+}
+
+/** Required MHG brand line. Card templates cannot edit or hide it. */
 export const QR_CARD_DEFAULT_TAGLINE = "Bảo vệ khỏi virus, vi khuẩn và nấm";
 export const QR_CARD_TAGLINE_MAX = 80;
 

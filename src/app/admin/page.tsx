@@ -64,6 +64,11 @@ export default async function AdminPage({
                 </p>
                 <div className="mt-6 grid gap-2">
                   <AdminQrCreateDialog />
+                  <Button asChild variant="secondary">
+                    <Link href="/admin/enterprises">
+                      Nhận diện doanh nghiệp
+                    </Link>
+                  </Button>
                   <Button asChild variant="outline">
                     <Link href="/dashboard">Trang cá nhân</Link>
                   </Button>

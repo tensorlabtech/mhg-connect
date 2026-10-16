@@ -1,4 +1,6 @@
 "use client";
+import type { QrCardAppearance } from "./qr-card-appearance";
+import type { DigitalIdentity } from "./digital-identity-card";
 
 import {
   BarChart3,
@@ -31,6 +33,7 @@ import type { QrCardTextStyle } from "@/db/schema/product";
 import type {
   QrCardFont,
   QrCardOrientation,
+  QrCardPosition,
 } from "@/features/qr/qr-card-layout";
 import type { QrCardDesign } from "@/features/qr/qr-card-design";
 import { QrProfileAssignment } from "@/features/qr/qr-profile-assignment";
@@ -55,6 +58,10 @@ export function QrCardActions({
   heading,
   location,
   orientation,
+  position,
+  logoUrl,
+  logoName,
+  appearance, identity, canAddLogo, enterpriseUpdatedAt,
   presets,
   profileId,
   profiles,
@@ -76,6 +83,10 @@ export function QrCardActions({
   heading: string;
   location: string | null;
   orientation: QrCardOrientation;
+  position: QrCardPosition;
+  logoUrl?: string;
+  logoName?: string;
+  appearance?: QrCardAppearance; identity?: Partial<DigitalIdentity>; canAddLogo?: boolean; enterpriseUpdatedAt?: string | null;
   presets: readonly QrCardPreset[];
   profileId: string | null;
   profiles: AssignmentProfile[];
@@ -129,6 +140,7 @@ export function QrCardActions({
           scanCount={scanCount}
         />
         <QrCardPreviewDialog
+          profileId={profileId}
           backgroundUrl={backgroundUrl}
           description={description}
           designs={designs}
@@ -138,6 +150,10 @@ export function QrCardActions({
           onOpenChange={setCardOpen}
           open={cardOpen}
           orientation={orientation}
+          position={position}
+          logoUrl={logoUrl}
+          logoName={logoName}
+          appearance={appearance} identity={identity} canAddLogo={canAddLogo} enterpriseUpdatedAt={enterpriseUpdatedAt}
           presets={presets}
           publicToken={publicToken}
           qrId={qrId}

@@ -19,6 +19,7 @@ import { getAdminQrDetail } from "@/features/admin/admin-data";
 import { AdminQrPreviewDialog } from "@/features/admin/admin-qr-preview-dialog";
 import { createPublicQrSvg } from "@/features/qr/create-public-qr-svg";
 import { getQrCardDesigns } from "@/features/qr/qr-data";
+import { getEnterpriseBrand } from "@/features/enterprise/enterprise-data";
 import { requireAdmin } from "@/lib/session";
 
 const dateFormatter = new Intl.DateTimeFormat("vi-VN", {
@@ -37,6 +38,7 @@ export default async function AdminQrDetailPage({
   const { id } = await params;
   const qr = await getAdminQrDetail(id);
   if (!qr) notFound();
+  const brand = await getEnterpriseBrand(qr.ownerId);
   const query = await searchParams;
   const updated = typeof query.updated === "string" ? query.updated : "";
   const created = query.created === "1";
@@ -89,6 +91,11 @@ export default async function AdminQrDetailPage({
                     publicToken={qr.publicToken}
                     status={qr.status}
                     orientation={qr.cardOrientation}
+                    position={qr.cardPosition}
+                    logoUrl={brand.url}
+                    logoName={brand.name}
+          appearance={qr.cardAppearance}
+          identity={{ avatarUrl: qr.profileAvatarUrl, phone: qr.profileVisibleFields?.phone === false ? null : qr.profilePhone, website: qr.profileVisibleFields?.website === false ? null : qr.profileWebsite, title: qr.profileVisibleFields?.title === false ? null : qr.profileTitle, company: qr.profileVisibleFields?.company === false ? null : qr.profileCompany }}
                     svg={svg}
                     font={qr.cardFont}
                     tagline={qr.cardTagline}

@@ -1,11 +1,14 @@
+import { DashboardQrCardEditor } from "./dashboard-qr-card-editor";
+import type { QrCardAppearance } from "./qr-card-appearance";
 import { cn } from "cn";
 import QRCode from "qrcode";
 
 import { StatusBadge } from "@/components/product/status-badge";
-import type { QrCardTextStyle } from "@/db/schema/product";
+import type { ProfileVisibility, QrCardTextStyle } from "@/db/schema/product";
 import type {
   QrCardFont,
   QrCardOrientation,
+  QrCardPosition,
 } from "@/features/qr/qr-card-layout";
 import { QrCardActions } from "@/features/qr/qr-card-actions";
 import type { QrCardDesign } from "@/features/qr/qr-card-design";
@@ -15,14 +18,21 @@ import {
   isPresetCardBackground,
   type QrCardPreset,
 } from "@/features/qr/qr-card-presets";
-import { QrVisualCard } from "@/features/qr/qr-visual-card";
+import { getEnterpriseBrand } from "@/features/enterprise/enterprise-data";
 import { runtimeEnv } from "@/lib/runtime-env";
 
 type QrItem = {
   activatedAt: Date | null;
   cardBackgroundUrl: string | null;
+  cardAppearance?: QrCardAppearance;
+  profileAvatarUrl?: string | null;
+  profilePhone?: string | null;
+  profileWebsite?: string | null;
+  profileVisibleFields?: ProfileVisibility | null;
   cardFont: QrCardFont;
   cardOrientation: QrCardOrientation;
+  cardPosition: QrCardPosition;
+  ownerId: string | null;
   cardTagline: string;
   cardTextColor: string | null;
   cardTextStyle: QrCardTextStyle;
@@ -47,7 +57,14 @@ type AssignmentProfile = {
   title: string | null;
 };
 
-type QrCardItem = QrItem & { designs: QrCardDesign[]; svg: string };
+type QrCardItem = QrItem & {
+  designs: QrCardDesign[];
+  svg: string;
+  logoUrl: string;
+  logoName: string;
+  canAddLogo: boolean;
+  enterpriseUpdatedAt: string | null;
+};
 
 export async function UserQrList({
   items,
@@ -56,13 +73,18 @@ export async function UserQrList({
   items: QrItem[];
   profiles: AssignmentProfile[];
 }) {
-  const [designs, presets] = await Promise.all([
+  const [designs, presets, brand] = await Promise.all([
     getQrCardDesigns(items.map((item) => item.id)),
     getQrCardPresets(),
+    getEnterpriseBrand(items[0]?.ownerId),
   ]);
   const cards = await Promise.all(
     items.map(async (item) => ({
       ...item,
+      logoUrl: brand.url,
+      canAddLogo: brand.canAddLogo,
+      enterpriseUpdatedAt: brand.enterpriseUpdatedAt,
+      logoName: brand.name,
       designs: designs.get(item.id) ?? [],
       svg: await QRCode.toString(buildPublicQrUrl(item.publicToken), {
         color: { dark: "#0a0a0a", light: "#ffffff" },
@@ -106,27 +128,37 @@ function QrOwnershipCard({
       className={cn(
         "grid gap-4 rounded-surface bg-card p-4",
         item.cardOrientation === "landscape"
-          ? "lg:grid-cols-[24rem_minmax(0,1fr)] lg:items-start"
-          : "lg:grid-cols-[17rem_minmax(0,1fr)]",
+          ? "lg:grid-cols-[minmax(0,1.25fr)_minmax(16rem,1fr)] lg:items-start"
+          : "lg:grid-cols-[minmax(0,1.25fr)_minmax(16rem,1fr)] lg:items-start",
       )}
     >
-      <QrVisualCard
-        backgroundUrl={item.cardBackgroundUrl}
-        description={role}
-        font={item.cardFont}
-        heading={profileName}
-        location={item.profileLocation}
-        orientation={item.cardOrientation}
-        svg={item.svg}
-        tagline={item.cardTagline}
-        textColor={item.cardTextColor}
-        textStyle={item.cardTextStyle}
-      />
+      <div>
+        <DashboardQrCardEditor
+            profileEditHref={item.profileId ? `/profiles/${item.profileId}/edit` : undefined}
+          qrId={item.id} version={item.version} appearance={item.cardAppearance}
+          identity={{ avatarUrl: item.profileAvatarUrl, phone: item.profileVisibleFields?.phone === false ? null : item.profilePhone, website: item.profileVisibleFields?.website === false ? null : item.profileWebsite, title: item.profileVisibleFields?.title === false ? null : item.profileTitle, company: item.profileVisibleFields?.company === false ? null : item.profileCompany }}
+          canAddLogo={item.canAddLogo} enterpriseUpdatedAt={item.enterpriseUpdatedAt}
+          presets={presets} downloadName={item.publicToken}
+          backgroundUrl={item.cardBackgroundUrl}
+          description={role}
+          font={item.cardFont}
+          heading={profileName}
+          location={item.profileLocation}
+          orientation={item.cardOrientation}
+          position={item.cardPosition}
+          logoUrl={item.logoUrl}
+          logoName={item.logoName}
+          svg={item.svg}
+          tagline={item.cardTagline}
+          textColor={item.cardTextColor}
+          textStyle={item.cardTextStyle}
+        />
+      </div>
 
       <section className="flex min-h-80 flex-col p-6 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
           <div className="min-w-0">
-            <p className="text-xl font-semibold tracking-[-0.02em] break-keep whitespace-nowrap text-gold">
+            <p className="text-xl font-semibold tracking-[-0.02em] break-all text-gold">
               {item.publicToken}
             </p>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -168,6 +200,9 @@ function QrOwnershipCard({
           }
           description={role || "Quét để mở hồ sơ"}
           designs={item.designs}
+          appearance={item.cardAppearance}
+          identity={{ avatarUrl: item.profileAvatarUrl, phone: item.profileVisibleFields?.phone === false ? null : item.profilePhone, website: item.profileVisibleFields?.website === false ? null : item.profileWebsite, title: item.profileVisibleFields?.title === false ? null : item.profileTitle, company: item.profileVisibleFields?.company === false ? null : item.profileCompany }}
+          canAddLogo={item.canAddLogo} enterpriseUpdatedAt={item.enterpriseUpdatedAt}
           font={item.cardFont}
           heading={profileName}
           location={item.profileLocation}
@@ -180,6 +215,9 @@ function QrOwnershipCard({
           status={item.status}
           svg={item.svg}
           orientation={item.cardOrientation}
+          position={item.cardPosition}
+          logoUrl={item.logoUrl}
+          logoName={item.logoName}
           tagline={item.cardTagline}
           textColor={item.cardTextColor}
           textStyle={item.cardTextStyle}

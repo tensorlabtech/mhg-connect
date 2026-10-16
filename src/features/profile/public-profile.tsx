@@ -77,6 +77,7 @@ type SelectionMode = {
 
 export function PublicProfile({
   document: persistedDocument,
+  digitalCard,
   editor,
   inlineEdit,
   locale = "vi",
@@ -88,6 +89,7 @@ export function PublicProfile({
   showActions = true,
 }: {
   document?: unknown;
+  digitalCard?: React.ReactNode;
   editor?: EditorMode;
   /** Sửa trực tiếp trên trang: bấm vào chữ, ảnh, mục nào là sửa ngay chỗ đó. */
   inlineEdit?: InlineEditApi;
@@ -209,6 +211,14 @@ export function PublicProfile({
           </BlockFrame>
           <div className="profile-inner">
             {identityActions ? null : actions}
+            {digitalCard ? (
+              <details className="my-6 print:hidden">
+                <summary className="w-fit cursor-pointer rounded-control px-3 py-2 text-sm font-medium text-gold focus-visible:ring-2 focus-visible:ring-ring/60">
+                  Xem danh thiếp 3D
+                </summary>
+                <div className="mx-auto mt-5 mb-8 max-w-xl">{digitalCard}</div>
+              </details>
+            ) : null}
             <div className="profile-blocks">
               {document.blocks.slice(1).map((block) =>
                 inlineEditing ? (

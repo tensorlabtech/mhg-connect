@@ -1,4 +1,8 @@
 "use client";
+import type { QrCardAppearance } from "@/features/qr/qr-card-appearance";
+import type { DigitalIdentity } from "@/features/qr/digital-identity-card";
+
+import { QrInteractiveSurface } from "@/features/qr/qr-interactive-surface";
 
 import { ArrowUpRight, Printer, QrCode } from "lucide-react";
 import Link from "next/link";
@@ -19,6 +23,7 @@ import type { QrCardTextStyle } from "@/db/schema/product";
 import type {
   QrCardFont,
   QrCardOrientation,
+  QrCardPosition,
 } from "@/features/qr/qr-card-layout";
 import { QrVisualCard } from "@/features/qr/qr-visual-card";
 
@@ -34,6 +39,10 @@ export function AdminQrPreviewDialog({
   status,
   svg,
   orientation,
+  position,
+  logoUrl,
+  logoName,
+  appearance, identity,
   font,
   tagline,
   textColor,
@@ -50,6 +59,10 @@ export function AdminQrPreviewDialog({
   status: string;
   svg: string;
   orientation?: QrCardOrientation;
+  position?: QrCardPosition;
+  logoUrl?: string;
+  logoName?: string;
+  appearance?: QrCardAppearance; identity?: Partial<DigitalIdentity>;
   font?: QrCardFont;
   tagline?: string;
   textColor?: string | null;
@@ -86,19 +99,25 @@ export function AdminQrPreviewDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 sm:grid-cols-[16rem_minmax(0,1fr)] sm:items-stretch">
-          <QrVisualCard
-            backgroundUrl={backgroundUrl}
-            description={profileDescription || "Quét để mở mã"}
-            heading={profileName || publicToken}
-            headingClassName={profileName ? undefined : "text-nowrap"}
-            location={location}
-            svg={svg}
-            orientation={orientation}
-            font={font}
-            tagline={tagline}
-            textColor={textColor}
-            textStyle={textStyle}
-          />
+          <QrInteractiveSurface label={`Thẻ 3D ${profileName || publicToken}`}>
+            <QrVisualCard
+              backgroundUrl={backgroundUrl}
+              description={profileDescription || "Quét để mở mã"}
+              heading={profileName || publicToken}
+              headingClassName={profileName ? undefined : "text-nowrap"}
+              location={location}
+              svg={svg}
+              orientation={orientation}
+              position={position}
+              logoUrl={logoUrl}
+              logoName={logoName}
+              appearance={appearance} identity={identity}
+              font={font}
+              tagline={tagline}
+              textColor={textColor}
+              textStyle={textStyle}
+            />
+          </QrInteractiveSurface>
           <div className="flex min-w-0 flex-col">
             <dl className="grid gap-6 text-sm sm:grid-cols-2">
               <div>

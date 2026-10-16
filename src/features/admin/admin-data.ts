@@ -9,9 +9,12 @@ export async function getAdminQrList() {
   return db
     .select({
       id: qrCodes.id,
+      ownerId: qrCodes.ownerId,
       cardBackgroundUrl: qrCodes.cardBackgroundUrl,
+      cardAppearance: qrCodes.cardAppearance,
       cardTextStyle: qrCodes.cardTextStyle,
       cardOrientation: qrCodes.cardOrientation,
+      cardPosition: qrCodes.cardPosition,
       cardTagline: qrCodes.cardTagline,
       cardFont: qrCodes.cardFont,
       cardTextColor: qrCodes.cardTextColor,
@@ -21,6 +24,10 @@ export async function getAdminQrList() {
       profileName: profiles.name,
       profileTitle: profiles.title,
       profileCompany: profiles.company,
+      profileAvatarUrl: profiles.avatarUrl,
+      profilePhone: profiles.phone,
+      profileWebsite: profiles.website,
+      profileVisibleFields: profiles.visibleFields,
       profileLocation: profiles.location,
       scanCount: count(scanEvents.id),
       createdAt: qrCodes.createdAt,

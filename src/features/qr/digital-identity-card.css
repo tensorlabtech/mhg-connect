@@ -1,0 +1,517 @@
+.business-card-size {
+  width: 100%;
+  min-width: 0;
+  container-type: inline-size;
+}
+.digital-identity-card {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  container-type: inline-size;
+  overflow: hidden;
+  border-radius: var(--radius-surface, 1.5rem);
+  padding: 4.5cqw;
+  aspect-ratio: 85.6 / 53.98;
+  display: flex;
+  flex-direction: column;
+  gap: 3cqw;
+  -webkit-font-smoothing: auto;
+  text-rendering: optimizeLegibility;
+  color: #fbfaf6;
+  background:
+    radial-gradient(
+      ellipse at 90% 0%,
+      rgb(229 193 107 / 0.21),
+      transparent 55%
+    ),
+    linear-gradient(145deg, #252722, #0a0a0a 65%);
+  border: 1px solid rgb(229 193 107 / 0.3);
+}
+.digital-identity-card[data-card-finish="ivory"] {
+  color: #24251f;
+  background:
+    radial-gradient(ellipse at 90% 0%, #fffef6, transparent 60%),
+    linear-gradient(135deg, #f6f4eb, #dfded7);
+  border-color: #d8d4c4;
+}
+.digital-identity-card[data-card-finish="foil"] {
+  background:
+    radial-gradient(ellipse at 0% 0%, rgb(229 193 107 / 0.33), transparent 58%),
+    repeating-linear-gradient(
+      125deg,
+      transparent 0 16px,
+      rgb(255 255 255 / 0.025) 17px 18px
+    ),
+    linear-gradient(140deg, #34362d, #0a0a0a 62%, #4a4130);
+}
+.digital-card-background {
+  object-fit: cover;
+  z-index: -2;
+}
+.digital-card-photo-shade {
+  position: absolute;
+  inset: 0;
+  background: rgb(5 8 8);
+  z-index: -1;
+}
+[data-card-finish="ivory"] .digital-card-photo-shade {
+  background: rgb(246 244 235);
+}
+.digital-card-header,
+.digital-card-main,
+.digital-card-tagline {
+  position: relative;
+  z-index: 1;
+}
+.digital-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3cqw;
+  flex-shrink: 0;
+}
+.digital-card-brand-pair {
+  display: flex;
+  align-items: center;
+  gap: 4cqw;
+  min-width: 0;
+}
+.digital-card-logo-plate {
+  display: grid;
+  place-items: center;
+  width: 27cqw;
+  height: 12cqw;
+  padding: 0.8cqw 1cqw;
+  border-radius: 1.2cqw;
+  background: #151813;
+  flex-shrink: 0;
+}
+.digital-card-fixed-logo {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: contain;
+  opacity: 1;
+  filter: brightness(1.24) contrast(1.2) saturate(1.15);
+}
+[data-card-finish="ivory"]
+  :is(.digital-card-logo-plate, .digital-card-tagline) {
+  background: #f6f4eb;
+  color: #24251f;
+}
+[data-card-finish="ivory"] .digital-card-fixed-logo {
+  filter: brightness(0.5) contrast(1.5) saturate(1.05);
+}
+.digital-card-enterprise-logo {
+  display: block;
+  width: 21cqw;
+  height: 11cqw;
+  overflow: hidden;
+}
+.digital-card-enterprise-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.digital-card-enterprise-logo[data-logo-presentation="emblem-header"] {
+  width: 11cqw;
+}
+.digital-card-enterprise-logo[data-logo-presentation="emblem-header"] img {
+  width: auto;
+  max-width: none;
+  height: 100%;
+  object-fit: initial;
+}
+.digital-card-platform {
+  font-size: 2cqw;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  opacity: 1;
+  text-align: right;
+  line-height: 1.6;
+}
+.digital-card-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 26cqw;
+  grid-template-areas: "copy qr";
+  gap: 5cqw;
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+}
+.digital-card-identity {
+  grid-area: copy;
+  display: grid;
+  grid-template-columns: 14cqw minmax(0, 1fr);
+  align-items: center;
+  gap: 2.6cqw;
+  min-width: 0;
+}
+.digital-card-avatar-slot {
+  width: 14cqw;
+  height: 14cqw;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 1px solid rgb(128 128 128 / 0.35);
+}
+.digital-card-avatar-slot:has(.digital-card-inline-avatar:focus-visible) {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+.digital-card-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.digital-card-name-group {
+  min-width: 0;
+}
+.digital-card-identity:not(:has(.digital-card-avatar-slot))
+  .digital-card-name-group {
+  grid-column: 1/-1;
+}
+.digital-card-name-group h2 {
+  font-family: inherit;
+  font-size: 4.6cqw;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.digital-card-title {
+  margin-top: 1.5cqw;
+  font-size: 2.65cqw;
+  font-weight: 500;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.digital-card-company {
+  grid-column: 1/-1;
+  font-size: 2.7cqw;
+  line-height: 1.45;
+  font-weight: 500;
+  opacity: 1;
+  overflow-wrap: anywhere;
+}
+.digital-card-contacts {
+  grid-column: 1/-1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5cqw 2.8cqw;
+  min-width: 0;
+}
+.digital-card-contacts > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 1cqw;
+  max-width: 100%;
+  font-size: 2.65cqw;
+  font-weight: 500;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.digital-card-contacts svg {
+  width: 2.7cqw;
+  height: 2.7cqw;
+  flex-shrink: 0;
+}
+.digital-card-contacts a {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.digital-card-qr-group {
+  grid-area: qr;
+  display: grid;
+  gap: 1.8cqw;
+  text-align: center;
+  width: 26cqw;
+  justify-self: center;
+  align-self: center;
+}
+.digital-card-qr {
+  background: #fff;
+  padding: 0.8cqw;
+  border-radius: 1.2cqw;
+  aspect-ratio: 1;
+}
+.digital-card-qr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.digital-card-qr-group > span {
+  font-size: 2cqw;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+.digital-card-tagline {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 1cqw;
+  max-width: 100%;
+  padding: 0.65cqw 1.2cqw;
+  border-radius: 1cqw;
+  background: #151813;
+  color: #fbfaf6;
+  font-size: 2.55cqw;
+  font-weight: 700;
+  line-height: 1.35;
+  opacity: 1;
+  font-family: "Be Vietnam Pro", system-ui, sans-serif;
+  flex-shrink: 0;
+}
+.digital-card-tagline svg {
+  width: 3.6cqw;
+  height: 3.6cqw;
+  flex-shrink: 0;
+  color: #e5c16b;
+}
+[data-card-finish="ivory"] .digital-card-tagline svg {
+  color: #675021;
+}
+[data-card-orientation="landscape"][data-card-position="left"]
+  .digital-card-main {
+  grid-template-columns: 26cqw minmax(0, 1fr);
+  grid-template-areas: "qr copy";
+}
+[data-card-orientation="landscape"]:is(
+    [data-card-position="top"],
+    [data-card-position="bottom"]
+  )
+  .digital-card-main {
+  grid-template-columns: minmax(0, 1fr) 23cqw;
+  grid-template-areas: "copy qr";
+}
+[data-card-orientation="landscape"][data-card-position="top"]
+  .digital-card-qr-group {
+  align-self: start;
+  width: 23cqw;
+}
+[data-card-orientation="landscape"][data-card-position="bottom"]
+  .digital-card-qr-group {
+  align-self: end;
+  width: 23cqw;
+}
+[data-card-orientation="portrait"].digital-identity-card {
+  aspect-ratio: 53.98/85.6;
+  padding: 6cqw;
+  gap: 6cqw;
+}
+[data-card-orientation="portrait"] .digital-card-header {
+  gap: 3cqw;
+}
+[data-card-orientation="portrait"] .digital-card-logo-plate {
+  width: 30cqw;
+  height: 13cqw;
+}
+[data-card-orientation="portrait"] .digital-card-main {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  grid-template-areas: "copy" "qr";
+  gap: 6cqw;
+  align-content: center;
+}
+[data-card-orientation="portrait"] .digital-card-identity {
+  grid-template-columns: 20cqw minmax(0, 1fr);
+  gap: 4cqw;
+}
+[data-card-orientation="portrait"] .digital-card-avatar-slot {
+  width: 20cqw;
+  height: 20cqw;
+}
+[data-card-orientation="portrait"] .digital-card-name-group h2 {
+  font-size: 6.5cqw;
+}
+[data-card-orientation="portrait"] .digital-card-title {
+  font-size: 3.8cqw;
+}
+[data-card-orientation="portrait"] .digital-card-company {
+  font-size: 3.8cqw;
+}
+[data-card-orientation="portrait"] .digital-card-contacts > span {
+  font-size: 3.6cqw;
+}
+[data-card-orientation="portrait"] .digital-card-contacts svg {
+  width: 3.8cqw;
+  height: 3.8cqw;
+}
+[data-card-orientation="portrait"] .digital-card-qr-group {
+  width: 40cqw;
+}
+[data-card-orientation="portrait"] .digital-card-qr-group > span {
+  font-size: 2.4cqw;
+}
+[data-card-orientation="portrait"] .digital-card-tagline {
+  font-size: 3.2cqw;
+}
+[data-card-orientation="portrait"][data-card-position="top"]
+  .digital-card-main {
+  grid-template-areas: "qr" "copy";
+}
+[data-card-orientation="portrait"][data-card-position="left"]
+  .digital-card-qr-group {
+  justify-self: start;
+}
+[data-card-orientation="portrait"][data-card-position="right"]
+  .digital-card-qr-group {
+  justify-self: end;
+}
+.digital-card-inline-target {
+  text-align: inherit;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  border-radius: 3px;
+  cursor: text;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.digital-card-inline-target:hover {
+  outline: 1px dashed currentColor;
+  outline-offset: 3px;
+}
+.digital-card-inline-target:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+.digital-card-inline-target:empty::after {
+  content: attr(data-placeholder);
+}
+.digital-card-inline-target:empty {
+  padding: 0.35cqw 0.7cqw;
+  border: 1px dashed currentColor;
+  background: #20231e;
+  color: #fbfaf6;
+  font-family: "Be Vietnam Pro", system-ui, sans-serif;
+  font-size: 2.55cqw;
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+}
+[data-card-orientation="portrait"] .digital-card-inline-target:empty {
+  font-size: 3.5cqw;
+}
+[data-card-finish="ivory"] .digital-card-inline-target:empty {
+  background: #f6f4eb;
+  color: #24251f;
+}
+.digital-card-inline-avatar {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+  overflow: hidden;
+}
+.digital-card-inline-avatar:has(svg) {
+  border: 1px dashed currentColor;
+  background: #20231e;
+  color: #fbfaf6;
+}
+[data-card-finish="ivory"] .digital-card-inline-avatar:has(svg) {
+  background: #f6f4eb;
+  color: #24251f;
+}
+.digital-card-inline-avatar svg {
+  width: 6cqw;
+  height: 6cqw;
+}
+.digital-card-avatar-placeholder {
+  display: flex;
+  align-items: center;
+}
+.digital-card-avatar-placeholder svg + svg {
+  width: 3cqw;
+  height: 3cqw;
+}
+.digital-card-add-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1cqw;
+  min-width: 12cqw;
+  min-height: 9cqw;
+  border-radius: 1cqw;
+  font-size: 2cqw;
+  cursor: pointer;
+  border: 1px dashed rgb(128 128 128 / 0.65);
+}
+.digital-card-add-logo svg {
+  width: 2.7cqw;
+  height: 2.7cqw;
+}
+.digital-card-add-logo[data-editor-only] {
+  background: #20231e;
+  color: #fbfaf6;
+  border-color: currentColor;
+  font-weight: 600;
+}
+[data-card-finish="ivory"] .digital-card-add-logo[data-editor-only] {
+  background: #f6f4eb;
+  color: #24251f;
+}
+.digital-card-add-logo:focus-visible,
+.digital-card-inline-avatar:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+.digital-card-background-trigger {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  cursor: pointer;
+  border-radius: inherit;
+}
+.digital-card-background-trigger:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: -4px;
+}
+.digital-card-inline-target:disabled,
+.digital-card-inline-avatar:disabled,
+.digital-card-add-logo:disabled {
+  cursor: wait;
+  opacity: 1;
+}
+[data-card-capture="true"] .digital-card-inline-target {
+  outline: none !important;
+}
+[data-card-capture="true"] .digital-card-add-logo {
+  border-color: transparent;
+  outline: none !important;
+}
+[data-card-capture="true"] .digital-card-inline-avatar {
+  outline: none !important;
+}
+[data-card-capture="true"]
+  :is(
+    .digital-card-inline-target,
+    .digital-card-inline-avatar,
+    .digital-card-add-logo
+  ) {
+  opacity: 1 !important;
+}
+[data-card-capture="true"] .digital-card-inline-target:empty {
+  display: none;
+}
+[data-card-capture="true"] [data-editor-only] {
+  display: none !important;
+}
+[data-card-capture="true"] .digital-card-avatar-slot:has([data-editor-only]) {
+  display: none;
+}
+[data-card-capture="true"]
+  .digital-card-identity:has(.digital-card-avatar-slot [data-editor-only])
+  .digital-card-name-group {
+  grid-column: 1/-1;
+}
+[data-card-capture="true"]
+  .digital-card-contacts
+  > span:has(.digital-card-inline-target:empty) {
+  display: none;
+}

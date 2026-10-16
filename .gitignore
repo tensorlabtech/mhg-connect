@@ -14,3 +14,6 @@ site/
 .vercel
 # Ảnh tải lên khi chạy thử trên máy (MEDIA_STORAGE=local)
 public/_uploads/
+
+# Private local-only profile drafts and source photographs; never deployed.
+.local-drafts/

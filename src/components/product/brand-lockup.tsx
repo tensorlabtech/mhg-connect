@@ -1,22 +1,17 @@
 import { cn } from "cn";
+import Image from "next/image";
+import { MHG_LOGO_URL } from "@/features/enterprise/enterprise-branding";
 
 export function BrandMark({ className }: { className?: string }) {
   return (
-    <svg
-      aria-hidden="true"
-      className={cn("size-7 shrink-0", className)}
-      fill="none"
-      viewBox="0 0 32 32"
-    >
-      <rect fill="currentColor" height="32" rx="6" width="32" />
-      <path
-        d="M8 22.5v-13l8 8 8-8v13"
-        stroke="#0a0a0a"
-        strokeLinecap="square"
-        strokeLinejoin="miter"
-        strokeWidth="2.5"
-      />
-    </svg>
+    <Image
+      alt="MHG Airpurity"
+      src={MHG_LOGO_URL}
+      width={1918}
+      height={820}
+      unoptimized
+      className={cn("h-11 w-28 shrink-0 object-contain", className)}
+    />
   );
 }
 

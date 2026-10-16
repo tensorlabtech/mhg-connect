@@ -22,6 +22,10 @@ import {
 import { profileDocumentToFlat } from "@/features/profile/profile-document";
 import { getPublishedProfileSnapshot } from "@/features/profile/published-profile-snapshot";
 import { getSession } from "@/lib/session";
+import { createPublicQrSvg } from "@/features/qr/create-public-qr-svg";
+import { DigitalCardPreview } from "@/features/qr/digital-card-preview";
+import { digitalIdentityFromProfile } from "@/features/qr/digital-identity";
+import { getEnterpriseBrand } from "@/features/enterprise/enterprise-data";
 
 export const dynamic = "force-dynamic";
 const getQrPageData = cache(getQrByToken);
@@ -202,10 +206,25 @@ export default async function QrPage({
   });
   const profile = { ...result.profile, publicToken: token };
   const locale = resolveProfileLocale(publishedDocument, query.lang);
+  const localized = localizeProfileDocument(publishedDocument, locale);
+  const [cardSvg, brand] = await Promise.all([
+    createPublicQrSvg(token),
+    getEnterpriseBrand(result.qr.ownerId, true),
+  ]);
 
   return (
     <PublicProfile
       document={publishedDocument}
+      digitalCard={
+        <DigitalCardPreview
+          identity={digitalIdentityFromProfile(
+            profileDocumentToFlat(localized),
+          )}
+          svg={cardSvg}
+          logoUrl={brand.url}
+          logoName={brand.name}
+        />
+      }
       locale={locale}
       profile={profile}
     />

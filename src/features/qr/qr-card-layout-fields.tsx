@@ -1,26 +1,22 @@
 "use client";
 
 import { cn } from "cn";
-import { useState } from "react";
 
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import {
   QR_CARD_DEFAULT_TAGLINE,
-  QR_CARD_TAGLINE_MAX,
   qrCardOrientationOptions,
+  qrCardPositionOptions,
+  type QrCardPosition,
   type QrCardOrientation,
 } from "@/features/qr/qr-card-layout";
 
 /** Chọn hướng thẻ (dọc/ngang) và dòng chữ cạnh logo; dùng chung cho thẻ chính và mẫu thẻ. */
 export function QrCardLayoutFields({
   disabled,
-  idPrefix,
   onOrientationChange,
-  onTaglineCommit,
-  onTaglinePreview,
   orientation,
-  tagline,
+  position = "bottom",
+  onPositionChange,
 }: {
   disabled?: boolean;
   idPrefix: string;
@@ -28,22 +24,10 @@ export function QrCardLayoutFields({
   onTaglineCommit: (next: string) => void;
   onTaglinePreview?: (draft: string) => void;
   orientation: QrCardOrientation;
+  position?: QrCardPosition;
+  onPositionChange?: (next: QrCardPosition) => void;
   tagline: string;
 }) {
-  const [draft, setDraft] = useState(tagline);
-  const [lastShown, setLastShown] = useState(
-    tagline.trim() || QR_CARD_DEFAULT_TAGLINE,
-  );
-  const shown = draft.trim().length > 0;
-
-  function commit(next: string) {
-    const value = next.trim();
-    setDraft(value);
-    onTaglinePreview?.(value);
-    if (value) setLastShown(value);
-    if (value !== tagline.trim()) onTaglineCommit(value);
-  }
-
   return (
     <div className="grid min-w-0 gap-5">
       <fieldset className="grid min-w-0 gap-3">
@@ -96,44 +80,42 @@ export function QrCardLayoutFields({
         </div>
       </fieldset>
 
-      <div className="grid min-w-0 gap-2">
-        <div className="flex items-center justify-between gap-3">
-          <label
-            className="text-sm font-medium"
-            htmlFor={`${idPrefix}-tagline`}
-          >
-            Dòng chữ cạnh logo
-          </label>
-          <Switch
-            aria-label="Hiện dòng chữ cạnh logo"
-            checked={shown}
-            className="relative after:absolute after:-inset-3 after:content-['']"
-            disabled={disabled}
-            onCheckedChange={(checked) =>
-              commit(checked ? lastShown || QR_CARD_DEFAULT_TAGLINE : "")
-            }
-          />
+      <fieldset className="grid min-w-0 gap-3">
+        <legend className="text-sm font-medium">Bố cục QR và chữ</legend>
+        <div
+          className="grid grid-cols-2 gap-2"
+          role="group"
+          aria-label="Vị trí mã QR"
+        >
+          {qrCardPositionOptions.map((option) => (
+            <button
+              type="button"
+              key={option.id}
+              aria-pressed={position === option.id}
+              disabled={disabled}
+              onClick={() => onPositionChange?.(option.id)}
+              className={cn(
+                "min-h-10 rounded-overlay px-3 py-2 text-left text-sm transition-colors focus-visible:ring-2 focus-visible:ring-ring/60 disabled:opacity-50",
+                position === option.id
+                  ? "bg-secondary ring-1 ring-gold/70"
+                  : "bg-secondary/55 hover:bg-secondary",
+              )}
+            >
+              {option.label}
+            </button>
+          ))}
         </div>
-        <Input
-          disabled={disabled}
-          id={`${idPrefix}-tagline`}
-          maxLength={QR_CARD_TAGLINE_MAX}
-          onBlur={(event) => commit(event.target.value)}
-          onChange={(event) => {
-            setDraft(event.target.value);
-            onTaglinePreview?.(event.target.value);
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              event.preventDefault();
-              commit(event.currentTarget.value);
-            }
-          }}
-          placeholder={QR_CARD_DEFAULT_TAGLINE}
-          value={draft}
-        />
         <p className="text-xs leading-5 text-muted-foreground">
-          In đậm trên nền đậm ngay cạnh logo MHG. Tắt công tắc để ẩn.
+          QR và thông tin nằm ở hai vùng riêng. Chọn vùng trống của ảnh nền; chữ
+          đã có sẵn trong ảnh không thể tự nhận diện. Với thẻ ngang nhiều thông
+          tin, ưu tiên QR trái hoặc phải để chữ lớn hơn.
+        </p>
+      </fieldset>
+      <div className="grid min-w-0 gap-2">
+        <p className="text-sm font-medium">Dòng bảo vệ cố định của MHG</p>
+        <p className="text-sm font-semibold">{QR_CARD_DEFAULT_TAGLINE}</p>
+        <p className="text-xs leading-5">
+          Luôn hiển thị trên thẻ, không thể sửa hoặc ẩn.
         </p>
       </div>
     </div>

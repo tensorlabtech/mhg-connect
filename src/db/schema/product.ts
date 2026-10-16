@@ -15,12 +15,14 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { user } from "@/db/schema/auth";
+import type { QrCardAppearance } from "@/features/qr/qr-card-appearance";
 import {
   QR_CARD_DEFAULT_FONT,
   QR_CARD_DEFAULT_TAGLINE,
   type QrCardFont,
   type QrCardOrientation,
   qrCardOrientations,
+  type QrCardPosition,
 } from "@/features/qr/qr-card-layout";
 
 export { QR_CARD_DEFAULT_TAGLINE, qrCardOrientations };
@@ -128,6 +130,11 @@ export const qrCodes = pgTable(
     }),
     activeProfileId: uuid("active_profile_id"),
     cardBackgroundUrl: text("card_background_url"),
+      cardAppearance: jsonb("card_appearance").$type<QrCardAppearance>().default({}).notNull(),
+    cardPosition: text("card_position")
+      .$type<QrCardPosition>()
+      .default("bottom")
+      .notNull(),
     cardTextStyle: text("card_text_style")
       .$type<QrCardTextStyle>()
       .default("shadow")
@@ -175,6 +182,10 @@ export const qrCodes = pgTable(
     ),
     check("qr_codes_version_check", sql`${table.version} > 0`),
     check(
+      "qr_codes_card_position_check",
+      sql`${table.cardPosition} in ('left', 'right', 'top', 'bottom')`,
+    ),
+    check(
       "qr_codes_card_text_style_check",
       sql`${table.cardTextStyle} in ('shadow', 'band', 'dark', 'light')`,
     ),
@@ -202,6 +213,10 @@ export const qrCardDesigns = pgTable(
       .references(() => qrCodes.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     backgroundUrl: text("background_url"),
+    position: text("position")
+      .$type<QrCardPosition>()
+      .default("bottom")
+      .notNull(),
     textStyle: text("text_style")
       .$type<QrCardTextStyle>()
       .default("shadow")
@@ -216,6 +231,7 @@ export const qrCardDesigns = pgTable(
       .default(QR_CARD_DEFAULT_FONT)
       .notNull(),
     textColor: text("text_color"),
+      appearance: jsonb("appearance").$type<QrCardAppearance>().default({}).notNull(),
     heading: text("heading"),
     description: text("description"),
     location: text("location"),
@@ -224,6 +240,10 @@ export const qrCardDesigns = pgTable(
   },
   (table) => [
     index("qr_card_designs_qr_code_id_idx").on(table.qrCodeId),
+    check(
+      "qr_card_designs_position_check",
+      sql`${table.position} in ('left', 'right', 'top', 'bottom')`,
+    ),
     check(
       "qr_card_designs_text_style_check",
       sql`${table.textStyle} in ('shadow', 'band', 'dark', 'light')`,
@@ -331,5 +351,28 @@ export const qrClaimRateLimits = pgTable(
     primaryKey({ columns: [table.userId, table.bucketStart] }),
     index("qr_claim_rate_limits_bucket_start_idx").on(table.bucketStart),
     check("qr_claim_rate_limits_attempts_check", sql`${table.attempts} > 0`),
+  ],
+);
+
+export const enterprises = pgTable("enterprises", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  customLogoEnabled: boolean("custom_logo_enabled").default(false).notNull(),
+  logoUrl: text("logo_url"),
+  updatedAt: productTimestamp("updated_at").defaultNow().notNull(),
+});
+
+export const enterpriseMembers = pgTable(
+  "enterprise_members",
+  {
+    userId: text("user_id")
+      .primaryKey()
+      .references(() => user.id, { onDelete: "cascade" }),
+    enterpriseId: uuid("enterprise_id")
+      .notNull()
+      .references(() => enterprises.id, { onDelete: "restrict" }),
+  },
+  (table) => [
+    index("enterprise_members_enterprise_idx").on(table.enterpriseId),
   ],
 );

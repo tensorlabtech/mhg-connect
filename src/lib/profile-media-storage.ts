@@ -12,7 +12,7 @@ import path from "node:path";
 import { runtimeEnv } from "@/lib/runtime-env";
 
 export type ProfileMediaKind =
-  "article" | "avatar" | "background" | "card-background" | "cover";
+  "article" | "avatar" | "background" | "card-background" | "cover" | "logo";
 
 let b2Client: S3Client | null = null;
 

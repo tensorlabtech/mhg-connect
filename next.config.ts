@@ -25,9 +25,13 @@ const nextConfig: NextConfig = {
       "./private-assets/mhg-connect-outsource-quotation.pdf",
     ],
   },
+  // Local personal drafts must never be packaged with a deployable server build.
+  outputFileTracingExcludes: {
+    "/*": ["./.local-drafts/**/*"],
+  },
   experimental: {
     serverActions: {
-      bodySizeLimit: "3mb",
+      bodySizeLimit: "16mb",
     },
   },
   async redirects() {

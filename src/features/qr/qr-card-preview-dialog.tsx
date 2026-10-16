@@ -1,4 +1,6 @@
 "use client";
+import type { QrCardAppearance } from "./qr-card-appearance";
+import type { DigitalIdentity } from "./digital-identity-card";
 
 import { cn } from "cn";
 import { ArrowUpRight, LoaderCircle, Plus, QrCode } from "lucide-react";
@@ -30,6 +32,7 @@ import type { QrCardTextStyle } from "@/db/schema/product";
 import type {
   QrCardFont,
   QrCardOrientation,
+  QrCardPosition,
 } from "@/features/qr/qr-card-layout";
 import { QrCardBackgroundEditor } from "@/features/qr/qr-card-background-editor";
 import type { QrCardDesign } from "@/features/qr/qr-card-design";
@@ -49,7 +52,12 @@ export function QrCardPreviewDialog({
   onOpenChange,
   open,
   orientation,
+  position,
+  logoUrl,
+  logoName,
+  appearance, identity, canAddLogo, enterpriseUpdatedAt,
   presets = [],
+  profileId,
   publicToken,
   qrId,
   status,
@@ -68,7 +76,12 @@ export function QrCardPreviewDialog({
   onOpenChange: (open: boolean) => void;
   open: boolean;
   orientation: QrCardOrientation;
+  position: QrCardPosition;
+  logoUrl?: string;
+  logoName?: string;
+  appearance?: QrCardAppearance; identity?: Partial<DigitalIdentity>; canAddLogo?: boolean; enterpriseUpdatedAt?: string | null;
   presets?: readonly QrCardPreset[];
+  profileId?: string | null;
   publicToken: string;
   qrId: string;
   status: string;
@@ -111,12 +124,14 @@ export function QrCardPreviewDialog({
         copyFrom: current
           ? {
               font: current.font,
+                sourceDesignId: current.id,
               orientation: current.orientation,
+              position: current.position,
               tagline: current.tagline,
               textColor: current.textColor,
               textStyle: current.textStyle,
             }
-          : { font, orientation, tagline, textColor, textStyle },
+          : null,
         name: `Mẫu ${designs.length + 2}`,
         qrId,
       });
@@ -151,8 +166,7 @@ export function QrCardPreviewDialog({
               Mã QR {publicToken}
             </DialogTitle>
             <DialogDescription>
-              Chọn nền chữ, đổi ảnh nền hoặc tải ảnh thẻ trước khi in và gửi cho
-              người nhận quét.
+              Bấm trực tiếp trên danh thiếp để sửa. Lưu từng mẫu trước khi chuyển sang mẫu khác.
             </DialogDescription>
           </DialogHeader>
 
@@ -171,7 +185,7 @@ export function QrCardPreviewDialog({
                       ? "bg-secondary text-foreground ring-1 ring-gold/70"
                       : "bg-secondary/55 text-muted-foreground hover:bg-secondary hover:text-foreground",
                   )}
-                  disabled={isSaving}
+                  disabled={isSaving || (hasUnsavedChanges && activeDesign !== item.id)}
                   key={item.id}
                   onClick={() => setActiveDesign(item.id)}
                   role="tab"
@@ -182,7 +196,7 @@ export function QrCardPreviewDialog({
                 </button>
               ))}
               <Button
-                disabled={creating || isSaving || designs.length >= maxDesigns}
+                disabled={creating || isSaving || hasUnsavedChanges || designs.length >= maxDesigns}
                 onClick={() => void addDesign()}
                 size="sm"
                 type="button"
@@ -210,8 +224,13 @@ export function QrCardPreviewDialog({
 
           {selectedDesign ? (
             <QrCardDesignEditor
+              profileEditHref={profileId ? `/profiles/${profileId}/edit` : undefined}
               defaults={{ description, heading, location }}
+              qrId={qrId} identity={identity} canAddLogo={canAddLogo} enterpriseUpdatedAt={enterpriseUpdatedAt}
+              onUnsavedChange={setHasUnsavedChanges}
               design={selectedDesign}
+              logoUrl={logoUrl}
+              logoName={logoName}
               downloadName={publicToken}
               key={selectedDesign.id}
               onChange={(next) =>
@@ -233,7 +252,9 @@ export function QrCardPreviewDialog({
           {/* Thẻ chính luôn được giữ trong cây để không mất phiên bản đã lưu khi chuyển qua lại các mẫu. */}
           <div hidden={Boolean(selectedDesign)}>
             <QrCardBackgroundEditor
+              profileEditHref={profileId ? `/profiles/${profileId}/edit` : undefined}
               backgroundUrl={backgroundUrl}
+              appearance={appearance} identity={identity} canAddLogo={canAddLogo} enterpriseUpdatedAt={enterpriseUpdatedAt}
               description={description}
               downloadName={publicToken}
               font={font}
@@ -242,6 +263,9 @@ export function QrCardPreviewDialog({
               onPendingChange={setIsSaving}
               onUnsavedChange={setHasUnsavedChanges}
               orientation={orientation}
+              position={position}
+              logoUrl={logoUrl}
+              logoName={logoName}
               presets={presets}
               qrId={qrId}
               svg={svg}
@@ -275,10 +299,9 @@ export function QrCardPreviewDialog({
       <AlertDialog onOpenChange={setDiscardDialogOpen} open={discardDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Ảnh nền chưa được lưu</AlertDialogTitle>
+            <AlertDialogTitle>Thẻ có thay đổi chưa lưu</AlertDialogTitle>
             <AlertDialogDescription>
-              Lần tải ảnh vừa rồi chưa hoàn tất. Nếu rời bây giờ, ảnh đang xem
-              trước sẽ bị mất.
+              Nếu rời bây giờ, các thay đổi đang xem trên thẻ sẽ không được lưu.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
