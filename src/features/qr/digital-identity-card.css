@@ -515,3 +515,63 @@
   > span:has(.digital-card-inline-target:empty) {
   display: none;
 }
+
+/*
+ * Khối logo sang trọng: một tấm kính mờ viền vàng mảnh ôm logo MHG và logo đơn vị,
+ * hai logo ngăn bằng một vạch mảnh, cao bằng nhau. Bề mặt Ngọc trai dùng nền ngà.
+ */
+.digital-card-brand-pair {
+  gap: 2.2cqw;
+  padding: 1cqw 2cqw;
+  border: 0.16cqw solid rgb(214 184 116 / 0.55);
+  border-radius: 2.2cqw;
+  background: linear-gradient(
+    160deg,
+    rgb(24 26 21 / 0.74),
+    rgb(10 11 9 / 0.6)
+  );
+  box-shadow:
+    0 0.6cqw 2.2cqw rgb(0 0 0 / 0.28),
+    inset 0 0.14cqw 0 rgb(255 255 255 / 0.07);
+  backdrop-filter: blur(8px) saturate(1.1);
+}
+.digital-card-logo-plate,
+[data-card-finish="ivory"] .digital-card-logo-plate {
+  width: 24cqw;
+  height: 10.4cqw;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.digital-card-enterprise-logo,
+.digital-card-enterprise-logo[data-logo-presentation="emblem-header"] {
+  display: flex;
+  align-items: center;
+  width: auto;
+  height: 10.4cqw;
+  padding-left: 2.2cqw;
+  border-left: 0.14cqw solid rgb(214 184 116 / 0.5);
+  overflow: visible;
+}
+.digital-card-enterprise-logo img,
+.digital-card-enterprise-logo[data-logo-presentation="emblem-header"] img {
+  width: auto;
+  height: 100%;
+  max-width: 26cqw;
+  object-fit: contain;
+}
+[data-card-finish="ivory"] .digital-card-brand-pair {
+  border-color: rgb(176 141 74 / 0.6);
+  background: linear-gradient(160deg, #fcfaf3, #f2ede0);
+  box-shadow: 0 0.5cqw 1.6cqw rgb(60 48 20 / 0.14);
+}
+[data-card-finish="ivory"] .digital-card-enterprise-logo {
+  border-left-color: rgb(176 141 74 / 0.55);
+}
+[data-card-orientation="portrait"] .digital-card-logo-plate {
+  width: 26cqw;
+  height: 11.2cqw;
+}
+[data-card-orientation="portrait"] .digital-card-enterprise-logo {
+  height: 11.2cqw;
+}
