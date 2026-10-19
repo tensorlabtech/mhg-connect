@@ -1,5 +1,10 @@
 import "server-only";
 
+import {
+  resolveAuthUrl,
+  resolvePreviewBranchUrl,
+} from "@/lib/resolve-auth-url";
+
 const runtime = globalThis.process?.["env"] ?? {};
 const isProductionBuild = runtime["NEXT_PHASE"] === "phase-production-build";
 
@@ -9,9 +14,10 @@ export const runtimeEnv = {
     runtime["BETTER_AUTH_SECRET"] ??
     (isProductionBuild ? crypto.randomUUID().repeat(2) : undefined),
   authUrl:
-    runtime["BETTER_AUTH_URL"] ??
+    resolveAuthUrl(runtime) ??
     (isProductionBuild ? "http://localhost:3000" : undefined),
   blobToken: runtime["BLOB_READ_WRITE_TOKEN"],
+  authBranchUrl: resolvePreviewBranchUrl(runtime),
   b2ApplicationKey: runtime["B2_APPLICATION_KEY"],
   b2BucketName: runtime["B2_BUCKET_NAME"],
   b2KeyId: runtime["B2_KEY_ID"],

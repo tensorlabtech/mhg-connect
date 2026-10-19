@@ -21,6 +21,7 @@ if (
 export const auth = betterAuth({
   appName: "MHG Connect",
   baseURL: runtimeEnv.authUrl,
+  trustedOrigins: runtimeEnv.authBranchUrl ? [runtimeEnv.authBranchUrl] : [],
   secret: runtimeEnv.authSecret,
   database: drizzleAdapter(db, {
     provider: "pg",
