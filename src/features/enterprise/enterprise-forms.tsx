@@ -59,6 +59,7 @@ export function EnterpriseBrandForm({
     name: string;
     logoUrl: string | null;
     customLogoEnabled: boolean;
+    hideMhgLogo: boolean;
     updatedAt: Date;
   };
 }) {
@@ -96,6 +97,21 @@ export function EnterpriseBrandForm({
           className="size-4 accent-[var(--gold)]"
         />
         Bật logo riêng cho toàn bộ nhân sự của doanh nghiệp
+      </label>
+      <label className="flex min-h-10 items-start gap-3 text-sm">
+        <input
+          type="checkbox"
+          name="hideMhgLogo"
+          defaultChecked={company.hideMhgLogo}
+          disabled={pending}
+          className="mt-0.5 size-4 accent-[var(--gold)]"
+        />
+        <span>
+          Quyền đặc biệt: bỏ logo MHG Airpurity, thẻ chỉ hiện logo cơ quan
+          <span className="block text-xs text-muted-foreground">
+            Chỉ cấp cho cơ quan đặc biệt. Mặc định mọi thẻ bắt buộc có logo MHG.
+          </span>
+        </span>
       </label>
       <label htmlFor={`logo-${company.id}`} className="text-sm">
         Chọn hoặc thay logo (PNG, JPG, WebP; tối đa 2 MB)

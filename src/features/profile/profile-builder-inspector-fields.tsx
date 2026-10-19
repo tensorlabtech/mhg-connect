@@ -140,7 +140,7 @@ function IdentityTranslationInspector({
     {
       key: "identity.company",
       original: block.data.company ?? "",
-      title: "Công ty",
+      title: "Cơ quan",
     },
     {
       key: "identity.location",
@@ -242,7 +242,7 @@ export function IdentityInspector({
           value={block.data.title ?? ""}
         />
         <InspectorTextField
-          label="Công ty"
+          label="Cơ quan"
           maxLength={120}
           name="company"
           onChange={(value) =>

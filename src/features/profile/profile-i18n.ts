@@ -13,7 +13,7 @@ const strings = {
   about: { en: "About", vi: "Giới thiệu", zh: "简介" },
   article: { en: "Article", vi: "Bài viết", zh: "条目" },
   call: { en: "Call", vi: "Gọi", zh: "拨打" },
-  company: { en: "Organization", vi: "Đơn vị", zh: "单位" },
+  company: { en: "Organization", vi: "Cơ quan", zh: "机关" },
   contact: { en: "Contact", vi: "Liên hệ", zh: "联系" },
   contactDetails: {
     en: "Contact details",

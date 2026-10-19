@@ -9,7 +9,8 @@
   width: 100%;
   container-type: inline-size;
   overflow: hidden;
-  border-radius: var(--radius-surface, 1.5rem);
+  /* Thẻ góc vuông để in và cắt chuẩn khổ. */
+  border-radius: 0;
   padding: 4.5cqw;
   aspect-ratio: 85.6 / 53.98;
   display: flex;
@@ -185,6 +186,8 @@
   font-weight: 500;
   line-height: 1.45;
   overflow-wrap: anywhere;
+  /* Chức danh nhiều dòng: xuống dòng trong dữ liệu được giữ nguyên trên thẻ. */
+  white-space: pre-line;
 }
 .digital-card-company {
   grid-column: 1/-1;
@@ -369,7 +372,8 @@
   min-width: 0;
   max-width: 100%;
   overflow-wrap: anywhere;
-  white-space: normal;
+  /* Theo ô chứa: chức danh nhiều dòng vẫn xuống dòng khi đang sửa trên thẻ. */
+  white-space: inherit;
 }
 .digital-card-inline-target:hover {
   outline: 1px dashed currentColor;
@@ -574,4 +578,13 @@
 }
 [data-card-orientation="portrait"] .digital-card-enterprise-logo {
   height: 11.2cqw;
+}
+
+/* Quyền đặc biệt theo cơ quan: chỉ hiện logo cơ quan, không có vạch ngăn với logo MHG. */
+.digital-card-brand-pair[data-enterprise-only-logo] .digital-card-enterprise-logo {
+  padding-left: 0;
+  border-left: 0;
+}
+.digital-card-brand-pair[data-enterprise-only-logo] .digital-card-enterprise-logo img {
+  max-width: 34cqw;
 }

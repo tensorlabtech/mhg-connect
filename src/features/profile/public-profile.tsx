@@ -454,8 +454,10 @@ function IdentityBlockView({
             <dt>{profileText(locale, "title")}</dt>
             <EditableText
               as="dd"
+              className="profile-title-text"
               k="identity.title"
               label="Chức danh"
+              multiline
               maxLength={120}
               placeholder="Thêm chức danh"
             />
@@ -463,9 +465,9 @@ function IdentityBlockView({
             <EditableText
               as="dd"
               k="identity.company"
-              label="Đơn vị"
+              label="Cơ quan"
               maxLength={120}
-              placeholder="Thêm đơn vị"
+              placeholder="Thêm cơ quan"
             />
             <dt>{profileText(locale, "location")}</dt>
             <EditableText
@@ -499,10 +501,10 @@ function IdentityBlockView({
                         )
                       }
                       placeholder="Thêm chức danh"
-                      value={title ?? ""}
+                      value={(title ?? "").replace(/\n+/g, " ")}
                     />
                   ) : (
-                    shownTitle
+                    <span className="profile-title-text">{shownTitle}</span>
                   )}
                 </dd>
               </>
@@ -513,7 +515,7 @@ function IdentityBlockView({
                 <dd>
                   {editor ? (
                     <InlineInput
-                      ariaLabel="Công ty"
+                      ariaLabel="Cơ quan"
                       disabled={editor.disabled}
                       maxLength={120}
                       onChange={(value) =>
@@ -522,7 +524,7 @@ function IdentityBlockView({
                           "identity.company",
                         )
                       }
-                      placeholder="Thêm công ty"
+                      placeholder="Thêm cơ quan"
                       value={company ?? ""}
                     />
                   ) : (
@@ -619,8 +621,10 @@ function IdentityBlockView({
           {!isWikipedia && inlineEditing ? (
             <p className="profile-byline">
               <EditableText
+                className="profile-title-text"
                 k="identity.title"
                 label="Chức danh"
+                multiline
                 maxLength={120}
                 placeholder="Thêm chức danh"
               />
@@ -628,9 +632,9 @@ function IdentityBlockView({
               <EditableText
                 as="strong"
                 k="identity.company"
-                label="Đơn vị"
+                label="Cơ quan"
                 maxLength={120}
-                placeholder="Thêm đơn vị"
+                placeholder="Thêm cơ quan"
               />
             </p>
           ) : null}
@@ -650,10 +654,10 @@ function IdentityBlockView({
                       )
                     }
                     placeholder="Thêm chức danh"
-                    value={title ?? ""}
+                    value={(title ?? "").replace(/\n+/g, " ")}
                   />
                 ) : shownTitle ? (
-                  <span>{shownTitle}</span>
+                  <span className="profile-title-text">{shownTitle}</span>
                 ) : null
               ) : null}
               {(
@@ -666,7 +670,7 @@ function IdentityBlockView({
               {visibleFields.company ? (
                 editor ? (
                   <InlineInput
-                    ariaLabel="Công ty"
+                    ariaLabel="Cơ quan"
                     className="profile-inline-accent"
                     disabled={editor.disabled}
                     maxLength={120}
@@ -677,7 +681,7 @@ function IdentityBlockView({
                         "identity.company",
                       )
                     }
-                    placeholder="Thêm công ty"
+                    placeholder="Thêm cơ quan"
                     value={company ?? ""}
                   />
                 ) : shownCompany ? (
