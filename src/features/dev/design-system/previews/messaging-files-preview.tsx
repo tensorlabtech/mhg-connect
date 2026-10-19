@@ -1,0 +1,21 @@
+import type { ReactNode } from "react"
+import { Bot, FileText, Info, User } from "lucide-react"
+import { Attachment, AttachmentContent, AttachmentDescription, AttachmentMedia, AttachmentTitle } from "@/components/ui/attachment"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Bubble, BubbleContent, BubbleGroup, BubbleReactions } from "@/components/ui/bubble"
+import { Kbd, KbdGroup } from "@/components/ui/kbd"
+import { Marker, MarkerContent, MarkerIcon } from "@/components/ui/marker"
+import { Message, MessageAvatar, MessageContent, MessageFooter, MessageGroup, MessageHeader } from "@/components/ui/message"
+import { MessageScroller, MessageScrollerButton, MessageScrollerContent, MessageScrollerItem, MessageScrollerProvider, MessageScrollerViewport } from "@/components/ui/message-scroller"
+
+const bubbleVariants = ["default", "secondary", "muted", "tinted", "outline", "ghost", "destructive"] as const
+const attachmentStates = ["idle", "uploading", "processing", "done", "error"] as const
+const previews: Record<string, ReactNode> = {
+  attachment: <div className="flex w-full flex-wrap items-start gap-2">{attachmentStates.map((state, index) => <Attachment key={state} size={index > 2 ? "sm" : "default"} state={state}><AttachmentMedia><FileText /></AttachmentMedia><AttachmentContent><AttachmentTitle>design-system.pdf</AttachmentTitle><AttachmentDescription>{state}</AttachmentDescription></AttachmentContent></Attachment>)}<Attachment size="xs"><AttachmentMedia><FileText /></AttachmentMedia><AttachmentContent><AttachmentTitle>compact.pdf</AttachmentTitle><AttachmentDescription>xs</AttachmentDescription></AttachmentContent></Attachment><Attachment orientation="vertical"><AttachmentMedia variant="image"><img alt="Biểu trưng ứng dụng" src="/favicon.svg" /></AttachmentMedia><AttachmentContent><AttachmentTitle>preview.svg</AttachmentTitle><AttachmentDescription>vertical · image</AttachmentDescription></AttachmentContent></Attachment></div>,
+  bubble: <BubbleGroup className="w-full gap-4">{bubbleVariants.map((variant, index) => <Bubble align={index % 2 ? "end" : "start"} key={variant} variant={variant}><BubbleContent>Tin nhắn {variant}</BubbleContent>{variant === "tinted" && <BubbleReactions>Thích 3</BubbleReactions>}{variant === "outline" && <BubbleReactions align="start" side="top">Mới</BubbleReactions>}</Bubble>)}</BubbleGroup>,
+  message: <MessageGroup className="w-full"><Message><MessageAvatar><Avatar><AvatarFallback><Bot /></AvatarFallback></Avatar></MessageAvatar><MessageContent><MessageHeader>Trợ lý</MessageHeader><Bubble variant="muted"><BubbleContent>Tôi có thể hỗ trợ gì?</BubbleContent></Bubble><MessageFooter>09:41</MessageFooter></MessageContent></Message><Message align="end"><MessageAvatar><Avatar><AvatarFallback><User /></AvatarFallback></Avatar></MessageAvatar><MessageContent><MessageHeader>Bạn</MessageHeader><Bubble><BubbleContent>Hiện toàn bộ biến thể.</BubbleContent></Bubble><MessageFooter>Đã gửi</MessageFooter></MessageContent></Message></MessageGroup>,
+  "message-scroller": <MessageScrollerProvider><MessageScroller className="h-48 w-full rounded-overlay bg-background"><MessageScrollerViewport><MessageScrollerContent className="p-4">{Array.from({ length: 8 }, (_, index) => <MessageScrollerItem key={index} scrollAnchor={index === 7}><Bubble variant={index % 2 ? "secondary" : "muted"}><BubbleContent>Tin nhắn {index + 1}</BubbleContent></Bubble></MessageScrollerItem>)}</MessageScrollerContent></MessageScrollerViewport><MessageScrollerButton direction="start" /><MessageScrollerButton direction="end" /></MessageScroller></MessageScrollerProvider>,
+  marker: <div className="grid w-full gap-4"><Marker><MarkerIcon><Info /></MarkerIcon><MarkerContent>Mốc mặc định</MarkerContent></Marker><Marker variant="separator"><MarkerContent>Mốc phân cách</MarkerContent></Marker><Marker variant="border"><MarkerContent>Mốc có viền</MarkerContent></Marker></div>,
+  kbd: <div className="flex flex-wrap items-center gap-4"><Kbd>⌘</Kbd><KbdGroup><Kbd>⌘</Kbd><span>+</span><Kbd>K</Kbd></KbdGroup><span className="text-sm text-muted-foreground">Mở bảng lệnh</span></div>,
+}
+export function MessagingFilesPreview({ file }: { file: string }) { return previews[file] ?? null }

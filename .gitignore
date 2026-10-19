@@ -1,0 +1,29 @@
+node_modules/
+dist/
+.next/
+.vinext/
+.vite/
+.wrangler/
+.openai/
+.vercel/
+.env*
+!.env.example
+.DS_Store
+*.tsbuildinfo
+site/
+.vercel
+# Ảnh tải lên khi chạy thử trên máy (MEDIA_STORAGE=local)
+public/_uploads/
+
+# Private local-only profile drafts and source photographs; never deployed.
+.local-drafts/
+
+# Private archives and commercial source material stay outside the public repo.
+original-docs/
+bao-gia-phase-1/
+private-assets/
+plans/
+backups/
+*.dump
+*.backup
+*.bundle

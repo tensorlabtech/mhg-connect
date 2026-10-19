@@ -1,0 +1,2 @@
+ALTER TABLE "qr_card_designs" ADD COLUMN "appearance" jsonb DEFAULT '{}'::jsonb NOT NULL;--> statement-breakpoint
+ALTER TABLE "qr_codes" ADD COLUMN "card_appearance" jsonb DEFAULT '{}'::jsonb NOT NULL;

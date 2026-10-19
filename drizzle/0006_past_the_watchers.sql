@@ -1,0 +1,1 @@
+ALTER TABLE "profiles" ADD COLUMN "cover_url" text;

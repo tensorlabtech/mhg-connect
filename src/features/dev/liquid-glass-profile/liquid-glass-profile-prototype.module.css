@@ -1,0 +1,599 @@
+.page {
+  --liquid-bg: oklch(0.97 0.014 255);
+  --liquid-surface: oklch(0.995 0.005 255 / 0.7);
+  --liquid-text: oklch(0.19 0.03 266);
+  --liquid-muted: oklch(0.45 0.025 266);
+  --liquid-accent: oklch(0.57 0.19 258);
+  --liquid-line: oklch(0.73 0.025 255 / 0.48);
+  --liquid-focus: oklch(0.53 0.2 258);
+  --liquid-shadow: oklch(0.42 0.08 265 / 0.16);
+  --liquid-radius: 16px;
+  --liquid-ease: cubic-bezier(0.25, 1, 0.5, 1);
+  position: relative;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  background: var(--liquid-bg);
+  color: var(--liquid-text);
+  font-family: "Manrope Variable", "Be Vietnam Pro", sans-serif;
+  isolation: isolate;
+}
+
+.backdrop {
+  position: fixed;
+  z-index: -2;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 82% 12%, oklch(0.86 0.09 310), transparent 34%),
+    radial-gradient(circle at 14% 36%, oklch(0.9 0.08 210), transparent 38%),
+    linear-gradient(145deg, oklch(0.99 0.005 255), oklch(0.92 0.035 272));
+}
+
+.backdrop::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    oklch(0.98 0.008 255 / 0.36),
+    oklch(0.975 0.012 255 / 0.9) 48%,
+    oklch(0.97 0.014 255) 76%
+  );
+  content: "";
+}
+
+.backdropImage {
+  object-fit: cover;
+  object-position: center 42%;
+  opacity: 0.26;
+  filter: saturate(0.78) contrast(0.9);
+}
+
+.lightField {
+  position: absolute;
+  z-index: 1;
+  top: -16rem;
+  right: -12rem;
+  width: 42rem;
+  height: 42rem;
+  border-radius: 50%;
+  background: oklch(0.82 0.11 310 / 0.34);
+  filter: blur(80px);
+  animation: drift 18s var(--liquid-ease) infinite alternate;
+}
+
+.variantNav {
+  position: fixed;
+  z-index: 40;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: oklch(0.99 0.005 255 / 0.72);
+  color: var(--liquid-muted);
+  backdrop-filter: blur(16px) saturate(120%);
+}
+
+.variantLink {
+  display: grid;
+  min-height: 44px;
+  align-items: center;
+  padding-inline: 16px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color 200ms var(--liquid-ease),
+    color 200ms var(--liquid-ease),
+    transform 100ms var(--liquid-ease);
+}
+
+.variantLink[aria-current="page"] {
+  background: var(--liquid-text);
+  color: var(--liquid-bg);
+}
+
+.variantLink:hover {
+  transform: translateY(-1px);
+}
+
+.variantLink:active {
+  transform: translateY(1px);
+}
+
+.variantLink:focus-visible,
+.directoryItem:focus-visible,
+.socialItem:focus-visible,
+.actionGlass:focus-within {
+  outline: 3px solid var(--liquid-focus);
+  outline-offset: 3px;
+}
+
+.compactHeader {
+  position: fixed;
+  z-index: 30;
+  top: 24px;
+  left: 50%;
+  width: min(24rem, calc(100% - 32px));
+  height: 56px;
+  pointer-events: none;
+}
+
+.compactGlass {
+  width: 100%;
+  color: var(--liquid-text);
+  transform: translateX(-50%);
+}
+
+.compactContent {
+  display: grid;
+  width: 100%;
+  min-height: 56px;
+  box-sizing: border-box;
+  grid-template-columns: 40px 1fr 20px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px 8px 8px;
+}
+
+.compactContent > span {
+  overflow: hidden;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compactContent > svg {
+  width: 18px;
+  height: 18px;
+}
+
+.shell {
+  width: min(100% - 64px, 78rem);
+  margin-inline: auto;
+}
+
+.hero {
+  display: grid;
+  min-height: 100dvh;
+  grid-template-columns: minmax(0, 1fr) 30rem;
+  align-content: center;
+  align-items: end;
+  gap: 48px;
+  padding-block: 112px 96px;
+}
+
+.identity {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 144px minmax(0, 1fr);
+  align-items: end;
+  gap: 32px;
+}
+
+.avatar,
+.avatarSmall {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--liquid-surface);
+  color: var(--liquid-text);
+  font-weight: 700;
+}
+
+.avatar {
+  width: 144px;
+  height: 144px;
+  font-size: 2rem;
+  box-shadow: 0 16px 48px var(--liquid-shadow);
+}
+
+.avatarSmall {
+  width: 40px;
+  height: 40px;
+  font-size: 0.75rem;
+}
+
+.avatar img,
+.avatarSmall img {
+  object-fit: cover;
+  object-position: center;
+}
+
+.identityCopy {
+  min-width: 0;
+}
+
+.identityCopy h1 {
+  max-width: 12ch;
+  font-family: "Sora Variable", "Be Vietnam Pro", sans-serif;
+  font-size: clamp(3.5rem, 8vw, 6rem);
+  font-weight: 650;
+  letter-spacing: -0.04em;
+  line-height: 0.96;
+  text-wrap: balance;
+}
+
+.byline,
+.location {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  color: var(--liquid-muted);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.byline strong {
+  color: var(--liquid-accent);
+  font-weight: 650;
+}
+
+.location {
+  margin-top: 8px;
+  font-size: 0.875rem;
+}
+
+.location svg {
+  width: 16px;
+  height: 16px;
+  color: var(--liquid-accent);
+}
+
+.actions {
+  display: grid;
+  width: min(30rem, 100%);
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  justify-self: end;
+  gap: 12px;
+}
+
+.actionGlass {
+  min-width: 144px;
+  color: var(--liquid-text);
+}
+
+.actionGlass a,
+.actionGlass button {
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-inline: 20px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.actionGlass svg {
+  width: 18px;
+  height: 18px;
+}
+
+.actionGlass:active {
+  transform: translateY(2px);
+}
+
+.content {
+  display: grid;
+  gap: 96px;
+  padding-bottom: 144px;
+}
+
+.bioSection {
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.7fr) minmax(0, 1.3fr);
+  gap: 64px;
+  padding-top: 64px;
+  border-top: 1px solid var(--liquid-line);
+}
+
+.bioSection h2,
+.directorySection h2 {
+  font-family: "Sora Variable", "Be Vietnam Pro", sans-serif;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 620;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.bioSection p {
+  max-width: 60ch;
+  color: var(--liquid-muted);
+  font-size: clamp(1.125rem, 2vw, 1.5rem);
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.directorySection {
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.7fr) minmax(0, 1.3fr);
+  align-items: start;
+  gap: 64px;
+}
+
+.directoryList,
+.socialGrid {
+  min-width: 0;
+  border-top: 1px solid var(--liquid-line);
+}
+
+.directoryItem {
+  display: grid;
+  min-height: 88px;
+  grid-template-columns: 24px 112px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 16px;
+  margin-inline: -16px;
+  padding-inline: 16px;
+  border-bottom: 1px solid var(--liquid-line);
+  border-radius: var(--liquid-radius);
+  color: var(--liquid-text);
+  text-decoration: none;
+  transition:
+    background-color 220ms var(--liquid-ease),
+    transform 220ms var(--liquid-ease);
+}
+
+.directoryItem:hover,
+.socialItem:hover {
+  background: oklch(0.995 0.008 255 / 0.58);
+  transform: translateY(-2px);
+}
+
+.directoryItem:active,
+.socialItem:active {
+  transform: translateY(1px);
+}
+
+.directoryItem > svg:first-child,
+.socialIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--liquid-accent);
+}
+
+.directoryItem > span {
+  color: var(--liquid-muted);
+  font-size: 0.75rem;
+}
+
+.directoryItem strong,
+.socialItem strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.9375rem;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.directoryItem > svg:last-child,
+.socialItem > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--liquid-muted);
+  transition: transform 200ms var(--liquid-ease);
+}
+
+.directoryItem:hover > svg:last-child,
+.socialItem:hover > svg {
+  transform: translate(2px, -2px);
+}
+
+.socialGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 32px;
+}
+
+.socialItem {
+  display: grid;
+  min-width: 0;
+  min-height: 88px;
+  grid-template-columns: 24px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 16px;
+  margin-inline: -16px;
+  padding-inline: 16px;
+  border-bottom: 1px solid var(--liquid-line);
+  border-radius: var(--liquid-radius);
+  color: var(--liquid-text);
+  text-decoration: none;
+  transition:
+    background-color 220ms var(--liquid-ease),
+    transform 220ms var(--liquid-ease);
+}
+
+.socialIcon {
+  display: block;
+  background: currentColor;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+
+.socialItem > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.socialItem small {
+  color: var(--liquid-muted);
+  font-size: 0.6875rem;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  margin: -1px;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(-4%, -2%, 0) scale(0.96);
+  }
+  to {
+    transform: translate3d(6%, 8%, 0) scale(1.08);
+  }
+}
+
+@media (max-width: 900px) {
+  .variantNav {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    left: 16px;
+    justify-content: center;
+  }
+
+  .variantLink {
+    min-width: 0;
+    flex: 1;
+    justify-content: center;
+    padding-inline: 8px;
+    text-align: center;
+  }
+
+  .compactHeader {
+    display: none;
+  }
+
+  .shell {
+    width: min(100% - 32px, 48rem);
+  }
+
+  .hero {
+    min-height: 100dvh;
+    grid-template-columns: 1fr;
+    align-content: end;
+    gap: 32px;
+    padding-block: 112px 120px;
+  }
+
+  .identity {
+    grid-template-columns: 112px minmax(0, 1fr);
+    align-items: center;
+    gap: 24px;
+  }
+
+  .avatar {
+    width: 112px;
+    height: 112px;
+  }
+
+  .identityCopy h1 {
+    font-size: clamp(2.75rem, 11vw, 4.5rem);
+  }
+
+  .actions {
+    position: fixed;
+    z-index: 30;
+    right: 16px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    left: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .actionGlass {
+    min-width: 0;
+  }
+
+  .actionGlass a,
+  .actionGlass button {
+    min-height: 56px;
+    padding-inline: 8px;
+  }
+
+  .bioSection,
+  .directorySection {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .content {
+    gap: 64px;
+    padding-bottom: 160px;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero {
+    padding-bottom: 112px;
+  }
+
+  .identity {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .identityCopy h1 {
+    max-width: 9ch;
+  }
+
+  .actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .actionGlass a,
+  .actionGlass button {
+    display: grid;
+    gap: 4px;
+    font-size: 0.75rem;
+    line-height: 1;
+  }
+
+  .directoryItem {
+    grid-template-columns: 20px minmax(0, 1fr) 20px;
+    gap: 12px;
+  }
+
+  .directoryItem > span {
+    display: none;
+  }
+
+  .socialGrid {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lightField {
+    animation: none;
+  }
+
+  .variantLink,
+  .directoryItem,
+  .socialItem,
+  .directoryItem > svg:last-child,
+  .socialItem > svg {
+    transition-duration: 0.01ms;
+  }
+}

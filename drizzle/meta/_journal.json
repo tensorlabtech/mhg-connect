@@ -1,0 +1,125 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789045618307,
+      "tag": "0000_faithful_karma",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789046875188,
+      "tag": "0001_careful_devos",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789048356534,
+      "tag": "0002_abnormal_the_call",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789049404711,
+      "tag": "0003_nice_white_queen",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789050496168,
+      "tag": "0004_wide_marten_broadcloak",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789050842107,
+      "tag": "0005_long_dark_phoenix",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789095961246,
+      "tag": "0006_past_the_watchers",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789100261553,
+      "tag": "0007_daily_norrin_radd",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789136800468,
+      "tag": "0008_quick_nova",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789613624233,
+      "tag": "0009_amused_jimmy_woo",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791894143837,
+      "tag": "0010_qr_card_text_style",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791897116192,
+      "tag": "0011_qr_card_designs",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791904601515,
+      "tag": "0012_qr_card_layout",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791968900760,
+      "tag": "0013_qr_card_presets",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792004672680,
+      "tag": "0014_qr_card_font_text_color",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1792158810606,
+      "tag": "0015_enterprise_branding_card_position",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1792164104251,
+      "tag": "0016_business_card_inline_appearance",
+      "breakpoints": true
+    }
+  ]
+}
