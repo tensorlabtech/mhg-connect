@@ -372,7 +372,8 @@
   min-width: 0;
   max-width: 100%;
   overflow-wrap: anywhere;
-  white-space: normal;
+  /* Theo ô chứa: chức danh nhiều dòng vẫn xuống dòng khi đang sửa trên thẻ. */
+  white-space: inherit;
 }
 .digital-card-inline-target:hover {
   outline: 1px dashed currentColor;
