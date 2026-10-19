@@ -157,6 +157,40 @@ describe("shared business card rendering", () => {
     expect(html).toContain(MHG_CARD_LOGO_URL);
     expect(html).not.toContain("/brand/enterprise.png");
   });
+  it("drops MHG only when an admin-granted enterprise shows its own logo", () => {
+    const html = renderToStaticMarkup(
+      <QrVisualCard
+        heading="Nguyễn Văn Thanh"
+        svg={svg}
+        logoUrl="/brand/enterprise.png"
+        logoName="Cơ quan"
+        hideMhgLogo
+      />,
+    );
+    expect(html).not.toContain(MHG_CARD_LOGO_URL);
+    expect(html).not.toContain("data-fixed-mhg-logo");
+    expect(html).toContain("data-enterprise-only-logo");
+    expect(html).toContain("/brand/enterprise.png");
+  });
+  it("never leaves a card without a brand: MHG stays when no enterprise logo is shown", () => {
+    for (const props of [
+      { logoUrl: MHG_LOGO_URL },
+      { logoUrl: "/brand/enterprise.png", appearance: { showEnterpriseLogo: false } },
+    ]) {
+      const html = renderToStaticMarkup(
+        <QrVisualCard heading="Kiểm thử" svg={svg} hideMhgLogo {...props} />,
+      );
+      expect(html).toContain(MHG_CARD_LOGO_URL);
+    }
+  });
+  it("prints as a square-cornered card and keeps multi-line titles", () => {
+    const css = readFileSync(
+      path.join(process.cwd(), "src/features/qr/digital-identity-card.css"),
+      "utf8",
+    );
+    expect(css).toMatch(/\.digital-identity-card\s*\{[^}]*border-radius:\s*0;/s);
+    expect(css).toMatch(/\.digital-card-title\s*\{[^}]*white-space:\s*pre-line/s);
+  });
   it("uses saved card copy, avatar and layout without replacing the QR", () => {
     const html = renderToStaticMarkup(
       <QrVisualCard

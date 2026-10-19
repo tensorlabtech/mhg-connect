@@ -147,6 +147,11 @@
   font-size: 0.875rem;
 }
 
+/* Chức danh nhiều dòng (ví dụ hai chức vụ) giữ đúng chỗ xuống dòng. */
+.profile-title-text {
+  white-space: pre-line;
+}
+
 .profile-byline strong {
   color: var(--gold);
   font-weight: 500;

@@ -120,6 +120,13 @@
       "when": 1792164104251,
       "tag": "0016_business_card_inline_appearance",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792393087834,
+      "tag": "0017_enterprise_hide_mhg_logo",
+      "breakpoints": true
     }
   ]
 }

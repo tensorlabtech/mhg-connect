@@ -94,6 +94,7 @@ export default async function AdminQrDetailPage({
                     position={qr.cardPosition}
                     logoUrl={brand.url}
                     logoName={brand.name}
+                    hideMhgLogo={brand.hideMhgLogo}
           appearance={qr.cardAppearance}
           identity={{ avatarUrl: qr.profileAvatarUrl, phone: qr.profileVisibleFields?.phone === false ? null : qr.profilePhone, website: qr.profileVisibleFields?.website === false ? null : qr.profileWebsite, title: qr.profileVisibleFields?.title === false ? null : qr.profileTitle, company: qr.profileVisibleFields?.company === false ? null : qr.profileCompany }}
                     svg={svg}

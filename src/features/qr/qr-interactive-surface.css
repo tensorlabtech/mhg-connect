@@ -11,7 +11,7 @@
 .qr-interactive-plane {
   position: relative;
   min-width: 0;
-  border-radius: var(--radius-surface, 1.5rem);
+  border-radius: 0;
   transform: none;
   transform-style: flat;
   transition:

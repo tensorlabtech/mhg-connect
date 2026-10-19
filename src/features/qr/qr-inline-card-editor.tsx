@@ -56,7 +56,7 @@ import { qrOnlyPng } from "./qr-only-export";
 const labels: Record<CardTextField, string> = {
   name: "Tên trên thẻ",
   title: "Chức danh",
-  company: "Cơ quan / doanh nghiệp",
+  company: "Cơ quan",
   phone: "Điện thoại",
   website: "Website",
   location: "Địa chỉ",
@@ -90,6 +90,7 @@ export type InlineCardEditorProps = {
   backgroundUrl?: string | null;
   logoUrl?: string;
   logoName?: string;
+  hideMhgLogo?: boolean;
   canAddLogo?: boolean;
   enterpriseUpdatedAt?: string | null;
   svg: string;
@@ -735,6 +736,7 @@ export function QrInlineCardEditor(props: InlineCardEditorProps) {
               backgroundUrl={backgroundPreview}
               logoUrl={previews.enterpriseLogo ?? brand.url}
               logoName={brand.name}
+              hideMhgLogo={props.hideMhgLogo}
               svg={props.svg}
               edit={{
                 text: textEditor,
@@ -786,7 +788,7 @@ export function QrInlineCardEditor(props: InlineCardEditorProps) {
           >
             <span
               aria-hidden="true"
-              className={`relative mx-auto block h-14 ${t.orientation === "portrait" ? "w-9" : "w-full"} overflow-hidden rounded-md border border-current/20 ${t.finish === "ivory" ? "bg-[#eeece2] text-[#24251f]" : t.finish === "foil" ? "bg-[linear-gradient(130deg,#71613a,#20231e)] text-[#fbfaf6]" : "bg-[#20231e] text-[#fbfaf6]"}`}
+              className={`relative mx-auto block h-14 ${t.orientation === "portrait" ? "w-9" : "w-full"} overflow-hidden rounded-none border border-current/20 ${t.finish === "ivory" ? "bg-[#eeece2] text-[#24251f]" : t.finish === "foil" ? "bg-[linear-gradient(130deg,#71613a,#20231e)] text-[#fbfaf6]" : "bg-[#20231e] text-[#fbfaf6]"}`}
             >
               <span
                 className={`absolute size-3 rounded-full bg-current/40 ${t.position === "left" ? "top-2 right-2" : "top-2 left-2"}`}
