@@ -5,11 +5,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "tsx scripts/validate-deployment-env.ts && next build",
+    "build:deploy": "tsx scripts/build-after-migration.ts",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "release:db": "tsx scripts/release-database.ts",
     "db:studio": "drizzle-kit studio",
     "db:seed": "NODE_OPTIONS='--conditions react-server' tsx scripts/seed-demo-data.ts",
     "qr:generate": "tsx scripts/generate-demo-qr.ts",

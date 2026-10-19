@@ -14,13 +14,36 @@ Preview also trusts its exact injected `VERCEL_BRANCH_URL` (when present) for lo
 
 ## Release
 
-Push branch tính năng và mở pull request để Vercel tạo bản Preview cho review. Khi merge vào `main`, Git integration triển khai lên production. Migration vẫn là bước riêng; kiểm tra và áp dụng trước khi merge code phụ thuộc schema mới.
+Người phát triển tạo nhánh từ `main` mới nhất, sửa code, push và mở PR. GitHub Actions chạy kiểm tra và migration trên DB Preview; Vercel đợi xác nhận của đúng commit rồi build và deploy Preview. Khi chủ repository review và merge `main`, quy trình tương tự chạy trên production, với backup mã hoá trước migration. Không cần thao tác DB hoặc Vercel cho mỗi PR.
 
-1. Run tests, typecheck, lint and build.
-2. If migrations changed, back up the target database and run `npm run db:migrate` with the intended connection string. Verify the migration ledger before releasing code that depends on the new schema. Do not run `db:seed` during normal releases.
-3. Deploy through the connected Git integration or authenticated Vercel CLI linked to the intended project. The `main` branch is intended for production.
-4. Verify login, public QR, uploaded media and changed authenticated flows.
+Nguồn chuẩn: [workflow](../.github/workflows/release.yml), [lệnh quản lý DB](../scripts/release-database.ts), [bước chờ migration](../scripts/build-after-migration.ts) và [cấu hình Vercel](../vercel.json).
 
-Migration and seed do not run in `npm run build`. Git auto-deploy alone does not sequence migrations. Coordinate migration-bearing merges until a dedicated release pipeline exists.
+1. GitHub Actions chạy test, typecheck, lint và build thông thường, trước khi cấp quyền truy cập DB cho job phát hành.
+2. Job DB kiểm tra commit còn là đầu nhánh, lịch sử bắt đầu từ repository đã dọn và ledger khớp chính xác với các file SQL. Sai hash, thiếu migration hoặc DB đã đi trước nhánh đều làm job dừng.
+3. Production tạo archive `pg_dump`, kiểm tra bằng `pg_restore`, mã hoá AES-256-GCM và upload **chỉ bản mã hoá cùng checksum** vào Actions artifacts. Upload lỗi thì không chạy migration.
+4. Migration chạy trên kết nối Neon không qua pooler, có advisory lock; sau đó kiểm tra lại toàn bộ ledger. Các job dùng chung DB Preview chạy lần lượt; production có hàng đợi riêng.
+5. Job ghi xác nhận theo môi trường, nhánh, commit và fingerprint migration trong schema do pipeline quản lý `release_control`. Đây là dữ liệu điều phối, không phải bảng nghiệp vụ trong Drizzle.
+6. Vercel dùng `npm run build:deploy`, chờ xác nhận trong thời gian giới hạn, kiểm tra ledger rồi mới chạy build. Trước khi hoàn tất còn kiểm tra lại commit và ledger. Thiếu xác nhận, migration lỗi hoặc build lỗi thì bản deploy mới thất bại, domain đang phục vụ không chuyển sang bản đó.
 
-Keep backups outside Git. A database backup does not include binary media in object storage. Rolling back application code does not roll back the database schema.
+`npm run build` vẫn dùng cho local và kiểm tra CI; không chạy hoặc chờ migration. Không seed trong quy trình phát hành. Giữ Git integration của Vercel hoạt động; `vercel.json` đặt build command có bước chờ DB, không tạo pipeline deploy thứ hai.
+
+## Cấu hình quản trị một lần
+
+GitHub environment `Production` chỉ cho phép nhánh `main`; `Preview` dùng DB và storage dev riêng. Quyền merge `main` là bước duyệt production. Cả GitHub và Vercel đều phải trỏ vào cùng DB của môi trường tương ứng.
+
+| Nơi lưu | Tên | Mục đích |
+| --- | --- | --- |
+| GitHub environment secret | `DATABASE_URL` | URL Neon không qua pooler, chỉ của đúng môi trường |
+| GitHub environment variable | `DATABASE_EXPECTED_NAME` | Tên DB được kiểm tra trước thao tác |
+| GitHub `Production` secret | `BACKUP_ENCRYPTION_KEY` | Khoá 32 byte dạng 64 ký tự hex để mã hoá backup |
+| Vercel | Các biến trong phần Environment | Kết nối runtime và xác thực của ứng dụng |
+
+Workflow dùng token GitHub tự cấp cho việc kiểm tra commit và upload artifact. Không cần chuyển token Vercel cá nhân vào GitHub. Người có quyền sửa workflow và merge code được coi là người quản trị tin cậy; xác nhận trong DB dùng để điều phối phát hành, không phải cơ chế ngăn mã độc từ maintainer.
+
+## Backup và phục hồi
+
+Backup được lưu dưới dạng artifact mã hoá trong lần chạy workflow production, giữ 30 ngày. Khi tải về, giữ cả file backup và file `.sha256` đi kèm. Khoá giải mã phải được chủ dự án giữ riêng ngoài Git và ngoài artifact. Không có khoá thì không khôi phục được archive; cần tải bản backup muốn lưu lâu hơn trước khi hết thời gian giữ.
+
+Lệnh `release:db` có các thao tác `check`, `backup`, `migrate`, `ready` và `decrypt`. Để giải mã, cung cấp môi trường, URL DB, commit của backup, khoá và đường dẫn backup qua biến môi trường; đặt `BACKUP_DECRYPTED_PATH` là đường dẫn tuyệt đối ngoài checkout, rồi chạy `npm run release:db -- decrypt`. Lệnh chỉ tạo và kiểm tra archive, không tự restore hay ghi đè DB. Xem guard trong script trước khi thao tác khôi phục bằng `pg_restore`.
+
+Backup DB không chứa file ảnh trong object storage. Rollback ứng dụng không rollback schema. Migration phải tương thích với bản ứng dụng còn đang chạy: ưu tiên thêm cột/bảng và tách việc xoá hoặc đổi dữ liệu sang lần phát hành được kiểm tra riêng. Một migration phá tương thích vẫn có thể ảnh hưởng bản đang phục vụ dù deploy mới chưa thành công.

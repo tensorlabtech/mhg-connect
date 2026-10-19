@@ -46,6 +46,6 @@ Database integration tests chỉ chạy với database test riêng và `ALLOW_DA
 
 ## Triển khai
 
-Xem [hướng dẫn triển khai](docs/deployment-guide.md) và [kiến trúc](docs/system-architecture.md). Migration và seed không tự chạy trong build. Nếu có migration, backup rồi áp dụng vào đúng database trước khi đưa code phụ thuộc schema mới lên production.
+Xem [hướng dẫn triển khai](docs/deployment-guide.md) và [kiến trúc](docs/system-architecture.md). Push nhánh và mở PR để kiểm tra Preview; merge `main` để phát hành production. GitHub Actions kiểm tra code, chạy migration trên đúng database và xác nhận cho Vercel tiếp tục build rồi deploy; production lưu backup mã hoá trước migration. Người phát triển không cần chạy migration cloud thủ công. Build local và seed không tự chạy migration.
 
 Source đã được dọn và gộp về lịch sử mới ngay trên repository gốc. Tài liệu khách hàng, báo giá, trao đổi và lịch sử phát triển trước đây được lưu trong bản sao private riêng. Người đã clone trước đợt chuyển đổi có thể giữ thư mục và cấu hình local; cần sao lưu phần việc chưa merge rồi đồng bộ lại với lịch sử mới của `origin/main`. Không merge hoặc push các branch chứa lịch sử cũ vào repository đã dọn.

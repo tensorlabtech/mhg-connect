@@ -1,0 +1,112 @@
+name: Database release readiness
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  quality:
+    if: github.repository == 'tensorlabtech/mhg-connect' && startsWith(github.ref, 'refs/heads/')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Require the cleaned source history
+        run: git merge-base --is-ancestor 3d891e23494583a008450beaf1eddc02bbf955b3 "$GITHUB_SHA"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npx next typegen
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run build
+  release:
+    needs: quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    # All feature branches share one Preview database.
+    concurrency:
+      group: mhg-release-${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+      cancel-in-progress: false
+      queue: max
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Preview' }}
+    env:
+      RELEASE_ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+      RELEASE_COMMIT: ${{ github.sha }}
+      RELEASE_BRANCH: ${{ github.ref_name }}
+    steps:
+      - name: Set backup path outside the source checkout
+        run: echo "BACKUP_PATH=$RUNNER_TEMP/mhg-production-backup.mhg" >> "$GITHUB_ENV"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Install PostgreSQL 18 backup client
+        if: github.ref == 'refs/heads/main'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh --yes
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client-18
+          echo "/usr/lib/postgresql/18/bin" >> "$GITHUB_PATH"
+      - name: Verify latest branch commit before database changes
+        run: npx tsx scripts/check-release-head.ts
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Verify database identity and migration ledger
+        run: npm run release:db -- check
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_EXPECTED_NAME: ${{ vars.DATABASE_EXPECTED_NAME }}
+      - name: Encrypt production backup
+        if: github.ref == 'refs/heads/main'
+        run: npm run release:db -- backup
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_EXPECTED_NAME: ${{ vars.DATABASE_EXPECTED_NAME }}
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+      - name: Preserve encrypted backup before migration
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: production-backup-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/mhg-production-backup.mhg
+            ${{ runner.temp }}/mhg-production-backup.mhg.sha256
+          if-no-files-found: error
+          retention-days: 30
+      - name: Apply migrations to the selected database
+        run: npm run release:db -- migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_EXPECTED_NAME: ${{ vars.DATABASE_EXPECTED_NAME }}
+          BACKUP_ENCRYPTION_KEY: ${{ github.ref == 'refs/heads/main' && secrets.BACKUP_ENCRYPTION_KEY || '' }}
+      - name: Verify latest branch commit before readiness
+        run: npx tsx scripts/check-release-head.ts
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Authorize the exact commit for native Vercel build
+        run: npm run release:db -- ready
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_EXPECTED_NAME: ${{ vars.DATABASE_EXPECTED_NAME }}
+      - name: Database readiness summary
+        run: |
+          echo "### Database ready: $RELEASE_ENVIRONMENT" >> "$GITHUB_STEP_SUMMARY"
+          echo "Branch: $RELEASE_BRANCH" >> "$GITHUB_STEP_SUMMARY"
+          echo "Commit: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Native Vercel deployment is separate. Its build must verify this exact readiness marker and complete migration ledger before publishing." >> "$GITHUB_STEP_SUMMARY"
+          echo "Application rollback does not revert database changes." >> "$GITHUB_STEP_SUMMARY"
