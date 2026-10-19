@@ -12,6 +12,8 @@ Keep `ENABLE_DEV_ROUTES=false` and leave `MEDIA_STORAGE` unset in production. De
 
 ## Release
 
+Push branch tính năng và mở pull request để Vercel tạo bản Preview cho review. Khi merge vào `main`, Git integration triển khai lên production. Migration vẫn là bước riêng; kiểm tra và áp dụng trước khi merge code phụ thuộc schema mới.
+
 1. Run tests, typecheck, lint and build.
 2. If migrations changed, back up the target database and run `npm run db:migrate` with the intended connection string. Verify the migration ledger before releasing code that depends on the new schema. Do not run `db:seed` during normal releases.
 3. Deploy through the connected Git integration or authenticated Vercel CLI linked to the intended project. The `main` branch is intended for production.
