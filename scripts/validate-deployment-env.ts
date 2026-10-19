@@ -1,3 +1,8 @@
+import {
+  resolveAuthUrl,
+  resolvePreviewBranchUrl,
+} from "../src/lib/resolve-auth-url";
+
 const runtime = globalThis.process?.["env"] ?? {};
 const strict = globalThis.process.argv.includes("--strict");
 const shouldValidate = strict || runtime["VERCEL"] === "1";
@@ -8,7 +13,7 @@ if (!shouldValidate) {
   const required = [
     "DATABASE_URL",
     "BETTER_AUTH_SECRET",
-    "BETTER_AUTH_URL",
+    ...(runtime["VERCEL_ENV"] === "preview" ? [] : ["BETTER_AUTH_URL"]),
     "B2_S3_ENDPOINT",
     "B2_REGION",
     "B2_BUCKET_NAME",
@@ -23,7 +28,8 @@ if (!shouldValidate) {
   if ((runtime["BETTER_AUTH_SECRET"]?.length ?? 0) < 32) {
     throw new Error("BETTER_AUTH_SECRET must contain at least 32 characters.");
   }
-  const authUrl = new URL(runtime["BETTER_AUTH_URL"]!);
+  const authUrl = new URL(resolveAuthUrl(runtime)!);
+  resolvePreviewBranchUrl(runtime);
   if (authUrl.protocol !== "https:") {
     throw new Error("BETTER_AUTH_URL must use HTTPS for deployment.");
   }
