@@ -358,6 +358,8 @@ export const enterprises = pgTable("enterprises", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
   customLogoEnabled: boolean("custom_logo_enabled").default(false).notNull(),
+  /** Quyền đặc biệt do quản trị MHG cấp: thẻ chỉ hiện logo cơ quan, bỏ logo MHG. Mặc định tắt. */
+  hideMhgLogo: boolean("hide_mhg_logo").default(false).notNull(),
   logoUrl: text("logo_url"),
   updatedAt: productTimestamp("updated_at").defaultNow().notNull(),
 });

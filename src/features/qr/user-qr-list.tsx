@@ -62,6 +62,7 @@ type QrCardItem = QrItem & {
   svg: string;
   logoUrl: string;
   logoName: string;
+  hideMhgLogo: boolean;
   canAddLogo: boolean;
   enterpriseUpdatedAt: string | null;
 };
@@ -85,6 +86,7 @@ export async function UserQrList({
       canAddLogo: brand.canAddLogo,
       enterpriseUpdatedAt: brand.enterpriseUpdatedAt,
       logoName: brand.name,
+      hideMhgLogo: brand.hideMhgLogo,
       designs: designs.get(item.id) ?? [],
       svg: await QRCode.toString(buildPublicQrUrl(item.publicToken), {
         color: { dark: "#0a0a0a", light: "#ffffff" },
@@ -148,6 +150,7 @@ function QrOwnershipCard({
           position={item.cardPosition}
           logoUrl={item.logoUrl}
           logoName={item.logoName}
+          hideMhgLogo={item.hideMhgLogo}
           svg={item.svg}
           tagline={item.cardTagline}
           textColor={item.cardTextColor}
@@ -218,6 +221,7 @@ function QrOwnershipCard({
           position={item.cardPosition}
           logoUrl={item.logoUrl}
           logoName={item.logoName}
+          hideMhgLogo={item.hideMhgLogo}
           tagline={item.cardTagline}
           textColor={item.cardTextColor}
           textStyle={item.cardTextStyle}

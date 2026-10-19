@@ -61,6 +61,7 @@ export function QrCardActions({
   position,
   logoUrl,
   logoName,
+  hideMhgLogo,
   appearance, identity, canAddLogo, enterpriseUpdatedAt,
   presets,
   profileId,
@@ -86,6 +87,7 @@ export function QrCardActions({
   position: QrCardPosition;
   logoUrl?: string;
   logoName?: string;
+  hideMhgLogo?: boolean;
   appearance?: QrCardAppearance; identity?: Partial<DigitalIdentity>; canAddLogo?: boolean; enterpriseUpdatedAt?: string | null;
   presets: readonly QrCardPreset[];
   profileId: string | null;
@@ -153,6 +155,7 @@ export function QrCardActions({
           position={position}
           logoUrl={logoUrl}
           logoName={logoName}
+          hideMhgLogo={hideMhgLogo}
           appearance={appearance} identity={identity} canAddLogo={canAddLogo} enterpriseUpdatedAt={enterpriseUpdatedAt}
           presets={presets}
           publicToken={publicToken}

@@ -40,6 +40,7 @@ export function BusinessCardFace({
   logoUrl,
   logoName,
   logoPresentation = "wordmark",
+  hideMhgLogo = false,
   finish = "signature",
   orientation = "landscape",
   position = "right",
@@ -57,6 +58,8 @@ export function BusinessCardFace({
   logoUrl?: string;
   logoName?: string;
   logoPresentation?: "wordmark" | "emblem-header";
+  /** Quyền đặc biệt cấp theo cơ quan; chỉ có hiệu lực khi có logo cơ quan. */
+  hideMhgLogo?: boolean;
   finish?: DigitalCardFinish;
   orientation?: QrCardOrientation;
   position?: QrCardPosition;
@@ -103,6 +106,8 @@ export function BusinessCardFace({
         />
       </span>
     ) : null;
+  // Không bao giờ để thẻ trống thương hiệu: thiếu logo cơ quan thì vẫn hiện MHG.
+  const showMhgLogo = !(hideMhgLogo && customLogo);
   const avatar = identity.avatarUrl ? (
     <Image
       alt={`Ảnh đại diện ${identity.name}`}
@@ -150,17 +155,23 @@ export function BusinessCardFace({
         <div className="qr-card-sheen" aria-hidden="true" />
         {edit?.background}
         <header className="digital-card-header">
-          <span className="digital-card-brand-pair" data-fixed-mhg-logo>
-            <span className="digital-card-logo-plate" data-brand-plate="logo">
-              <Image
-                alt="MHG Airpurity, logo cố định"
-                src={MHG_CARD_LOGO_URL}
-                width={1918}
-                height={820}
-                unoptimized
-                className="digital-card-fixed-logo"
-              />
-            </span>
+          <span
+            className="digital-card-brand-pair"
+            data-fixed-mhg-logo={showMhgLogo ? "" : undefined}
+            data-enterprise-only-logo={showMhgLogo ? undefined : ""}
+          >
+            {showMhgLogo ? (
+              <span className="digital-card-logo-plate" data-brand-plate="logo">
+                <Image
+                  alt="MHG Airpurity, logo cố định"
+                  src={MHG_CARD_LOGO_URL}
+                  width={1918}
+                  height={820}
+                  unoptimized
+                  className="digital-card-fixed-logo"
+                />
+              </span>
+            ) : null}
             {edit ? edit.logo(customLogo) : customLogo}
           </span>
           <span className="digital-card-platform">

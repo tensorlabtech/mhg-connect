@@ -42,6 +42,7 @@ export function AdminQrPreviewDialog({
   position,
   logoUrl,
   logoName,
+  hideMhgLogo,
   appearance, identity,
   font,
   tagline,
@@ -62,6 +63,7 @@ export function AdminQrPreviewDialog({
   position?: QrCardPosition;
   logoUrl?: string;
   logoName?: string;
+  hideMhgLogo?: boolean;
   appearance?: QrCardAppearance; identity?: Partial<DigitalIdentity>;
   font?: QrCardFont;
   tagline?: string;
@@ -111,6 +113,7 @@ export function AdminQrPreviewDialog({
               position={position}
               logoUrl={logoUrl}
               logoName={logoName}
+              hideMhgLogo={hideMhgLogo}
               appearance={appearance} identity={identity}
               font={font}
               tagline={tagline}

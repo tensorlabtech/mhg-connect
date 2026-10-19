@@ -1,0 +1,1 @@
+ALTER TABLE "enterprises" ADD COLUMN "hide_mhg_logo" boolean DEFAULT false NOT NULL;

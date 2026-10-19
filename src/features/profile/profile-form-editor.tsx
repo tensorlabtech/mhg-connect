@@ -937,7 +937,7 @@ function IdentityCard({
             },
             {
               key: "identity.company",
-              label: "Đơn vị",
+              label: "Cơ quan",
               original: block.data.company ?? "",
             },
             {
@@ -969,9 +969,10 @@ function IdentityCard({
             </p>
           ) : null}
           <div className="grid gap-4 sm:grid-cols-2">
-            <LineInput
-              label="Chức danh"
+            <LineTextarea
+              label="Chức danh (Enter để xuống dòng)"
               maxLength={120}
+              rows={1}
               onChange={(event) =>
                 setData({ title: event.target.value || null }, "identity.title")
               }
@@ -979,7 +980,7 @@ function IdentityCard({
               value={block.data.title ?? ""}
             />
             <LineInput
-              label="Đơn vị"
+              label="Cơ quan"
               maxLength={120}
               onChange={(event) =>
                 setData(
