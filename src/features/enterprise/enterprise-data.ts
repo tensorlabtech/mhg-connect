@@ -13,7 +13,6 @@ export async function getEnterpriseBrand(
   if (!ownerId)
     return {
       ...resolveEnterpriseLogo(null),
-      hideMhgLogo: false,
       canAddLogo: false,
       enterpriseUpdatedAt: null,
     };
@@ -24,7 +23,6 @@ export async function getEnterpriseBrand(
       name: enterprises.name,
       logoUrl: enterprises.logoUrl,
       customLogoEnabled: enterprises.customLogoEnabled,
-      hideMhgLogo: enterprises.hideMhgLogo,
     })
     .from(enterpriseMembers)
     .innerJoin(enterprises, eq(enterpriseMembers.enterpriseId, enterprises.id))
@@ -40,8 +38,6 @@ export async function getEnterpriseBrand(
       : brand;
   return {
     ...resolved,
-    // Chỉ bỏ logo MHG khi cơ quan đã có logo riêng đang bật; mặc định luôn giữ MHG.
-    hideMhgLogo: Boolean(brand.custom && row?.hideMhgLogo),
     canAddLogo: row?.customLogoEnabled ?? false,
     enterpriseUpdatedAt: row?.updatedAt.toISOString() ?? null,
   };

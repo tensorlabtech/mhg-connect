@@ -223,7 +223,6 @@ export default async function QrPage({
           svg={cardSvg}
           logoUrl={brand.url}
           logoName={brand.name}
-          hideMhgLogo={brand.hideMhgLogo}
         />
       }
       locale={locale}

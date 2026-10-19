@@ -50,7 +50,6 @@ export function QrVisualCard({
   logoUrl,
   logoName,
   logoPresentation,
-  hideMhgLogo,
   svg,
   tagline = QR_CARD_DEFAULT_TAGLINE,
   textColor,
@@ -71,7 +70,6 @@ export function QrVisualCard({
   logoUrl?: string;
   logoName?: string;
   logoPresentation?: "wordmark" | "emblem-header";
-  hideMhgLogo?: boolean;
   svg: string;
   tagline?: string | null;
   textColor?: string | null;
@@ -93,7 +91,6 @@ export function QrVisualCard({
       logoUrl={appearance?.showEnterpriseLogo === false ? undefined : logoUrl}
       logoName={logoName}
       logoPresentation={logoPresentation}
-      hideMhgLogo={hideMhgLogo}
       orientation={orientation}
       position={position}
       backgroundUrl={backgroundUrl}

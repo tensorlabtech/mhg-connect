@@ -55,7 +55,6 @@ export function QrCardPreviewDialog({
   position,
   logoUrl,
   logoName,
-  hideMhgLogo,
   appearance, identity, canAddLogo, enterpriseUpdatedAt,
   presets = [],
   profileId,
@@ -80,7 +79,6 @@ export function QrCardPreviewDialog({
   position: QrCardPosition;
   logoUrl?: string;
   logoName?: string;
-  hideMhgLogo?: boolean;
   appearance?: QrCardAppearance; identity?: Partial<DigitalIdentity>; canAddLogo?: boolean; enterpriseUpdatedAt?: string | null;
   presets?: readonly QrCardPreset[];
   profileId?: string | null;
@@ -233,7 +231,6 @@ export function QrCardPreviewDialog({
               design={selectedDesign}
               logoUrl={logoUrl}
               logoName={logoName}
-              hideMhgLogo={hideMhgLogo}
               downloadName={publicToken}
               key={selectedDesign.id}
               onChange={(next) =>
@@ -269,7 +266,6 @@ export function QrCardPreviewDialog({
               position={position}
               logoUrl={logoUrl}
               logoName={logoName}
-              hideMhgLogo={hideMhgLogo}
               presets={presets}
               qrId={qrId}
               svg={svg}

@@ -270,10 +270,11 @@
   width: 3.6cqw;
   height: 3.6cqw;
   flex-shrink: 0;
-  color: #e5c16b;
+  /* Xanh lá của lá cây trong logo MHG Airpurity: gắn khiên kháng khuẩn với thương hiệu. */
+  color: #3fb54f;
 }
 [data-card-finish="ivory"] .digital-card-tagline svg {
-  color: #675021;
+  color: #3fb54f;
 }
 [data-card-orientation="landscape"][data-card-position="left"]
   .digital-card-main {
@@ -578,13 +579,4 @@
 }
 [data-card-orientation="portrait"] .digital-card-enterprise-logo {
   height: 11.2cqw;
-}
-
-/* Quyền đặc biệt theo cơ quan: chỉ hiện logo cơ quan, không có vạch ngăn với logo MHG. */
-.digital-card-brand-pair[data-enterprise-only-logo] .digital-card-enterprise-logo {
-  padding-left: 0;
-  border-left: 0;
-}
-.digital-card-brand-pair[data-enterprise-only-logo] .digital-card-enterprise-logo img {
-  max-width: 34cqw;
 }

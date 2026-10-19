@@ -63,13 +63,6 @@ export async function saveEnterpriseBrandAction(
         "Nhận diện đã thay đổi ở nơi khác. Hãy tải lại trang trước khi lưu.",
     };
   const enabled = form.get("customLogoEnabled") === "on";
-  const hideMhgLogo = form.get("hideMhgLogo") === "on";
-  if (hideMhgLogo && !enabled)
-    return {
-      success: false,
-      message:
-        "Chỉ bỏ được logo MHG khi đã bật logo riêng của cơ quan.",
-    };
   const file = form.get("logo");
   let logoUrl = company.logoUrl;
   if (file instanceof File && file.size > 0) {
@@ -117,7 +110,7 @@ export async function saveEnterpriseBrandAction(
   // Preserve replaced assets; no automatic deletion of user files.
   const [updated] = await db
     .update(enterprises)
-    .set({ customLogoEnabled: enabled, hideMhgLogo, logoUrl, updatedAt: nextCardRevision(company.updatedAt) })
+    .set({ customLogoEnabled: enabled, logoUrl, updatedAt: nextCardRevision(company.updatedAt) })
     .where(
       and(
         eq(enterprises.id, id.data),
@@ -134,11 +127,9 @@ export async function saveEnterpriseBrandAction(
   refreshBranding();
   return {
     success: true,
-    message: !enabled
-      ? "Đã tắt logo riêng; toàn bộ nhân sự trở về logo MHG."
-      : hideMhgLogo
-        ? "Thẻ của nhân sự được gán chỉ hiện logo cơ quan (đã bỏ logo MHG)."
-        : "Logo doanh nghiệp đã áp dụng cho toàn bộ nhân sự được gán.",
+    message: enabled
+      ? "Logo doanh nghiệp đã áp dụng cho toàn bộ nhân sự được gán."
+      : "Đã tắt logo riêng; toàn bộ nhân sự trở về logo MHG.",
   };
 }
 

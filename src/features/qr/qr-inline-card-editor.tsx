@@ -90,7 +90,6 @@ export type InlineCardEditorProps = {
   backgroundUrl?: string | null;
   logoUrl?: string;
   logoName?: string;
-  hideMhgLogo?: boolean;
   canAddLogo?: boolean;
   enterpriseUpdatedAt?: string | null;
   svg: string;
@@ -736,7 +735,6 @@ export function QrInlineCardEditor(props: InlineCardEditorProps) {
               backgroundUrl={backgroundPreview}
               logoUrl={previews.enterpriseLogo ?? brand.url}
               logoName={brand.name}
-              hideMhgLogo={props.hideMhgLogo}
               svg={props.svg}
               edit={{
                 text: textEditor,
