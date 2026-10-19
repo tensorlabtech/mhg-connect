@@ -50,6 +50,7 @@
   transform: none !important;
   transition: none !important;
   box-shadow: none !important;
+  animation: none !important;
 }
 [data-card-capture="true"] .qr-card-sheen {
   display: none !important;
@@ -58,15 +59,53 @@
 [data-qr-card] .qr-card-brand {
   z-index: 1;
 }
-@media (prefers-reduced-motion: reduce), (pointer: coarse) {
+/* Điện thoại: thẻ tự nghiêng nhẹ qua lại cho thấy chiều sâu; chạm kéo hoặc nghiêng máy thì thẻ đi theo. */
+@media (pointer: coarse) and (prefers-reduced-motion: no-preference) {
+  .qr-interactive-surface {
+    touch-action: pan-y;
+  }
+  [data-tilt-auto="true"]:not([data-tilt-active="true"]) > .qr-interactive-plane {
+    transform-style: preserve-3d;
+    box-shadow: 0 18px 40px rgb(0 0 0 / 0.22);
+    animation: qr-card-sway 7s ease-in-out infinite;
+  }
+  [data-tilt-auto="true"]:not([data-tilt-active="true"]) .qr-card-sheen {
+    opacity: 0.55;
+    animation: qr-card-glare 7s ease-in-out infinite;
+  }
+  [data-tilt-active="true"] > .qr-interactive-plane {
+    transition: transform 90ms linear;
+  }
+}
+@keyframes qr-card-sway {
+  0%,
+  100% {
+    transform: rotateX(4deg) rotateY(-8deg);
+  }
+  50% {
+    transform: rotateX(-3deg) rotateY(8deg);
+  }
+}
+@keyframes qr-card-glare {
+  0%,
+  100% {
+    background-position: -12% 0;
+  }
+  50% {
+    background-position: 12% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
   .qr-interactive-plane {
     transform: none !important;
     transition: none;
     box-shadow: none !important;
+    animation: none !important;
   }
   .qr-card-sheen {
     opacity: 0.08 !important;
     transition: none;
+    animation: none !important;
   }
 }
 @media print {
@@ -77,6 +116,7 @@
     transform: none !important;
     transition: none;
     box-shadow: none !important;
+    animation: none !important;
   }
   .qr-card-sheen {
     display: none !important;
